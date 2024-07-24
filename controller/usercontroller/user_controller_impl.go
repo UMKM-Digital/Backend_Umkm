@@ -2,6 +2,7 @@ package usercontroller
 
 import (
 	"net/http"
+	"umkm/helper"
 	"umkm/model"
 	"umkm/model/web"
 	userservice "umkm/service/user"
@@ -53,4 +54,20 @@ func (controller *UserControllerImpl) Login(c echo.Context) error {
     }
 
     return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, "login berhasil", userRes))
+}
+
+
+func (controller *UserControllerImpl) SendOtp(c echo.Context) error {
+	user := new(web.OtpRequest)
+
+	if err := c.Bind(user); err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseToJsonOtp(http.StatusBadRequest, err.Error(), nil))
+	}
+
+	otpResponse, err := controller.userService.SendOtp(user.No_Phone)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, helper.ResponseToJsonOtp(http.StatusInternalServerError, err.Error(), nil))
+	}
+
+	return c.JSON(http.StatusOK, helper.ResponseToJsonOtp(http.StatusOK, "login berhasil", otpResponse))
 }

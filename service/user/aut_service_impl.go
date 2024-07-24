@@ -1,11 +1,12 @@
 package userservice
 
 import (
-	"time"
-	"strconv"
 	"errors"
+	"strconv"
+	"time"
 	"umkm/helper"
 	"umkm/model/domain"
+	
 	"umkm/model/web"
 	"umkm/repository/userrepo"
 
@@ -24,6 +25,7 @@ func Newauthservice(authrepository userrepo.AuthUserRepo, token helper.TokenUseC
 	}
 }
 
+//register
 func (service *AuthServiceImpl) RegisterRequest(user web.RegisterRequest)(map[string]interface{}, error) {	
 	passHash, errHash := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.MinCost)
 	if errHash != nil {
@@ -36,6 +38,7 @@ func (service *AuthServiceImpl) RegisterRequest(user web.RegisterRequest)(map[st
 		Password:     user.Password,
 		Email:        user.Email,
 		Role: user.Role,
+		No_Phone: user.No_Phone,
 	}
 
 	saveUser, errSaveUser := service.authrepository.RegisterRequest(newUser)
@@ -52,6 +55,9 @@ func (service *AuthServiceImpl) LoginRequest(email string, password string) (map
 	if getUserErr != nil {
 		return nil, errors.New("email not found")
 	}
+	if getUserErr != nil {
+		return nil, errors.New("phone not found")
+	}
 
 	if checkPassword := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); checkPassword != nil {
 		return nil, errors.New("incorrect password")
@@ -61,6 +67,7 @@ func (service *AuthServiceImpl) LoginRequest(email string, password string) (map
 		ID:    strconv.Itoa(user.IdUser),
 		Name:  user.Username,
 		Email: user.Email,
+		
 	}
 
 	token, tokenErr := service.tokenUseCase.GenerateAccessToken(claims)
@@ -76,3 +83,24 @@ func (service *AuthServiceImpl) LoginRequest(email string, password string) (map
 	}, nil
 }
 
+func (service *AuthServiceImpl) SendOtp(phone string) (map[string]interface{}, error) {
+	_, err := service.authrepository.FindUserByPhone(phone)
+	if err != nil {
+		return nil, errors.New("phone number not found")
+	}
+
+	otp, otpErr := helper.GenerateOTP()
+	if otpErr != nil {
+		return nil, otpErr
+	}
+
+	if err := helper.SendWhatsAppOTP(phone, otp); err != nil {
+		return nil, err
+	}
+
+	expirationTime := time.Now().Add(10 * time.Minute)
+	return map[string]interface{}{
+		"message":    "OTP sent successfully",
+		"expires_at": expirationTime.Format(time.RFC3339),
+	}, nil
+}

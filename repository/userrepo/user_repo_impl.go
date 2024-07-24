@@ -1,7 +1,7 @@
 package userrepo
 
 import (
-	"errors"
+	
 	"umkm/model/domain"
 
 	"gorm.io/gorm"
@@ -36,15 +36,13 @@ func (repo *AuthrepositoryImpl) FindUserByEmail(email string) (*domain.Users, er
 	return user, nil
 }
 
-//logout
-func (repo *AuthrepositoryImpl) GetSeller(Id int) (domain.Users, error){
-	var userData domain.Users
+//otp
+func (repo *AuthrepositoryImpl) FindUserByPhone(phone string) (*domain.Users, error) {
+	user := new(domain.Users)
 
-	err := repo.db.First(&userData, "id = ?", Id).Error
-
-	if err != nil {
-		return domain.Users{}, errors.New("user tidak ditemukan")
+	if err := repo.db.Where("no_phone = ?", phone).Take(&user).Error; err != nil {
+		return user, err
 	}
 
-	return userData, nil
+	return user, nil
 }
