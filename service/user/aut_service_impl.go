@@ -103,5 +103,6 @@ func (service *AuthServiceImpl) SendOtp(phone string) (map[string]interface{}, e
 	return map[string]interface{}{
 		"message":    "OTP sent successfully",
 		"expires_at": expirationTime.Format(time.RFC3339),
+		"otp" : otp,
 	}, nil
 }

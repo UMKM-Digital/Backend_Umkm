@@ -71,3 +71,5 @@ func (controller *UserControllerImpl) SendOtp(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, helper.ResponseToJsonOtp(http.StatusOK, "login berhasil", otpResponse))
 }
+
+// UserControllerImpl.go
