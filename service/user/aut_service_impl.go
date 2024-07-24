@@ -50,8 +50,8 @@ func (service *AuthServiceImpl) RegisterRequest(user web.RegisterRequest)(map[st
 }
 
 
-func (service *AuthServiceImpl) LoginRequest(email string, password string) (map[string]interface{}, error) {
-	user, getUserErr := service.authrepository.FindUserByEmail(email)
+func (service *AuthServiceImpl) LoginRequest(email string, password string, no_phone string) (map[string]interface{}, error) {
+	user, getUserErr := service.authrepository.FindUserByEmail(email, no_phone)
 	if getUserErr != nil {
 		return nil, errors.New("email not found")
 	}
@@ -67,6 +67,7 @@ func (service *AuthServiceImpl) LoginRequest(email string, password string) (map
 		ID:    strconv.Itoa(user.IdUser),
 		Name:  user.Username,
 		Email: user.Email,
+		Phone: user.No_Phone,
 		
 	}
 

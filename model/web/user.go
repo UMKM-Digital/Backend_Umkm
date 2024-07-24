@@ -8,6 +8,7 @@ type RegisterRequest struct {
 	No_Phone string `validate:"required" json:"no_phone"`
 }
 type LoginRequest struct {
+	No_Phone string `validate:"required" json:"no_phone"`
 	Email    string `validate:"required,email" json:"email"`
 	Password string `validate:"required" json:"password"`	
 }
