@@ -5,7 +5,7 @@ import(
 )
 
 type Kategori_Umkm struct {
-    IdUser     int       `gorm:"column:id;primaryKey;autoIncrement"`
+    IdKtegori     int       `gorm:"column:id;primaryKey;autoIncrement"`
     Name       string    `gorm:"column:name"`
     Created_at time.Time `gorm:"column:created_at"`
     Updated_at time.Time `gorm:"column:updated_at"`

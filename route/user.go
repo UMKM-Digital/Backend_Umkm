@@ -43,6 +43,8 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	KatUmkmRoute := g.Group("/kategori")
 	KatUmkmRoute.POST("/umkm", userKategoriUmkmController.Create)
 	KatUmkmRoute.GET("/list", userKategoriUmkmController.GetKategoriList)
+	KatUmkmRoute.GET("/:id", userKategoriUmkmController.GetKategoriId)
+	KatUmkmRoute.PUT("/umkm/:id", userKategoriUmkmController.UpdateKategoriId)
 }
 
 func JWTProtection() echo.MiddlewareFunc {
