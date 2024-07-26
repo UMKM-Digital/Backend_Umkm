@@ -9,6 +9,7 @@ type Users struct {
     Password   string    `gorm:"column:password"`
 	Role       string    `gorm:"column:role"`
 	No_Phone   string    `gorm:"column:no_phone"`
+	Picture    string    `gorm:"column:picture"`
     Created_at time.Time `gorm:"column:created_at"`
     Updated_at time.Time `gorm:"column:updated_at"`
 }

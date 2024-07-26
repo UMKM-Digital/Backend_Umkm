@@ -9,5 +9,7 @@ type AuthUserRepo interface {
 	RegisterRequest(user domain.Users)(domain.Users, error)
 	FindUserByEmail(email string, phone string ) (*domain.Users, error)
 	FindUserByPhone(phone string) (*domain.Users, error)
+	GetByID(idUser int) (domain.Users, error)
+	// UpdateId(idUser int, user domain.Users) (domain.Users, error)
 }
 	

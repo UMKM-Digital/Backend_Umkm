@@ -6,4 +6,7 @@ type SellerController interface {
 	Register(c echo.Context) error
 	Login(c echo.Context) error
 	SendOtp(c echo.Context) error
+	Logout(c echo.Context) error
+	View(c echo.Context) error
+	// Update(c echo.Context) error
 }

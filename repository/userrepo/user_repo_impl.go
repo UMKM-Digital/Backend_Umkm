@@ -1,6 +1,7 @@
 package userrepo
 
 import (
+	"errors"
 	
 	"umkm/model/domain"
 
@@ -46,3 +47,20 @@ func (repo *AuthrepositoryImpl) FindUserByPhone(phone string) (*domain.Users, er
 
 	return user, nil
 }
+
+//profile
+func (repo *AuthrepositoryImpl) GetByID(idUser int) (domain.Users, error) {
+	var user domain.Users
+	if err := repo.db.Where("id = ?", idUser).Take(&user).Error; err != nil {
+		return domain.Users{}, errors.New("user not found")
+	}
+	return user, nil
+}
+
+// repository/userrepo/auth_repository.go
+// func (repo *AuthrepositoryImpl) UpdateId(idUser int, user domain.Users) (domain.Users, error) {
+//     if err := repo.db.Model(&domain.Users{}).Where("id = ?", idUser).Updates(user).Error; err != nil {
+//         return domain.Users{}, errors.New("failed to update profile")
+//     }
+//     return user, nil
+// }

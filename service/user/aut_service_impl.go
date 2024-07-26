@@ -6,7 +6,8 @@ import (
 	"time"
 	"umkm/helper"
 	"umkm/model/domain"
-	
+	"umkm/model/entity"
+
 	"umkm/model/web"
 	"umkm/repository/userrepo"
 
@@ -18,15 +19,15 @@ type AuthServiceImpl struct {
 	tokenUseCase   helper.TokenUseCase
 }
 
-func Newauthservice(authrepository userrepo.AuthUserRepo, token helper.TokenUseCase) *AuthServiceImpl{
+func Newauthservice(authrepository userrepo.AuthUserRepo, token helper.TokenUseCase) *AuthServiceImpl {
 	return &AuthServiceImpl{
 		authrepository: authrepository,
-		tokenUseCase: token,
+		tokenUseCase:   token,
 	}
 }
 
-//register
-func (service *AuthServiceImpl) RegisterRequest(user web.RegisterRequest)(map[string]interface{}, error) {	
+// register
+func (service *AuthServiceImpl) RegisterRequest(user web.RegisterRequest) (map[string]interface{}, error) {
 	passHash, errHash := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.MinCost)
 	if errHash != nil {
 		return nil, errHash
@@ -34,10 +35,10 @@ func (service *AuthServiceImpl) RegisterRequest(user web.RegisterRequest)(map[st
 
 	user.Password = string(passHash)
 	newUser := domain.Users{
-		Username:     user.Username,
-		Password:     user.Password,
-		Email:        user.Email,
-		Role: user.Role,
+		Username: user.Username,
+		Password: user.Password,
+		Email:    user.Email,
+		Role:     user.Role,
 		No_Phone: user.No_Phone,
 	}
 
@@ -48,7 +49,6 @@ func (service *AuthServiceImpl) RegisterRequest(user web.RegisterRequest)(map[st
 
 	return helper.ResponseToJson{"username": saveUser.Username, "email": saveUser.Email}, nil
 }
-
 
 func (service *AuthServiceImpl) LoginRequest(email string, password string, no_phone string) (map[string]interface{}, error) {
 	user, getUserErr := service.authrepository.FindUserByEmail(email, no_phone)
@@ -68,7 +68,6 @@ func (service *AuthServiceImpl) LoginRequest(email string, password string, no_p
 		Name:  user.Username,
 		Email: user.Email,
 		Phone: user.No_Phone,
-		
 	}
 
 	token, tokenErr := service.tokenUseCase.GenerateAccessToken(claims)
@@ -99,10 +98,63 @@ func (service *AuthServiceImpl) SendOtp(phone string) (map[string]interface{}, e
 		return nil, err
 	}
 
-	expirationTime := time.Now().Add(10 * time.Minute)
+	expirationTime := time.Now().Add(1 * time.Minute)
 	return map[string]interface{}{
 		"message":    "OTP sent successfully",
 		"expires_at": expirationTime.Format(time.RFC3339),
-		"otp" : otp,
+		"otp":        otp,
 	}, nil
 }
+
+// get profile
+func (service *AuthServiceImpl) ViewMe(userId int) (entity.UserEntity, error) {
+	user, err := service.authrepository.GetByID(userId)
+	if err != nil {
+		return entity.UserEntity{}, err
+	}
+
+	return entity.ToUserEntity(user), nil
+}
+
+// update profile
+// func (service *AuthServiceImpl) Update(userId int, req web.UpdateUserRequest, profilePicturePath string) (helper.ResponseToJson, error) {
+//     user, errUser := service.authrepository.GetByID(userId)
+//     if errUser != nil {
+//         return nil, errUser
+//     }
+
+//     if req.Username != "" {
+//         user.Username = req.Username
+//     }
+//     if req.Email != "" {
+//         user.Email = req.Email
+//     }
+//     if req.No_Phone != "" {
+//         user.No_Phone = req.No_Phone
+//     }
+//     if req.Password != "" {
+//         passHash, errHash := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.MinCost)
+//         if errHash != nil {
+//             return nil, errHash
+//         }
+//         user.Password = string(passHash)
+//     }
+//     if profilePicturePath != "" {
+//         user.Picture = profilePicturePath
+//     }
+
+//     result, errUpdate := service.authrepository.UpdateId(userId, user)
+//     if errUpdate != nil {
+//         return nil, errUpdate
+//     }
+
+//     data := helper.ResponseToJson{
+//         "id":             result.IdUser,
+//         "username":       result.Username,
+//         "email":          result.Email,
+//         "no_phone":       result.No_Phone,
+//         "profile_picture": result.Picture,
+//     }
+
+//     return data, nil
+// }

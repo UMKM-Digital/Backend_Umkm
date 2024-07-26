@@ -15,11 +15,3 @@ func ToUserEntity(user domain.Users) UserEntity {
 		Email:   user.Email,
 	}
 }
-
-func ToUserListEntity(buyers []domain.Users) []UserEntity {
-	var result []UserEntity
-	for _, buyer := range buyers {
-		result = append(result, ToUserEntity(buyer))
-	}
-	return result
-}
