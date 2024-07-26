@@ -14,8 +14,7 @@ type RegisterRequest struct {
 	No_Phone string `validate:"required" json:"no_phone"`
 }
 type LoginRequest struct {
-	No_Phone string `validate:"required" json:"no_phone"`
-	Email    string `validate:"required,email" json:"email"`
+	Username    string `validate:"required,username" json:"username"`
 	Password string `validate:"required" json:"password"`	
 }
 

@@ -27,10 +27,10 @@ func (repo *AuthrepositoryImpl) RegisterRequest(user domain.Users)(domain.Users,
 }
 
 //login
-func (repo *AuthrepositoryImpl) FindUserByEmail(email string, phone string) (*domain.Users, error){
+func (repo *AuthrepositoryImpl) FindUserByUsername(username string) (*domain.Users, error){
 	user := new(domain.Users)
 
-	if err	:= repo.db.Where("email = ? OR no_phone = ?", email, phone).Take(&user).Error; err != nil{
+	if err	:= repo.db.Where("username = ?", username).Take(&user).Error; err != nil{
 		return user, err
 	}
 

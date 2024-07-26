@@ -49,7 +49,7 @@ func (controller *UserControllerImpl) Login(c echo.Context) error {
     if err := c.Bind(&user); err != nil {
         return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, err.Error(), nil))
     }
-    userRes, errLogin := controller.userService.LoginRequest(user.Email, user.Password, user.No_Phone)
+    userRes, errLogin := controller.userService.LoginRequest(user.Username, user.Password,)
 
     if errLogin != nil {
         

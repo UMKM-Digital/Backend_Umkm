@@ -50,15 +50,11 @@ func (service *AuthServiceImpl) RegisterRequest(user web.RegisterRequest) (map[s
 	return helper.ResponseToJson{"username": saveUser.Username, "email": saveUser.Email}, nil
 }
 
-func (service *AuthServiceImpl) LoginRequest(email string, password string, no_phone string) (map[string]interface{}, error) {
-	user, getUserErr := service.authrepository.FindUserByEmail(email, no_phone)
+func (service *AuthServiceImpl) LoginRequest(username string, password string) (map[string]interface{}, error) {
+	user, getUserErr := service.authrepository.FindUserByUsername(username)
 	if getUserErr != nil {
-		return nil, errors.New("email not found")
+		return nil, errors.New("username not found")
 	}
-	if getUserErr != nil {
-		return nil, errors.New("phone not found")
-	}
-
 	if checkPassword := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); checkPassword != nil {
 		return nil, errors.New("incorrect password")
 	}
