@@ -68,7 +68,7 @@ func (service *KategoriUmkmServiceImpl) UpdateKategori(request web.UpdateCategor
 
 	// Buat objek Kategori_Umkm baru untuk pembaruan
 	KategoriumkmRequest := domain.Kategori_Umkm{
-		IdKtegori: pathId,
+		IdKategori: pathId,
 		Name:      request.Name,
 	}
 
@@ -82,3 +82,9 @@ func (service *KategoriUmkmServiceImpl) UpdateKategori(request web.UpdateCategor
 	response := map[string]interface{}{"name": updateKategoriUmkm.Name}
 	return response, nil
 }
+
+//delete
+func (service *KategoriUmkmServiceImpl) DeleteKategoriUmkmId(id int) error {
+    return service.kategorirepository.DeleteKategoriUmkmId(id)
+}
+

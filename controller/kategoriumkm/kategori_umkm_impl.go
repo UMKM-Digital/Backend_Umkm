@@ -3,6 +3,7 @@ package kategoriumkmcontroller
 import (
 	"net/http"
 	"strconv"
+	"umkm/helper"
 	"umkm/model"
 	"umkm/model/web"
 	kategoriumkmservice "umkm/service/kategori_umkm"
@@ -75,3 +76,18 @@ func (controller *KategoriUmkmControllerImpl) UpdateKategoriId(c echo.Context) e
 
 	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, "data berhasil diupdate", userUpdate))
 }
+
+//hapus kategori
+func (controller *KategoriUmkmControllerImpl) DeleteKategoriId(c echo.Context) error {
+    id, _ := strconv.Atoi(c.Param("id"))
+
+    if errDeleteKategori := controller.kategoriService.DeleteKategoriUmkmId(id); errDeleteKategori != nil {
+        return c.JSON(http.StatusBadRequest, helper.ResponseClient(http.StatusBadRequest, errDeleteKategori.Error(), nil))
+    }
+
+    return c.JSON(http.StatusOK, helper.ResponseClient(http.StatusOK, "Delete Kategori Success", nil))
+}
+
+
+
+

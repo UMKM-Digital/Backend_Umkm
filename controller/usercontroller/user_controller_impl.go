@@ -2,24 +2,24 @@ package usercontroller
 
 import (
 	"net/http"
-	"os"
-	"time"
+	"strings"
 	"umkm/helper"
 	"umkm/model"
 	"umkm/model/web"
 	userservice "umkm/service/user"
 
-	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
 )
 
 type UserControllerImpl struct {
 	userService userservice.AuthUserService
+	tokenUseCase helper.TokenUseCase
 }
 
-func NewAuthController(service userservice.AuthUserService) *UserControllerImpl {
+func NewAuthController(service userservice.AuthUserService, tokenUseCase helper.TokenUseCase) *UserControllerImpl {
 	return &UserControllerImpl{
 		userService: service,
+		tokenUseCase: tokenUseCase,
 	}
 }
 
@@ -108,27 +108,56 @@ func (controller *UserControllerImpl) View(c echo.Context) error {
 	return c.JSON(http.StatusOK, helper.ResponseToJsonOtp(http.StatusOK, "Success", result))
 }
 
+//logout
+
 func (controller *UserControllerImpl) Logout(c echo.Context) error {
-	authHeader := c.Request().Header.Get("Authorization")
-	if authHeader == "" {
-		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, "Authorization header is required", nil))
-	}
+    authHeader := c.Request().Header.Get("Authorization")
+    if authHeader == "" {
+        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, "Authorization header is required", nil))
+    }
 
-	// Create a token with a very short expiration time
-	expirationTime := time.Now().Add(0 * time.Second)
-	expiredToken := jwt.NewWithClaims(jwt.SigningMethodHS256, &jwt.RegisteredClaims{
-		ExpiresAt: jwt.NewNumericDate(expirationTime),
-	})
-	tokenString, err := expiredToken.SignedString([]byte(os.Getenv("SECRET_KEY")))
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, "Could not create token", nil))
-	}
+    // Extract the token from the header
+    tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 
-	// Return the short-lived token as part of the response
-	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, "You have been logged out", map[string]string{
-		"token": tokenString,
-	}))
+    // Blacklist the token
+    err := controller.tokenUseCase.BlacklistAccessToken(tokenString)
+    if err != nil {
+        return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, err.Error(), nil))
+    }
+
+    // Return a success message without a new token
+    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, "You have been logged out", nil))
 }
+
+// func (controller *UserControllerImpl) Logout(c echo.Context) error {
+// 	authHeader := c.Request().Header.Get("Authorization")
+// 	if authHeader == "" {
+// 		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, "Authorization header is required", nil))
+// 	}
+
+// 	// Extract the token from the header
+// 	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+
+// 	// Blacklist the token
+// 	err := controller.tokenUseCase.BlacklistAccessToken(tokenString)
+// 	if err != nil {
+// 		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, err.Error(), nil))
+// 	}
+
+// 	// Create a token with a very short expiration time (optional)
+// 	expirationTime := time.Now().Add(0 * time.Second)
+// 	expiredToken := jwt.NewWithClaims(jwt.SigningMethodHS256, &jwt.RegisteredClaims{
+// 		ExpiresAt: jwt.NewNumericDate(expirationTime),
+// 	})
+// 	newTokenString, err := expiredToken.SignedString([]byte(os.Getenv("SECRET_KEY")))
+// 	if err != nil {
+// 		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, "Could not create token", nil))
+// 	}
+
+// 	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, "You have been logged out", map[string]string{
+// 		"token": newTokenString,
+// 	}))
+// }
 
 //update
 // controller/usercontroller/user_controller_impl.go

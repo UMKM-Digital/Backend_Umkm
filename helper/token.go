@@ -1,7 +1,9 @@
 package helper
 
 import (
+	"errors"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -9,25 +11,31 @@ import (
 
 type TokenUseCase interface {
 	GenerateAccessToken(claims JwtCustomClaims) (string, error)
+	BlacklistAccessToken(token string) error
+	IsTokenBlacklisted(token string) bool
 }
 
-type TokenUseCaseImpl struct{}
+type TokenUseCaseImpl struct {
+	blacklistedTokens map[string]struct{}
+	mu                sync.RWMutex
+}
 
 type JwtCustomClaims struct {
-	ID    string `json:"id"`
-	Name  string `json:"username"`
-	Email string `json:"email"`
-	Phone string `json:"no_phone"`
+	ID      string `json:"id"`
+	Name    string `json:"username"`
+	Email   string `json:"email"`
+	Phone   string `json:"no_phone"`
 	Picture string `json:"picture"`
 	jwt.RegisteredClaims
 }
 
 func NewTokenUseCase() *TokenUseCaseImpl {
-	return &TokenUseCaseImpl{}
+	return &TokenUseCaseImpl{
+		blacklistedTokens: make(map[string]struct{}),
+	}
 }
 
 func (t *TokenUseCaseImpl) GenerateAccessToken(claims JwtCustomClaims) (string, error) {
-
 	expirationTime := time.Now().Add(1 * time.Hour)
 	claims.RegisteredClaims = jwt.RegisteredClaims{
 		ExpiresAt: jwt.NewNumericDate(expirationTime),
@@ -40,4 +48,24 @@ func (t *TokenUseCaseImpl) GenerateAccessToken(claims JwtCustomClaims) (string, 
 	}
 
 	return encodedToken, nil
+}
+
+func (t *TokenUseCaseImpl) BlacklistAccessToken(token string) error {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+
+	if _, exists := t.blacklistedTokens[token]; exists {
+		return errors.New("token already blacklisted")
+	}
+
+	t.blacklistedTokens[token] = struct{}{}
+	return nil
+}
+
+func (t *TokenUseCaseImpl) IsTokenBlacklisted(token string) bool {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+
+	_, exists := t.blacklistedTokens[token]
+	return exists
 }

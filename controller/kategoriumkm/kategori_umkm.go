@@ -7,4 +7,5 @@ type KategoriUmkmController interface {
 	GetKategoriList(c echo.Context) error
 	GetKategoriId(c echo.Context) error
 	UpdateKategoriId(c echo.Context) error
+	DeleteKategoriId(c echo.Context) error
 }

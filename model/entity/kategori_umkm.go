@@ -9,7 +9,7 @@ type KategoriEntity struct {
 
 func ToKategoriEntity(kategori domain.Kategori_Umkm) KategoriEntity {
 	return KategoriEntity{
-		Id: kategori.IdKtegori,
+		Id: kategori.IdKategori,
 		Name: kategori.Name,
 	}
 }

@@ -10,4 +10,5 @@ type KategoriUmkm interface {
 	GetKategoriUmkmList() ([]entity.KategoriEntity, error)
 	GetKategoriUmkmId(id int) (entity.KategoriEntity, error)
 	UpdateKategori(request web.UpdateCategoriUmkm, pathId int) (map[string]interface{}, error)
+	DeleteKategoriUmkmId(id int) error
 }
