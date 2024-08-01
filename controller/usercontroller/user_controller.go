@@ -9,4 +9,5 @@ type SellerController interface {
 	Logout(c echo.Context) error
 	View(c echo.Context) error
 	// Update(c echo.Context) error
+	VerifyOTP(c echo.Context) error
 }

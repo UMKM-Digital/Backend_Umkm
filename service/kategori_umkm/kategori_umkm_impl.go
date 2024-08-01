@@ -21,6 +21,7 @@ func NewKategoriUmkmService(kategorirepository repokategoriumkm.CreateCategoryUm
 func (service *KategoriUmkmServiceImpl) CreateKategori(kategori web.CreateCategoriUmkm) (map[string]interface{}, error) {
 	newKategori := domain.Kategori_Umkm{
 		Name: kategori.Name,
+		
 	}
 
 	saveKategoriUmkm, errSaveKategoriUmkm := service.kategorirepository.CreateRequest(newKategori)

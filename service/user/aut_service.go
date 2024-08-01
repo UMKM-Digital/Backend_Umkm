@@ -10,5 +10,6 @@ type AuthUserService interface {
 	LoginRequest(username string, password string) (map[string]interface{}, error)
 	SendOtp(phone string) (map[string]interface{}, error)
 	ViewMe(userId int) (entity.UserEntity, error)
-	// Update(userId int, req web.UpdateUserRequest, profilePicturePath string) (helper.ResponseToJson, error)
+	// Update(userId int, req web.UpdateUserRequest, profilePicturePath string) (helper.ResponseToJson, error
+	VerifyOTP(phone string, otp_code string)(map[string]interface{}, error)
 }

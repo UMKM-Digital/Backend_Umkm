@@ -1,34 +1,44 @@
 package route
 
 import (
-	"fmt"
 	"net/http"
-	
+	"os"
+
 	"umkm/app"
 	kategoriumkmcontroller "umkm/controller/kategoriumkm"
+	umkmcontroller "umkm/controller/umkm"
 	"umkm/controller/usercontroller"
 	"umkm/helper"
 	"umkm/model"
 	repokategoriumkm "umkm/repository/kategori_umkm"
+	umkmrepo "umkm/repository/umkm"
 	"umkm/repository/userrepo"
 	kategoriumkmservice "umkm/service/kategori_umkm"
+	umkmservice "umkm/service/umkm"
 	userservice "umkm/service/user"
+
+	"github.com/golang-jwt/jwt/v5"
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 )
 
-var tokenUseCase helper.TokenUseCase
+// var tokenUseCase helper.TokenUseCase
 
 func RegisterUserRoute(prefix string, e *echo.Echo) {
 	db := app.DBConnection()
 	tokenUseCase := helper.NewTokenUseCase()
 
 	userAuthRepo := userrepo.NewAuthRepositoryImpl(db)
-	userAuthService := userservice.Newauthservice(userAuthRepo, tokenUseCase)
+	userAuthService := userservice.Newauthservice(userAuthRepo, tokenUseCase, db)
 	userAuthController := usercontroller.NewAuthController(userAuthService, tokenUseCase)
 
 	userKategoriUmkmRepo := repokategoriumkm.NewKategoriUmkmRepositoryImpl(db)
 	userKatgoriUmkmService := kategoriumkmservice.NewKategoriUmkmService(userKategoriUmkmRepo)
 	userKategoriUmkmController := kategoriumkmcontroller.NewKategeoriUmkmController(userKatgoriUmkmService)
+
+	userUmkmRepo := umkmrepo.NewUmkmRepositoryImpl(db)
+	userUmkmService := umkmservice.NewUmkmService(userUmkmRepo)
+	userUmkmController := umkmcontroller.NewUmkmController(userUmkmService)
 
 	g := e.Group(prefix)
 
@@ -36,34 +46,85 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	authRoute.POST("/register", userAuthController.Register)
 	authRoute.POST("/login", userAuthController.Login)
 	authRoute.POST("/send-otp", userAuthController.SendOtp)
-	authRoute.POST("/logout", userAuthController.Logout, JWTProtection(tokenUseCase))
+	authRoute.POST("/verifyOtp", userAuthController.VerifyOTPHandler)
+	authRoute.POST("/logout", userAuthController.Logout, JWTProtection())
 
 	meRoute := g.Group("/me")
-	meRoute.GET("", userAuthController.View, JWTProtection(tokenUseCase))
+	meRoute.GET("", userAuthController.View, JWTProtection())
 
 	KatUmkmRoute := g.Group("/kategori")
-	KatUmkmRoute.POST("/umkm", userKategoriUmkmController.Create, JWTProtection(tokenUseCase))
-	KatUmkmRoute.GET("/list", userKategoriUmkmController.GetKategoriList, JWTProtection(tokenUseCase))
-	KatUmkmRoute.GET("/:id", userKategoriUmkmController.GetKategoriId, JWTProtection(tokenUseCase))
-	KatUmkmRoute.PUT("/umkm/:id", userKategoriUmkmController.UpdateKategoriId, JWTProtection(tokenUseCase))
-	KatUmkmRoute.DELETE("/umkm/delete/:id", userKategoriUmkmController.DeleteKategoriId, JWTProtection(tokenUseCase))
-}
-func JWTProtection(tokenUseCase helper.TokenUseCase) echo.MiddlewareFunc {
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			token := c.Request().Header.Get("Authorization")
-			if token != "" {
-				token = token[7:] // Remove "Bearer " prefix
-			}
+	KatUmkmRoute.POST("/umkm", userKategoriUmkmController.Create, JWTProtection())
+	KatUmkmRoute.GET("/list", userKategoriUmkmController.GetKategoriList, JWTProtection())
+	KatUmkmRoute.GET("/:id", userKategoriUmkmController.GetKategoriId, JWTProtection())
+	KatUmkmRoute.PUT("/umkm/:id", userKategoriUmkmController.UpdateKategoriId, JWTProtection())
+	KatUmkmRoute.DELETE("/umkm/delete/:id", userKategoriUmkmController.DeleteKategoriId, JWTProtection())
 
-			if tokenUseCase.IsTokenBlacklisted(token) {
-				// Tambahkan log untuk debugging
-				fmt.Println("Token ditemukan di blacklist")
-				return c.JSON(http.StatusUnauthorized, model.ResponseToClient(http.StatusUnauthorized, "Token sudah di-blacklist", nil))
-			}
-
-			// Jika token tidak di-blacklist, lanjutkan ke handler berikutnya
-			return next(c)
-		}
-	}
+	Umkm := g.Group("/create")
+	Umkm.POST("/umkm", userUmkmController.Create)
 }
+
+
+func JWTProtection() echo.MiddlewareFunc {
+	return echojwt.WithConfig(echojwt.Config{
+		NewClaimsFunc: func(c echo.Context) jwt.Claims {
+			return new(helper.JwtCustomClaims)
+		},
+		SigningKey: []byte(os.Getenv("SECRET_KEY")),
+		ErrorHandler: func(c echo.Context, err error) error {
+			return c.JSON(http.StatusUnauthorized, model.ResponseToClient(http.StatusUnauthorized, "unauthorized", nil))
+		},
+	})
+}
+
+// func JWTProtection(tokenUseCase helper.TokenUseCase) echo.MiddlewareFunc {
+// 	return func(next echo.HandlerFunc) echo.HandlerFunc {
+// 		return func(c echo.Context) error {
+
+// 			token := c.Request().Header.Get("Authorization")
+// 			if token != "" {
+// 				token = token[7:] // Remove "Bearer " prefix
+// 			}
+
+// 			if tokenUseCase.IsTokenBlacklisted(token) {
+// 				// Tambahkan log untuk debugging
+// 				fmt.Println("Token ditemukan di blacklist")
+// 				return c.JSON(http.StatusUnauthorized, model.ResponseToClient(http.StatusUnauthorized, "Token sudah di-blacklist", nil))
+// 			}
+
+// 			// Jika token tidak di-blacklist, lanjutkan ke handler berikutnya
+// 			return next(c)
+// 		}
+// 	}
+// }
+
+
+// func JWTProtection(tokenUseCase helper.TokenUseCase) echo.MiddlewareFunc {
+// 	return func(next echo.HandlerFunc) echo.HandlerFunc {
+// 		return func(c echo.Context) error {
+// 			token := c.Request().Header.Get("Authorization")
+			
+// 			if token == "" {
+// 				// Jika header Authorization tidak ada, kembalikan status Unauthorized
+// 				return c.JSON(http.StatusUnauthorized, model.ResponseToClient(http.StatusUnauthorized, "Token tidak ditemukan", nil))
+// 			}
+
+// 			// Hapus awalan "Bearer " jika ada
+// 			if len(token) > 7 && token[:7] == "Bearer " {
+// 				token = token[7:]
+// 			} else {
+// 				// Jika format token tidak sesuai, kembalikan status Unauthorized
+// 				return c.JSON(http.StatusUnauthorized, model.ResponseToClient(http.StatusUnauthorized, "Format token tidak valid", nil))
+// 			}
+
+// 			if tokenUseCase.IsTokenBlacklisted(token) {
+// 				// Tambahkan log untuk debugging
+// 				fmt.Println("Token ditemukan di blacklist")
+// 				return c.JSON(http.StatusUnauthorized, model.ResponseToClient(http.StatusUnauthorized, "Token sudah di-blacklist", nil))
+// 			}
+
+// 			// Jika token tidak di-blacklist, lanjutkan ke handler berikutnya
+// 			return next(c)
+// 		}
+// 	}
+// }
+

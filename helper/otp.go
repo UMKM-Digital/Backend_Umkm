@@ -1,15 +1,29 @@
 package helper
 
 import (
+	"errors"
 	"bytes"
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
 	"math/big"
 	"net/http"
+	"time"
+
+	"gorm.io/gorm"
 )
 
 const otpLength = 6
+
+type SaveOtp struct {
+	PhoneNumber string    `gorm:"column:phone_number" json:"phone_number"`
+	Otp         string    `gorm:"column:otp_code" json:"otp_code"`
+	Status      bool      `gorm:"column:status" json:"status"`
+	CreatedAt   time.Time `gorm:"column:created_at" json:"created_at"`
+	ExpiresAt   time.Time `gorm:"column:expires_at" json:"expires_at"`
+}
+
+
 
 // GenerateOTP generates a random OTP
 func GenerateOTP() (string, error) {
@@ -20,7 +34,7 @@ func GenerateOTP() (string, error) {
 	return otp, nil
 }
 
-// GenerateRandomOTP generates a random OTP of given length
+// generateRandomOTP generates a random OTP of given length
 func generateRandomOTP(length int) (string, error) {
 	var otp string
 	for i := 0; i < length; i++ {
@@ -33,10 +47,22 @@ func generateRandomOTP(length int) (string, error) {
 	return otp, nil
 }
 
-// SendWhatsAppOTP sends OTP via WhatsApp
-func SendWhatsAppOTP(phone, otp string) error {
-	url := "http://103.162.60.86:3000/kirim-pesan"
+// SendWhatsAppOTP sends OTP via WhatsApp and saves it to the database
+// SendWhatsAppOTP sends OTP via WhatsApp and saves it to the database
+func SendWhatsAppOTP(db *gorm.DB, phone string, expiresAt time.Time) error {
+	otp, err := GenerateOTP()
+	if err != nil {
+		return err
+	}
 
+	// Save OTP to the database
+	err = saveOTP(db, phone, otp, expiresAt)
+	if err != nil {
+		return err
+	}
+
+	// Send OTP via WhatsApp
+	url := "http://103.162.60.86:3000/kirim-pesan"
 	requestData := map[string]interface{}{
 		"app_token_id": "ea5be31c-d4ec-4d44-8163-948a8e528ff6",
 		"service":      "whatsapp",
@@ -60,5 +86,99 @@ func SendWhatsAppOTP(phone, otp string) error {
 	return nil
 }
 
-// ResponseToJson standardizes the response format
 
+// saveOTP saves OTP to the database
+// Simpan OTP
+func saveOTP(db *gorm.DB, phoneNumber, otpCode string, expiresAt time.Time) error {
+    // Hapus OTP yang sudah kadaluarsa
+    db.Where("phone_number = ? AND expires_at < ?", phoneNumber, time.Now()).Delete(&SaveOtp{})
+
+    // Buat atau perbarui OTP
+    otp := SaveOtp{
+        PhoneNumber: phoneNumber,
+        Otp:         otpCode,
+        Status:      false,
+        CreatedAt:   time.Now(),
+        ExpiresAt:   expiresAt,
+    }
+
+    // Cek apakah ada OTP yang masih berlaku
+    result := db.Where("phone_number = ? AND expires_at >= ?", phoneNumber, time.Now()).First(&otp)
+    if result.RowsAffected > 0 {
+        return fmt.Errorf("OTP untuk nomor ini masih berlaku")
+    }
+
+    // Jika tidak ada OTP yang berlaku, buat yang baru
+    return db.Create(&otp).Error
+}
+
+
+func VerifyOTP(db *gorm.DB, phoneNumber, otpCode string) (bool, error) {
+    var otp SaveOtp
+    result := db.Where("phone_number = ? AND otp_code = ?", phoneNumber, otpCode).
+        Order("created_at DESC").
+        First(&otp)
+
+    if result.Error != nil {
+        if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+            fmt.Printf("OTP tidak ditemukan untuk nomor telepon %s dan kode OTP %s\n", phoneNumber, otpCode)
+            return false, fmt.Errorf("OTP tidak ditemukan untuk nomor telepon %s", phoneNumber)
+        }
+        fmt.Printf("Error saat mencari OTP: %v\n", result.Error)
+        return false, result.Error
+    }
+
+    fmt.Printf("OTP Found: %+v\n", otp)
+
+    if otp.Status {
+        return false, fmt.Errorf("OTP sudah digunakan")
+    }
+
+    if otpCode != otp.Otp {
+        return false, fmt.Errorf("Kode OTP tidak valid")
+    }
+
+    if time.Now().After(otp.ExpiresAt) {
+        return false, fmt.Errorf("OTP sudah kadaluarsa")
+    }
+
+    if err := db.Model(&otp).Where("phone_number = ? AND otp_code = ?", phoneNumber, otpCode).Update("status", true).Error; err != nil {
+        fmt.Printf("Error saat memperbarui status OTP: %v\n", err)
+        return false, err
+    }
+
+    return true, nil
+}
+
+// func VerifyOTP(db *gorm.DB, otpCode string) (bool, string, error) {
+//     var otp SaveOtp
+//     result := db.Where("otp_code = ?", otpCode).
+//         Order("created_at DESC").
+//         First(&otp)
+
+//     if result.Error != nil {
+//         if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+//             return false, "", fmt.Errorf("OTP tidak ditemukan untuk kode OTP %s", otpCode)
+//         }
+//         return false, "", result.Error
+//     }
+
+//     if otp.Status {
+//         return false, "", fmt.Errorf("OTP sudah digunakan")
+//     }
+
+//     if otpCode != otp.Otp {
+//         return false, "", fmt.Errorf("Kode OTP tidak valid")
+//     }
+
+//     if time.Now().After(otp.ExpiresAt) {
+//         return false, "", fmt.Errorf("OTP sudah kadaluarsa")
+//     }
+
+//     // Update status OTP menjadi digunakan
+//     if err := db.Model(&otp).Where("otp_code = ?", otpCode).Update("status", true).Error; err != nil {
+//         return false, "", err
+//     }
+
+//     return true, otp.PhoneNumber, nil
+// }

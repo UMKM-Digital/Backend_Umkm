@@ -14,6 +14,7 @@ import (
 type UserControllerImpl struct {
 	userService userservice.AuthUserService
 	tokenUseCase helper.TokenUseCase
+
 }
 
 func NewAuthController(service userservice.AuthUserService, tokenUseCase helper.TokenUseCase) *UserControllerImpl {
@@ -59,43 +60,23 @@ func (controller *UserControllerImpl) Login(c echo.Context) error {
     return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, "login berhasil", userRes))
 }
 
+//send otp
+	func (controller *UserControllerImpl) SendOtp(c echo.Context) error {
+		user := new(web.OtpRequest)
 
-func (controller *UserControllerImpl) SendOtp(c echo.Context) error {
-	user := new(web.OtpRequest)
+		if err := c.Bind(user); err != nil {
+			return c.JSON(http.StatusBadRequest, helper.ResponseToJsonOtp(http.StatusBadRequest, err.Error(), nil))
+		}
 
-	if err := c.Bind(user); err != nil {
-		return c.JSON(http.StatusBadRequest, helper.ResponseToJsonOtp(http.StatusBadRequest, err.Error(), nil))
+		otpResponse, err := controller.userService.SendOtp(user.No_Phone)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, helper.ResponseToJsonOtp(http.StatusInternalServerError, err.Error(), nil))
+		}
+
+		return c.JSON(http.StatusOK, helper.ResponseToJsonOtp(http.StatusOK, "login berhasil", otpResponse))
 	}
 
-	otpResponse, err := controller.userService.SendOtp(user.No_Phone)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, helper.ResponseToJsonOtp(http.StatusInternalServerError, err.Error(), nil))
-	}
-
-	return c.JSON(http.StatusOK, helper.ResponseToJsonOtp(http.StatusOK, "login berhasil", otpResponse))
-}
-
-// // UserControllerImpl.go
-// func (controller *UserControllerImpl) Logout(c echo.Context) error {
-// 	authHeader := c.Request().Header.Get("Authorization")
-// 	if authHeader == "" {
-// 		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, "Authorization header is required", nil))
-// 	}
-
-// 	// Membuat token kosong yang langsung kedaluwarsa
-// 	expiredToken := jwt.NewWithClaims(jwt.SigningMethodHS256, &jwt.StandardClaims{
-// 		ExpiresAt: time.Now().Add(-1 * time.Second).Unix(), // Token langsung kedaluwarsa
-// 	})
-// 	tokenString, err := expiredToken.SignedString([]byte(os.Getenv("SECRET_KEY")))
-// 	if err != nil {
-// 		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, "Could not create token", nil))
-// 	}
-
-// 	// Kirim token kedaluwarsa sebagai respons
-// 	c.Response().Header().Set("Authorization", "Bearer "+tokenString)
-// 	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, "You have been logged out", nil))
-// }
-
+//melihat isi profile
 func (controller *UserControllerImpl) View(c echo.Context) error {
 	adminID, _ := helper.GetAuthId(c)
 
@@ -129,35 +110,6 @@ func (controller *UserControllerImpl) Logout(c echo.Context) error {
     return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, "You have been logged out", nil))
 }
 
-// func (controller *UserControllerImpl) Logout(c echo.Context) error {
-// 	authHeader := c.Request().Header.Get("Authorization")
-// 	if authHeader == "" {
-// 		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, "Authorization header is required", nil))
-// 	}
-
-// 	// Extract the token from the header
-// 	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-
-// 	// Blacklist the token
-// 	err := controller.tokenUseCase.BlacklistAccessToken(tokenString)
-// 	if err != nil {
-// 		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, err.Error(), nil))
-// 	}
-
-// 	// Create a token with a very short expiration time (optional)
-// 	expirationTime := time.Now().Add(0 * time.Second)
-// 	expiredToken := jwt.NewWithClaims(jwt.SigningMethodHS256, &jwt.RegisteredClaims{
-// 		ExpiresAt: jwt.NewNumericDate(expirationTime),
-// 	})
-// 	newTokenString, err := expiredToken.SignedString([]byte(os.Getenv("SECRET_KEY")))
-// 	if err != nil {
-// 		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, "Could not create token", nil))
-// 	}
-
-// 	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, "You have been logged out", map[string]string{
-// 		"token": newTokenString,
-// 	}))
-// }
 
 //update
 // controller/usercontroller/user_controller_impl.go
@@ -204,3 +156,31 @@ func (controller *UserControllerImpl) Logout(c echo.Context) error {
 
 //     return c.JSON(http.StatusOK, helper.ResponseToJsonOtp(http.StatusOK, "Success", result))
 // }
+
+
+//verivy otp
+func (controller *UserControllerImpl) VerifyOTPHandler(c echo.Context) error {
+	// Bind request body to a struct
+	var req struct {
+		Phone      string `json:"phone_number"`
+		OTP        string `json:"otp_code"`
+	}
+
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message": "Invalid request",
+			"error":   err.Error(),
+		})
+	}
+
+	// Call the AuthService to verify OTP and password
+	result, err := controller.userService.VerifyOTP(req.Phone, req.OTP)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+			"message": "Verification failed",
+			"error":   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, result)
+}

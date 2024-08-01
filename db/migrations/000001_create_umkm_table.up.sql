@@ -17,18 +17,53 @@ CREATE TABLE kategori_umkm(
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE umkm(
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name VARCHAR(255) NOT NULL,
-    no_npwp VARCHAR(255) NOT NULL,
-    gambar JSONB NOT NULL,
-    kategori_umkm_id JSONB NOT NULL,
-    nama_penanggung_jawab VARCHAR(255) NOT NULL,
-    informasi_jambuka JSONB NOT NULL,
-    no_kontak VARCHAR(255) NOT NULL,
-    lokasi VARCHAR(255) NOT NULL,
-    maps VARCHAR(255) NOT NULL,
+-- CREATE TABLE umkm(
+--     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+--     name VARCHAR(255) NOT NULL,
+--     no_npwp VARCHAR(255) NOT NULL,
+--     gambar JSONB NOT NULL,
+--     kategori_umkm_id JSONB NOT NULL,
+--     nama_penanggung_jawab VARCHAR(255) NOT NULL,
+--     informasi_jambuka JSONB NOT NULL,
+--     no_kontak VARCHAR(255) NOT NULL,
+--     lokasi VARCHAR(255) NOT NULL,
+--     maps VARCHAR(255) NOT NULL,
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+-- );
+
+        CREATE TABLE umkm(
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            name VARCHAR(255),
+            no_npwp VARCHAR(255),
+            gambar JSONB,
+            kategori_umkm_id JSONB,
+            nama_penanggung_jawab VARCHAR(255),
+            informasi_jambuka JSONB,
+            no_kontak VARCHAR(255),
+            lokasi VARCHAR(255),
+            maps JSONB,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+
+CREATE TABLE hak_akses(
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+    umkm_id UUID NOT NULL,
+    status INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_umkm_user FOREIGN KEY ( kategori_umkm_id) REFERENCES kategori_umkm(id)
+    CONSTRAINT fk_hak_akses_user FOREIGN KEY (user_id) REFERENCES users(id),
+    CONSTRAINT fk_hak_akses_umkm FOREIGN KEY (umkm_id) REFERENCES umkm(id)
+);
+
+CREATE TABLE  save_otps(
+    id SERIAL PRIMARY KEY,
+    phone_number VARCHAR(15) UNIQUE NOT NULL,
+    otp_code VARCHAR(6) NOT NULL,
+    status BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP NOT NULL
 );

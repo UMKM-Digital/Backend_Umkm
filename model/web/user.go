@@ -32,4 +32,8 @@ type OtpRequest struct {
 	No_Phone string `validate:"required" json:"no_phone"`
 }
 
-
+type User struct {
+    ID          uint   `json:"id"`
+    PhoneNumber string `json:"phone_number"`
+    // Tambahkan field lain sesuai kebutuhan
+}

@@ -12,17 +12,20 @@ import (
 	"umkm/repository/userrepo"
 
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 type AuthServiceImpl struct {
 	authrepository userrepo.AuthUserRepo
 	tokenUseCase   helper.TokenUseCase
+	db             *gorm.DB // Tambahkan field ini
 }
 
-func Newauthservice(authrepository userrepo.AuthUserRepo, token helper.TokenUseCase) *AuthServiceImpl {
+func Newauthservice(authrepository userrepo.AuthUserRepo, token helper.TokenUseCase, db *gorm.DB) *AuthServiceImpl {
 	return &AuthServiceImpl{
 		authrepository: authrepository,
 		tokenUseCase:   token,
+		db: db,
 	}
 }
 
@@ -80,27 +83,30 @@ func (service *AuthServiceImpl) LoginRequest(username string, password string) (
 }
 
 func (service *AuthServiceImpl) SendOtp(phone string) (map[string]interface{}, error) {
+	// Temukan pengguna berdasarkan nomor telepon
 	_, err := service.authrepository.FindUserByPhone(phone)
 	if err != nil {
 		return nil, errors.New("phone number not found")
 	}
 
-	otp, otpErr := helper.GenerateOTP()
-	if otpErr != nil {
-		return nil, otpErr
-	}
+	// Generate OTP
 
-	if err := helper.SendWhatsAppOTP(phone, otp); err != nil {
+	// Tentukan waktu kadaluarsa OTP
+	expirationTime := time.Now().Add(1 * time.Minute)
+
+	// Kirim OTP melalui WhatsApp dan simpan ke database
+	if err := helper.SendWhatsAppOTP(service.db, phone, expirationTime); err != nil {
 		return nil, err
 	}
 
-	expirationTime := time.Now().Add(1 * time.Minute)
+
+
 	return map[string]interface{}{
 		"message":    "OTP sent successfully",
 		"expires_at": expirationTime.Format(time.RFC3339),
-		"otp":        otp,
 	}, nil
 }
+
 
 // get profile
 func (service *AuthServiceImpl) ViewMe(userId int) (entity.UserEntity, error) {
@@ -153,4 +159,63 @@ func (service *AuthServiceImpl) ViewMe(userId int) (entity.UserEntity, error) {
 //     }
 
 //     return data, nil
+// }
+
+//
+
+//verify
+func (service *AuthServiceImpl) VerifyOTP(phone_number string, otpCode string) (map[string]interface{}, error) {
+	// Verifikasi OTP
+	isValid, err := helper.VerifyOTP(service.db, phone_number, otpCode)
+	if err != nil || !isValid {
+		return nil, errors.New("invalid OTP")
+	}
+
+	// Temukan pengguna berdasarkan nomor telepon
+	user, err := service.authrepository.FindUserByPhone(phone_number)
+	if err != nil {
+		return nil, errors.New("user not found")
+	}
+
+	// Token
+	claims := helper.JwtCustomClaims{
+		ID:    strconv.Itoa(user.IdUser),
+		Name:  user.Username,
+		Email: user.Email,
+		Phone: user.No_Phone,
+	}
+
+	token, tokenErr := service.tokenUseCase.GenerateAccessToken(claims)
+	if tokenErr != nil {
+		return nil, tokenErr
+	}
+
+	// Hitung waktu kedaluwarsa token
+	expirationTime := time.Now().Add(1 * time.Hour).Format(time.RFC3339)
+
+	// OTP berhasil diverifikasi dan password benar
+	return map[string]interface{}{
+		"message": "OTP verified",
+		// "user":    user,
+		"token": token,
+		"expired time": expirationTime,
+	}, nil
+}
+// func (service *AuthServiceImpl) VerifyOTP(otp_code string)(map[string]interface{}, error) {
+//     // Verifikasi OTP
+//     isValid, phoneNumber, err := helper.VerifyOTP(service.db, otp_code)
+//     if err != nil || !isValid {
+//         return nil, errors.New("invalid OTP")
+//     }
+
+//     // Temukan pengguna berdasarkan nomor telepon
+//     user, err := service.authrepository.FindUserByPhone(phoneNumber)
+//     if err != nil {
+//         return nil, errors.New("user not found")
+//     }
+
+//     return map[string]interface{}{
+//         "message": "OTP verified successfully",
+//         "user":    user,
+//     }, nil
 // }

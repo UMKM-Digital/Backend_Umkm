@@ -2,7 +2,7 @@ package userrepo
 
 import (
 	"errors"
-	
+
 	"umkm/model/domain"
 
 	"gorm.io/gorm"
@@ -64,3 +64,6 @@ func (repo *AuthrepositoryImpl) GetByID(idUser int) (domain.Users, error) {
 //     }
 //     return user, nil
 // }
+
+//verivy otp
+
