@@ -60,6 +60,8 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	KatUmkmRoute.DELETE("/umkm/delete/:id", userKategoriUmkmController.DeleteKategoriId, JWTProtection())
 
 	Umkm := g.Group("/create")
+	Umkm.Static("/uploads", "uploads")
+
 	Umkm.POST("/umkm", userUmkmController.Create)
 }
 

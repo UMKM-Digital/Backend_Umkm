@@ -60,7 +60,6 @@ CREATE TABLE hak_akses(
 );
 
 CREATE TABLE  save_otps(
-    id SERIAL PRIMARY KEY,
     phone_number VARCHAR(15) UNIQUE NOT NULL,
     otp_code VARCHAR(6) NOT NULL,
     status BOOLEAN DEFAULT FALSE,

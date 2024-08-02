@@ -1,81 +1,39 @@
-// package helper
+package helper
 
-// import (
-// 	"errors"
-// 	"fmt"
+import (
+    "fmt"
+    "io"
+    "mime/multipart"
+    "os"
+    "path/filepath"
+)
 
-// 	"io"
-// 	"os"
-// 	"path/filepath"
+func HandleFileUpload(file *multipart.FileHeader, uploadDir string) (string, error) {
+    // Open the file
+    src, err := file.Open()
+    if err != nil {
+        return "", err
+    }
+    defer src.Close()
 
-// 	"github.com/labstack/echo/v4"
-// )
+    // Create the upload directory if it does not exist
+    if err := os.MkdirAll(uploadDir, os.ModePerm); err != nil {
+        return "", err
+    }
 
-// func RemoveFile(filePath string) error {
-// 	if _, err := os.Stat(filePath); err != nil {
-// 		if os.IsNotExist(err) {
-// 			return fmt.Errorf("File not found")
-// 		}
-// 		return err
-// 	}
+    // Define the file path
+    filename := file.Filename
+    dst, err := os.Create(filepath.Join(uploadDir, filename))
+    if err != nil {
+        return "", err
+    }
+    defer dst.Close()
 
-// 	if err := os.Remove(filePath); err != nil {
-// 		return err
-// 	}
+    // Copy the file content to the destination
+    if _, err := io.Copy(dst, src); err != nil {
+        return "", err
+    }
 
-// 	return nil
-// }
-
-// func HandleFileUpload(c *echo.Context, uploadPath string, formKey string) (string, error) {
-// 	form, err := c.mu
-
-// 	if err != nil {
-// 		return "", err
-// 	}
-
-// 	files := form.File[formKey]
-// 	if len(files) == 0 {
-// 		return "", errors.New("No file uploaded")
-// 	}
-
-// 	if files == nil {
-// 		return "", nil
-// 	} else {
-// 		file := files[0]
-// 		filename := file.Filename
-
-// 		destinationFile, err := os.Create(uploadPath + filename)
-// 		if err != nil {
-// 			return "", err
-// 		}
-// 		defer destinationFile.Close()
-
-// 		sourceFile, err := file.Open()
-// 		if err != nil {
-// 			return "", err
-// 		}
-// 		defer sourceFile.Close()
-
-// 		_, err = io.Copy(destinationFile, sourceFile)
-// 		if err != nil {
-// 			return "", err
-// 		}
-
-// 		return filename, nil
-// 	}
-// }
-
-// func IsDataInDirectory(directoryPath, targetData string) (bool, error) {
-// 	files, err := filepath.Glob(filepath.Join(directoryPath, "*"))
-// 	if err != nil {
-// 		return false, err
-// 	}
-
-// 	for _, file := range files {
-// 		if filepath.Base(file) == targetData {
-// 			return true, nil
-// 		}
-// 	}
-
-// 	return false, nil
-// }
+    // Return the URL of the uploaded file
+    return fmt.Sprintf("/uploads/%s", filename), nil
+}
