@@ -6,14 +6,17 @@ import (
 
 	"umkm/app"
 	kategoriumkmcontroller "umkm/controller/kategoriumkm"
+	transaksicontroller "umkm/controller/transaksi"
 	umkmcontroller "umkm/controller/umkm"
 	"umkm/controller/usercontroller"
 	"umkm/helper"
 	"umkm/model"
 	repokategoriumkm "umkm/repository/kategori_umkm"
+	transaksirepo "umkm/repository/transaksi"
 	umkmrepo "umkm/repository/umkm"
 	"umkm/repository/userrepo"
 	kategoriumkmservice "umkm/service/kategori_umkm"
+	transaksiservice "umkm/service/transaksi"
 	umkmservice "umkm/service/umkm"
 	userservice "umkm/service/user"
 
@@ -40,6 +43,12 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userUmkmService := umkmservice.NewUmkmService(userUmkmRepo)
 	userUmkmController := umkmcontroller.NewUmkmController(userUmkmService)
 
+	userTransaksiRepo := transaksirepo.NewTransaksiRepositoryImpl(db)
+	userTransaksiService := transaksiservice.NewTransaksiservice(userTransaksiRepo)
+	userTransaksiController := transaksicontroller.NewUmkmController(userTransaksiService)
+
+
+
 	g := e.Group(prefix)
 
 	authRoute := g.Group("/auth")
@@ -63,6 +72,9 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	Umkm.Static("/uploads", "uploads")
 
 	Umkm.POST("/umkm", userUmkmController.Create)
+
+	Transaksi := g.Group("/transaksi")
+	Transaksi.POST("/umkm", userTransaksiController.Create)
 }
 
 

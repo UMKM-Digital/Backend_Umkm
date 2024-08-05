@@ -66,3 +66,20 @@ CREATE TABLE  save_otps(
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     expires_at TIMESTAMP NOT NULL
 );
+
+CREATE TABLE transaksi(
+    id SERIAL PRIMARY KEY,
+    umkm_id UUID NOT NULL,
+    no_invoice VARCHAR(255) NOT NULL,
+    tanggal DATE NOT NULL,
+    name_client VARCHAR(255) NULL,
+    id_kategori_produk JSONB NOT NULL,
+    total_jml NUMERIC(15,2) NOT NULL,
+    keterangan text NOT NULL,
+    status INT NOT NULL,
+    alasan_perubahan INT,
+    tiket_validasi VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_transaksi FOREIGN KEY (umkm_id) REFERENCES umkm(id)
+);

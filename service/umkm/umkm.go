@@ -5,5 +5,5 @@ import (
 )
 
 type Umkm interface {
-	CreateUmkm(umkm web.UmkmRequest) (map[string]interface{}, error)
+	CreateUmkm( umkm web.UmkmRequest) (map[string]interface{}, error)
 }
