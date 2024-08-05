@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"umkm/helper"
 	"umkm/model/domain"
+	"umkm/model/entity"
 	"umkm/model/web"
 	transaksirepo "umkm/repository/transaksi"
 
@@ -76,4 +77,16 @@ func (service *TranssaksiServiceImpl) CreateTransaksi(transaksi web.CreateTransa
 		"Total":              saveTransaksi.TotalJml,
 		"Keterangan":         saveTransaksi.Keterangan,
 	}, nil
+}
+
+
+//get by id
+func (service *TranssaksiServiceImpl) GetKategoriUmkmId(id int)(entity.TransaksiEntity, error) {
+	GetTransaksiUmkm, errGetTransaksiUmkm := service.transaksirepository.GetRequestTransaksi(id)
+
+	if errGetTransaksiUmkm != nil {
+		return entity.TransaksiEntity{}, errGetTransaksiUmkm
+	}
+
+	return entity.ToTransaksiEntity(GetTransaksiUmkm), nil
 }

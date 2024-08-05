@@ -1,6 +1,7 @@
 package transaksirepo
 
 import (
+	"errors"
 	"umkm/model/domain"
 
 	"gorm.io/gorm"
@@ -22,4 +23,13 @@ func (repo *TransaksirepositoryImpl) CreateRequetsTransaksi(transaksi domain.Tra
 	return transaksi, nil
 }
 
+//get kategori by id
+func(repo *TransaksirepositoryImpl) GetRequestTransaksi(idTransaksi int)(domain.Transaksi, error){
+	var TrasnsaksiUmkm domain.Transaksi
+	err := repo.db.Find(&TrasnsaksiUmkm, "id = ?", idTransaksi).Error
+	if err != nil{
+		return domain.Transaksi{}, errors.New("Transaksi tidak ditemukan")
+	}
+	return TrasnsaksiUmkm, nil
+}
 

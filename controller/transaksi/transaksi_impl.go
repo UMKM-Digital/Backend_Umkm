@@ -1,6 +1,7 @@
 package transaksicontroller
 
 import (
+	"strconv"
 	"umkm/model"
 	"umkm/model/web"
 	transaksiservice "umkm/service/transaksi"
@@ -39,4 +40,16 @@ func (controller *TransaksiControllerImpl) Create(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, "Register Success", result))
+}
+
+func (controller *TransaksiControllerImpl) GetKategoriId(c echo.Context) error{
+	id, _ := strconv.Atoi(c.Param("id"))
+
+	getTransaksi, errGetTransaksi := controller.transaksiservice.GetKategoriUmkmId(id)
+
+	if errGetTransaksi != nil {
+		return c.JSON(http.StatusNotFound, model.ResponseToClient(http.StatusNotFound, errGetTransaksi.Error(), nil))
+	}
+
+	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, "success", getTransaksi))
 }
