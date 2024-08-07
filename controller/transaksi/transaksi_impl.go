@@ -3,21 +3,29 @@ package transaksicontroller
 import (
 	"strconv"
 	"umkm/model"
+	// "umkm/model/domain"
 	"umkm/model/web"
+	// querybuilder "umkm/query_builder"
 	transaksiservice "umkm/service/transaksi"
 
 	"net/http"
 
+	"fmt"
+
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"gorm.io/gorm"
 )
 
 type TransaksiControllerImpl struct {
 	transaksiservice transaksiservice.Transaksi
+	db                *gorm.DB
 }
 
-func NewUmkmController(transaksi transaksiservice.Transaksi) *TransaksiControllerImpl {
+func NewUmkmController(transaksi transaksiservice.Transaksi, db    *gorm.DB) *TransaksiControllerImpl {
 	return &TransaksiControllerImpl{
 		transaksiservice: transaksi,
+		db: db,
 	}
 }
 
@@ -52,4 +60,67 @@ func (controller *TransaksiControllerImpl) GetKategoriId(c echo.Context) error{
 	}
 
 	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, "success", getTransaksi))
+}
+
+//filter
+// func (controller *TransaksiControllerImpl) GetTransaksiFilterList(c echo.Context) error {
+//     umkmIDStr := c.Param("umkm_id")
+//     fmt.Println("Received UMKM ID:", umkmIDStr) // Debug log
+
+//     if umkmIDStr == "" {
+//         return echo.NewHTTPError(http.StatusBadRequest, "UMKM ID cannot be empty")
+//     }
+
+//     umkmID, err := uuid.Parse(umkmIDStr)
+//     if err != nil {
+//         fmt.Println("Error parsing UMKM ID:", err) // Debug log
+//         return echo.NewHTTPError(http.StatusBadRequest, "Invalid UMKM ID")
+//     }
+
+//     kategoriProduk, err := controller.transaksiservice.GetTransaksiFilter(umkmID)
+//     if err != nil {
+//         return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get kategori produk")
+//     }
+
+//     response := map[string]interface{}{
+//         "code":   http.StatusOK,
+//         "status": "success",
+//         "data":   kategoriProduk,
+//     }
+
+//     return c.JSON(http.StatusOK, response)
+// }
+func (controller *TransaksiControllerImpl) GetTransaksiFilterList(c echo.Context) error {
+	umkmIDStr := c.Param("umkm_id")
+	dateStr := c.Param("date") // Pastikan parameter tanggal sesuai
+
+	// Debug log untuk memeriksa ID UMKM
+	fmt.Println("Received UMKM ID:", umkmIDStr)
+
+	if umkmIDStr == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "UMKM ID cannot be empty")
+	}
+
+	umkmID, err := uuid.Parse(umkmIDStr)
+	if err != nil {
+		fmt.Println("Error parsing UMKM ID:", err) // Debug log
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid UMKM ID")
+	}
+
+	filters := map[string]string{"tanggal": dateStr}
+	allowedFilters := []string{"tanggal"} // Sesuaikan filter yang diizinkan
+
+	// Panggil metode GetTransaksiFilter dari service
+	transaksiList, err := controller.transaksiservice.GetTransaksiFilter(umkmID, filters, allowedFilters)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get transaksi")
+	}
+
+	response := map[string]interface{}{
+		"code":   http.StatusOK,
+		"status": "success",
+		"data":   transaksiList,
+	}
+
+	return c.JSON(http.StatusOK, response)
 }

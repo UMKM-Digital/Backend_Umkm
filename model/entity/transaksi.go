@@ -70,10 +70,10 @@ func ToTransaksiEntity(transaksi domain.Transaksi) TransaksiEntity {
 	}
 }
 
-func ToTransaksiEntities(transaksilist []domain.Transaksi) []TransaksiEntity {
-	var kategoriEntities []TransaksiEntity
-	for _, kategori := range transaksilist {
-		kategoriEntities = append(kategoriEntities, ToTransaksiEntity(kategori))
-	}
-	return kategoriEntities
-}
+// func ToTransaksiEntities(transaksilist []domain.Transaksi) []TransaksiEntity {
+// 	var kategoriEntities []TransaksiEntity
+// 	for _, kategori := range transaksilist {
+// 		kategoriEntities = append(kategoriEntities, ToTransaksiEntity(kategori))
+// 	}
+// 	return kategoriEntities
+// }

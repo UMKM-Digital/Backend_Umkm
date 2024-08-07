@@ -4,6 +4,7 @@ import (
 	"errors"
 	"umkm/model/domain"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -32,4 +33,14 @@ func(repo *TransaksirepositoryImpl) GetRequestTransaksi(idTransaksi int)(domain.
 	}
 	return TrasnsaksiUmkm, nil
 }
+
+func (repo *TransaksirepositoryImpl) GetFilterTransaksi(umkmID uuid.UUID) ([]domain.Transaksi, error) {
+	var transaksi []domain.Transaksi
+	err := repo.db.Where("umkm_id = ?", umkmID).Find(&transaksi).Error
+	if err != nil {
+		return nil, err
+	}
+	return transaksi, nil
+}
+
 

@@ -7,18 +7,23 @@ import (
 	"umkm/model/domain"
 	"umkm/model/entity"
 	"umkm/model/web"
+	querybuilder "umkm/query_builder"
 	transaksirepo "umkm/repository/transaksi"
 
+	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
+	"gorm.io/gorm"
 )
 
 type TranssaksiServiceImpl struct {
 	transaksirepository transaksirepo.TransaksiRepo
+	db *gorm.DB
 }
 
-func NewTransaksiservice(transaksirepository transaksirepo.TransaksiRepo) *TranssaksiServiceImpl {
+func NewTransaksiservice(transaksirepository transaksirepo.TransaksiRepo, db *gorm.DB) *TranssaksiServiceImpl {
 	return &TranssaksiServiceImpl{
 		transaksirepository: transaksirepository,
+		db: db,
 	}
 }
 
@@ -93,4 +98,40 @@ func (service *TranssaksiServiceImpl) GetKategoriUmkmId(id int)(entity.Transaksi
 	return entity.ToTransaksiEntity(GetTransaksiUmkm), nil
 }
 
-//list
+//filter
+// func (service *TranssaksiServiceImpl) GetTransaksiFilter(umkmID uuid.UUID) ([]entity.TransasksiFilterEntity, error) {
+//     // Misalkan Anda memiliki metode repository untuk mendapatkan transaksi berdasarkan umkmID
+//     domainTransaksiList, err := service.transaksirepository.GetFilterTransaksi(umkmID)
+//     if err != nil {
+//         return nil, err
+//     }
+    
+//     // Konversi dari domain.Transaksi ke entity.TransasksiFilterEntity
+//     return entity.ToTransaksiFilterEntities(domainTransaksiList), nil
+// }
+func (service *TranssaksiServiceImpl) GetTransaksiFilter(umkmID uuid.UUID, filters map[string]string, allowedFilters []string) ([]entity.TransasksiFilterEntity, error) {
+    queryBuilder := querybuilder.NewBaseQueryBuilder(service.db)
+
+    // Menggunakan queryBuilder untuk menerapkan filter
+    query, err := queryBuilder.GetQueryBuilder(filters, allowedFilters)
+    if err != nil {
+        return nil, err
+    }
+
+    // Menambahkan filter untuk umkmID
+    query = query.Where("umkm_id = ?", umkmID)
+
+    // Debug: Tampilkan SQL yang dihasilkan
+    sql := service.db.ToSQL(func(tx *gorm.DB) *gorm.DB {
+        return tx.Model(&entity.TransasksiFilterEntity{}).Where("umkm_id = ?", umkmID).Where("tanggal = ?", filters["tanggal"])
+    })
+    fmt.Println("Generated SQL Query:", sql)
+
+    var transaksiList []entity.TransasksiFilterEntity
+    result := query.Find(&transaksiList)
+    if result.Error != nil {
+        return nil, result.Error
+    }
+
+    return transaksiList, nil
+}

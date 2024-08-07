@@ -12,6 +12,8 @@ import (
 	"umkm/controller/usercontroller"
 	"umkm/helper"
 	"umkm/model"
+	// querybuilder "umkm/query_builder"
+
 	// querybuildertransaksi "umkm/query_builder/transaksi"
 	hakaksesrepo "umkm/repository/hakakses"
 	kategoriprodukrepo "umkm/repository/kategori_produk"
@@ -50,9 +52,10 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userUmkmController := umkmcontroller.NewUmkmController(userUmkmService)
 
 	//  
+	// userQuerBuilder := querybuilder.NewBaseQueryBuilder(db)
 	userTransaksiRepo := transaksirepo.NewTransaksiRepositoryImpl(db)
-	userTransaksiService := transaksiservice.NewTransaksiservice(userTransaksiRepo)
-	userTransaksiController := transaksicontroller.NewUmkmController(userTransaksiService)
+	userTransaksiService := transaksiservice.NewTransaksiservice(userTransaksiRepo, db)
+	userTransaksiController := transaksicontroller.NewUmkmController(userTransaksiService, db)
 
 	userKategoriProdukRepo := kategoriprodukrepo.NewKategoriProdukRepo(db)
 	userKategoriProdukService := kategoriprodukservice.NewKategoriProdukService(userKategoriProdukRepo)
@@ -85,10 +88,11 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	Transaksi := g.Group("/transaksi")
 	Transaksi.POST("/umkm", userTransaksiController.Create)
 	Transaksi.GET("/:id", userTransaksiController.GetKategoriId)
+	Transaksi.GET("/:umkm_id/:date", userTransaksiController.GetTransaksiFilterList)
 
 	KatProdukRoute := g.Group("/kategoriproduk")
 	KatProdukRoute.POST("/poost", userKategoriProdukController.Create)
-	KatProdukRoute.GET("/:umkm_id", userKategoriProdukController.GetKategoriList)
+	KatProdukRoute.GET("/:umkm_id/:tanggal", userKategoriProdukController.GetKategoriList)
 }
 
 func JWTProtection() echo.MiddlewareFunc {
