@@ -21,6 +21,8 @@ type UMKM struct {
     Images                 JSONB     `gorm:"column:gambar"` // Menggunakan JSONB untuk menyimpan URL gambar // Menyimpan URL gambar
     CreatedAt            time.Time `gorm:"column:created_at"`
     UpdatedAt            time.Time `gorm:"column:updated_at"`
+    HakAkses             []HakAkses `gorm:"foreignKey:umkm_id"`
+    KategoriProduk        []KategoriProduk `gorm:"foreignkey:umkm_id"`
 }
 
 func (UMKM) TableName() string {

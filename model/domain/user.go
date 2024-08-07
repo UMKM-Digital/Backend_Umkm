@@ -12,6 +12,7 @@ type Users struct {
 	Picture    string    `gorm:"column:picture"`
     Created_at time.Time `gorm:"column:created_at"`
     Updated_at time.Time `gorm:"column:updated_at"`
+    HakAkses   []HakAkses `gorm:"foreignKey:user_id"`
 }
 
 func (Users) TableName() string {

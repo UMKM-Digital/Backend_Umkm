@@ -17,11 +17,11 @@ func NewKategoriUmkmService(kategorirepository repokategoriumkm.CreateCategoryUm
 		kategorirepository: kategorirepository,
 	}
 }
-//post katgeori
+
+// post katgeori
 func (service *KategoriUmkmServiceImpl) CreateKategori(kategori web.CreateCategoriUmkm) (map[string]interface{}, error) {
 	newKategori := domain.Kategori_Umkm{
 		Name: kategori.Name,
-		
 	}
 
 	saveKategoriUmkm, errSaveKategoriUmkm := service.kategorirepository.CreateRequest(newKategori)
@@ -32,18 +32,18 @@ func (service *KategoriUmkmServiceImpl) CreateKategori(kategori web.CreateCatego
 	return helper.ResponseToJson{"Name": saveKategoriUmkm.Name}, nil
 }
 
-//baca seluruh kategori
+// baca seluruh kategori
 func (service *KategoriUmkmServiceImpl) GetKategoriUmkmList() ([]entity.KategoriEntity, error) {
-    getKategoriUmkmList, errGetKategoriUmkmList := service.kategorirepository.GetKategoriUmkm()
+	getKategoriUmkmList, errGetKategoriUmkmList := service.kategorirepository.GetKategoriUmkm()
 
-    if errGetKategoriUmkmList != nil {
-        return []entity.KategoriEntity{}, errGetKategoriUmkmList
-    }
+	if errGetKategoriUmkmList != nil {
+		return []entity.KategoriEntity{}, errGetKategoriUmkmList
+	}
 
-    return entity.ToKategoriEntities(getKategoriUmkmList), nil
+	return entity.ToKategoriEntities(getKategoriUmkmList), nil
 }
 
-//get by id
+// get by id
 func (service *KategoriUmkmServiceImpl) GetKategoriUmkmId(id int) (entity.KategoriEntity, error) {
 	GetKategoriUmkm, errGetKategGetKategoriUmkm := service.kategorirepository.GetKategoriUmkmId(id)
 
@@ -54,7 +54,7 @@ func (service *KategoriUmkmServiceImpl) GetKategoriUmkmId(id int) (entity.Katego
 	return entity.ToKategoriEntity(GetKategoriUmkm), nil
 }
 
-//update
+// update
 func (service *KategoriUmkmServiceImpl) UpdateKategori(request web.UpdateCategoriUmkm, pathId int) (map[string]interface{}, error) {
 	// Ambil data kategori berdasarkan ID
 	getKategoriById, err := service.kategorirepository.GetKategoriUmkmId(pathId)
@@ -70,7 +70,7 @@ func (service *KategoriUmkmServiceImpl) UpdateKategori(request web.UpdateCategor
 	// Buat objek Kategori_Umkm baru untuk pembaruan
 	KategoriumkmRequest := domain.Kategori_Umkm{
 		IdKategori: pathId,
-		Name:      request.Name,
+		Name:       request.Name,
 	}
 
 	// Update kategori UMKM
@@ -84,8 +84,7 @@ func (service *KategoriUmkmServiceImpl) UpdateKategori(request web.UpdateCategor
 	return response, nil
 }
 
-//delete
+// delete
 func (service *KategoriUmkmServiceImpl) DeleteKategoriUmkmId(id int) error {
-    return service.kategorirepository.DeleteKategoriUmkmId(id)
+	return service.kategorirepository.DeleteKategoriUmkmId(id)
 }
-

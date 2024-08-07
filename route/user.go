@@ -5,16 +5,21 @@ import (
 	"os"
 
 	"umkm/app"
+	kategoriprodukcontroller "umkm/controller/kategoriproduk"
 	kategoriumkmcontroller "umkm/controller/kategoriumkm"
 	transaksicontroller "umkm/controller/transaksi"
 	umkmcontroller "umkm/controller/umkm"
 	"umkm/controller/usercontroller"
 	"umkm/helper"
 	"umkm/model"
+	// querybuildertransaksi "umkm/query_builder/transaksi"
+	hakaksesrepo "umkm/repository/hakakses"
+	kategoriprodukrepo "umkm/repository/kategori_produk"
 	repokategoriumkm "umkm/repository/kategori_umkm"
 	transaksirepo "umkm/repository/transaksi"
 	umkmrepo "umkm/repository/umkm"
 	"umkm/repository/userrepo"
+	kategoriprodukservice "umkm/service/kategori_produk"
 	kategoriumkmservice "umkm/service/kategori_umkm"
 	transaksiservice "umkm/service/transaksi"
 	umkmservice "umkm/service/umkm"
@@ -40,14 +45,18 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userKategoriUmkmController := kategoriumkmcontroller.NewKategeoriUmkmController(userKatgoriUmkmService)
 
 	userUmkmRepo := umkmrepo.NewUmkmRepositoryImpl(db)
-	userUmkmService := umkmservice.NewUmkmService(userUmkmRepo)
+	userHakAksesRepo := hakaksesrepo.NewHakAksesRepositoryImpl(db) // Tambahkan repository HakAkses
+	userUmkmService := umkmservice.NewUmkmService(userUmkmRepo, userHakAksesRepo)
 	userUmkmController := umkmcontroller.NewUmkmController(userUmkmService)
 
+	//  
 	userTransaksiRepo := transaksirepo.NewTransaksiRepositoryImpl(db)
 	userTransaksiService := transaksiservice.NewTransaksiservice(userTransaksiRepo)
 	userTransaksiController := transaksicontroller.NewUmkmController(userTransaksiService)
 
-
+	userKategoriProdukRepo := kategoriprodukrepo.NewKategoriProdukRepo(db)
+	userKategoriProdukService := kategoriprodukservice.NewKategoriProdukService(userKategoriProdukRepo)
+	userKategoriProdukController := kategoriprodukcontroller.NewKategeoriProdukController(*userKategoriProdukService)
 
 	g := e.Group(prefix)
 
@@ -64,20 +73,23 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	KatUmkmRoute := g.Group("/kategori")
 	KatUmkmRoute.POST("/umkm", userKategoriUmkmController.Create, JWTProtection())
 	KatUmkmRoute.GET("/list", userKategoriUmkmController.GetKategoriList, JWTProtection())
-	KatUmkmRoute.GET("/:id", userKategoriUmkmController.GetKategoriId, JWTProtection())
+	 
 	KatUmkmRoute.PUT("/umkm/:id", userKategoriUmkmController.UpdateKategoriId, JWTProtection())
 	KatUmkmRoute.DELETE("/umkm/delete/:id", userKategoriUmkmController.DeleteKategoriId, JWTProtection())
 
 	Umkm := g.Group("/create")
 	Umkm.Static("/uploads", "uploads")
 
-	Umkm.POST("/umkm", userUmkmController.Create)
+	Umkm.POST("/umkm", userUmkmController.Create, JWTProtection())
 
 	Transaksi := g.Group("/transaksi")
 	Transaksi.POST("/umkm", userTransaksiController.Create)
 	Transaksi.GET("/:id", userTransaksiController.GetKategoriId)
-}
 
+	KatProdukRoute := g.Group("/kategoriproduk")
+	KatProdukRoute.POST("/poost", userKategoriProdukController.Create)
+	KatProdukRoute.GET("/:umkm_id", userKategoriProdukController.GetKategoriList)
+}
 
 func JWTProtection() echo.MiddlewareFunc {
 	return echojwt.WithConfig(echojwt.Config{
@@ -112,12 +124,11 @@ func JWTProtection() echo.MiddlewareFunc {
 // 	}
 // }
 
-
 // func JWTProtection(tokenUseCase helper.TokenUseCase) echo.MiddlewareFunc {
 // 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 // 		return func(c echo.Context) error {
 // 			token := c.Request().Header.Get("Authorization")
-			
+
 // 			if token == "" {
 // 				// Jika header Authorization tidak ada, kembalikan status Unauthorized
 // 				return c.JSON(http.StatusUnauthorized, model.ResponseToClient(http.StatusUnauthorized, "Token tidak ditemukan", nil))
@@ -142,4 +153,3 @@ func JWTProtection() echo.MiddlewareFunc {
 // 		}
 // 	}
 // }
-

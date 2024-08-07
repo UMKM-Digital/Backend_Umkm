@@ -7,6 +7,8 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+
+
 type Transaksi struct{
 	IdTransaksi     int       `gorm:"column:id;primaryKey;autoIncrement"`
 	UmkmId           uuid.UUID `gorm:"column:umkm_id;type:uuid"`
@@ -17,11 +19,19 @@ type Transaksi struct{
     TotalJml        decimal.Decimal `gorm:"column:total_jml;type:numeric(15,2)"`
 	Keterangan     string   			`gorm:"column:keterangan"`
 	Status     	   	int    `gorm:"column:status"`
+	NoHp     	   	string    `gorm:"column:no_hp"`
 	AlasanPerubahan     	   	string    `gorm:"column:status"`
 	TiketValidasi     	   	string    `gorm:"column:tiket_validasi"`
     Created_at time.Time `gorm:"column:created_at"`
     Updated_at time.Time `gorm:"column:updated_at"`
+    Umkm    UMKM `gorm:"foreignKey:umkm_id"`
 }
+
+type Kategori_Produk struct {
+    ID   []string `json:"id"`
+    Nama []string `json:"nama"`
+}
+
 
 func (Transaksi) TableName() string {
     return "transaksi"

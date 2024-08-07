@@ -61,6 +61,7 @@ func (service *TranssaksiServiceImpl) CreateTransaksi(transaksi web.CreateTransa
 		Keterangan:       transaksi.Keteranagan,
 		Status:           transaksi.Status,
 		TiketValidasi:    qrcode, // Pastikan ini terisi
+		NoHp: transaksi.NoHp,
 	}
 
 	saveTransaksi, errSaveTransaksi := service.transaksirepository.CreateRequetsTransaksi(newTransaksi)
@@ -69,13 +70,14 @@ func (service *TranssaksiServiceImpl) CreateTransaksi(transaksi web.CreateTransa
 	}
 
 	return map[string]interface{}{
-		"Id Umkm":            saveTransaksi.UmkmId,
-		"No Invoice":         saveTransaksi.NoInvoice,
-		"Tanggal":            saveTransaksi.Tanggal,
-		"Name Client":        saveTransaksi.Nameclient,
-		"Id Kategori Produk": saveTransaksi.IdKategoriProduk,
-		"Total":              saveTransaksi.TotalJml,
-		"Keterangan":         saveTransaksi.Keterangan,
+		"id_umkm":            saveTransaksi.UmkmId,
+		"no_invoice":         saveTransaksi.NoInvoice,
+		"tanggal":            saveTransaksi.Tanggal,
+		"name_client":        saveTransaksi.Nameclient,
+		"id_kategori_produk": saveTransaksi.IdKategoriProduk,
+		"total":              saveTransaksi.TotalJml,
+		"keterangan":         saveTransaksi.Keterangan,
+		"no_hp":         saveTransaksi.NoHp,
 	}, nil
 }
 
@@ -90,3 +92,5 @@ func (service *TranssaksiServiceImpl) GetKategoriUmkmId(id int)(entity.Transaksi
 
 	return entity.ToTransaksiEntity(GetTransaksiUmkm), nil
 }
+
+//list

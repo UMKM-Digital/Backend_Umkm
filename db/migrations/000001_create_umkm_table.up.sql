@@ -72,7 +72,8 @@ CREATE TABLE transaksi(
     umkm_id UUID NOT NULL,
     no_invoice VARCHAR(255) NOT NULL,
     tanggal DATE NOT NULL,
-    name_client VARCHAR(255) NULL,
+    name_client VARCHAR(255) NOT NULL,
+    no_hp VARCHAR(255) NOT NULL
     id_kategori_produk JSONB NOT NULL,
     total_jml NUMERIC(15,2) NOT NULL,
     keterangan text NOT NULL,
@@ -82,4 +83,13 @@ CREATE TABLE transaksi(
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_transaksi FOREIGN KEY (umkm_id) REFERENCES umkm(id)
+);
+
+CREATE TABLE kategori_produk (
+    id SERIAL PRIMARY KEY,
+    umkm_id UUID NOT NULL,
+    nama VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_kategori_produk FOREIGN KEY (umkm_id) REFERENCES umkm(id)
 );
