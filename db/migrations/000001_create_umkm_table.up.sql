@@ -93,3 +93,18 @@ CREATE TABLE kategori_produk (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_kategori_produk FOREIGN KEY (umkm_id) REFERENCES umkm(id)
 );
+
+CREATE TABLE produk(
+    id  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    umkm_id  UUID NOT NULL,
+    nama VARCHAR(255) NOT NULL,
+    gambar_id JSONB NOT NULL,
+    harga INT NOT NULL,
+    satuan INT NOT NULL,
+    min_pesanan INT NOT NULL,
+    kategori_produk_id JSONB NOT NULL,
+    deskripsi text NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_produk_umkm FOREIGN KEY (umkm_id) REFERENCES umkm(id)
+);   

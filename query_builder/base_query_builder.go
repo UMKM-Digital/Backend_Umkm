@@ -75,7 +75,7 @@ func (baseQuerybuilder *BaseQueryBuilderImpl) GetQueryBuilder(filters map[string
         }
 
         // Pastikan hanya menggunakan ILIKE untuk field teks
-        if field == "tanggal" { // Jangan gunakan ILIKE untuk field tanggal
+        if field == "tanggal" { 
             continue
         }
 

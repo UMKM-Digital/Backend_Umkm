@@ -7,22 +7,26 @@ import (
 	"umkm/app"
 	kategoriprodukcontroller "umkm/controller/kategoriproduk"
 	kategoriumkmcontroller "umkm/controller/kategoriumkm"
+	produkcontroller "umkm/controller/produk"
 	transaksicontroller "umkm/controller/transaksi"
 	umkmcontroller "umkm/controller/umkm"
 	"umkm/controller/usercontroller"
 	"umkm/helper"
 	"umkm/model"
+
 	// querybuilder "umkm/query_builder"
 
 	// querybuildertransaksi "umkm/query_builder/transaksi"
 	hakaksesrepo "umkm/repository/hakakses"
 	kategoriprodukrepo "umkm/repository/kategori_produk"
 	repokategoriumkm "umkm/repository/kategori_umkm"
+	produkrepo "umkm/repository/produk"
 	transaksirepo "umkm/repository/transaksi"
 	umkmrepo "umkm/repository/umkm"
 	"umkm/repository/userrepo"
 	kategoriprodukservice "umkm/service/kategori_produk"
 	kategoriumkmservice "umkm/service/kategori_umkm"
+	produkservice "umkm/service/produk"
 	transaksiservice "umkm/service/transaksi"
 	umkmservice "umkm/service/umkm"
 	userservice "umkm/service/user"
@@ -57,9 +61,15 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userTransaksiService := transaksiservice.NewTransaksiservice(userTransaksiRepo, db)
 	userTransaksiController := transaksicontroller.NewUmkmController(userTransaksiService, db)
 
+	//userkategori produk
 	userKategoriProdukRepo := kategoriprodukrepo.NewKategoriProdukRepo(db)
 	userKategoriProdukService := kategoriprodukservice.NewKategoriProdukService(userKategoriProdukRepo)
 	userKategoriProdukController := kategoriprodukcontroller.NewKategeoriProdukController(*userKategoriProdukService)
+
+	//userproduk
+	userProdukrepo := produkrepo.NewProdukRepositoryImpl(db)
+	userProdukService := produkservice.NewUmkmService(userProdukrepo)
+	userProdukController := produkcontroller.NewKategeoriUmkmController(userProdukService)
 
 	g := e.Group(prefix)
 
@@ -80,10 +90,11 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	KatUmkmRoute.PUT("/umkm/:id", userKategoriUmkmController.UpdateKategoriId, JWTProtection())
 	KatUmkmRoute.DELETE("/umkm/delete/:id", userKategoriUmkmController.DeleteKategoriId, JWTProtection())
 
-	Umkm := g.Group("/create")
+	Umkm := g.Group("/umkm")
 	Umkm.Static("/uploads", "uploads")
 
-	Umkm.POST("/umkm", userUmkmController.Create, JWTProtection())
+	Umkm.POST("/create", userUmkmController.Create, JWTProtection())
+	Umkm.GET("/list", userUmkmController.GetUmkmList)
 
 	Transaksi := g.Group("/transaksi")
 	Transaksi.POST("/umkm", userTransaksiController.Create)
@@ -93,6 +104,10 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	KatProdukRoute := g.Group("/kategoriproduk")
 	KatProdukRoute.POST("/poost", userKategoriProdukController.Create)
 	KatProdukRoute.GET("/:umkm_id/:tanggal", userKategoriProdukController.GetKategoriList)
+
+	//produk
+	Produk := g.Group("/produk")
+	Produk.POST("/create", userProdukController.CreateProduk)
 }
 
 func JWTProtection() echo.MiddlewareFunc {

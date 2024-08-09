@@ -22,3 +22,12 @@ func (repo *RepoUmkmImpl) CreateRequest(umkm domain.UMKM)(domain.UMKM, error) {
 
 	return umkm, nil
 }
+
+func (repo *RepoUmkmImpl) GetUmkmList()([]domain.UMKM, error){
+	var umkm []domain.UMKM
+	err := repo.db.Find(&umkm).Error
+	if err != nil{
+		return []domain.UMKM{},err
+	}
+	return umkm, nil
+}
