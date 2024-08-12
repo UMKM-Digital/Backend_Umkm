@@ -1,8 +1,10 @@
 package umkmrepo
 
 import (
+	"context"
 	"umkm/model/domain"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -23,11 +25,19 @@ func (repo *RepoUmkmImpl) CreateRequest(umkm domain.UMKM)(domain.UMKM, error) {
 	return umkm, nil
 }
 
-func (repo *RepoUmkmImpl) GetUmkmList()([]domain.UMKM, error){
+// func (repo *RepoUmkmImpl) GetUmkmList(ctx context.Context, umkmIDs []uuid.UUID)([]domain.UMKM, error){
+// 	var umkm []domain.UMKM
+// 	err := repo.db.Where("id IN (?))", umkmIDs).Find(&umkm).Error
+// 	if err != nil{
+// 		return []domain.UMKM{},err
+// 	}
+// 	return umkm, nil
+// }
+func (repo *RepoUmkmImpl) GetUmkmListByIds(ctx context.Context, umkmIDs []uuid.UUID) ([]domain.UMKM, error) {
 	var umkm []domain.UMKM
-	err := repo.db.Find(&umkm).Error
-	if err != nil{
-		return []domain.UMKM{},err
+	err := repo.db.Where("id IN (?)", umkmIDs).Find(&umkm).Error
+	if err != nil {
+		return []domain.UMKM{}, err
 	}
 	return umkm, nil
 }

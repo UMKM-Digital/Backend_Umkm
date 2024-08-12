@@ -207,12 +207,16 @@ func (controller *UmkmControllerImpl) Create(c echo.Context) error {
     return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, "Create UMKM Success", result))
 }
 
-func (controller *UmkmControllerImpl) GetUmkmList(c echo.Context) error {
-	getKUmkm, errGetUmkm := controller.umkmservice.GetUmkmList()
-
-	if errGetUmkm != nil {
-		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, errGetUmkm.Error(), nil))
-	}
-
-	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, "success", getKUmkm))
-}
+    func (controller *UmkmControllerImpl) GetUmkmList(c echo.Context) error {
+        userId, err := helper.GetAuthId(c)
+        if err != nil {
+            return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, err.Error(), nil))
+        }
+    
+        umkmList, err := controller.umkmservice.GetUmkmListByUserId(c.Request().Context(), userId)
+        if err != nil {
+            return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, err.Error(), nil))
+        }
+    
+        return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, "success", umkmList))
+    }

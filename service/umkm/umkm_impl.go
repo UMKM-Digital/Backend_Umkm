@@ -1,6 +1,7 @@
 package umkmservice
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 
@@ -12,6 +13,8 @@ import (
 	"umkm/model/web"
 	hakaksesrepo "umkm/repository/hakakses" // Tambahkan import untuk HakAkses repository
 	umkmrepo "umkm/repository/umkm"
+
+	"github.com/google/uuid"
 )
 
 type UmkmServiceImpl struct {
@@ -165,12 +168,25 @@ func (service *UmkmServiceImpl) CreateUmkm(umkm web.UmkmRequest, userID int) (ma
     }, nil
 }
 
-func (service *UmkmServiceImpl) GetUmkmList()([]entity.UmkmEntity, error){
-	getUmkmList, errGetUmkmList := service.umkmrepository.GetUmkmList()
-
-	if errGetUmkmList != nil {
-		return []entity.UmkmEntity{}, errGetUmkmList
+func (s *UmkmServiceImpl) GetUmkmListByUserId(ctx context.Context, userId int) ([]entity.UmkmEntity, error) {
+	// Fetch HakAkses for the given user ID
+	hakAksesList, err := s.hakaksesrepository.GetHakAksesByUserId(ctx, userId)
+	if err != nil {
+		return nil, err
 	}
 
-	return entity.ToUmkmEntities(getUmkmList), nil
+	// Collect UMKM IDs from HakAkses
+	var umkmIDs []uuid.UUID
+	for _, hakAkses := range hakAksesList {
+		umkmIDs = append(umkmIDs, hakAkses.UmkmId)
+	}
+
+	// Fetch UMKM entities based on the collected IDs
+	umkmList, err := s.umkmrepository.GetUmkmListByIds(ctx, umkmIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert UMKM entities to UmkmEntity format
+	return entity.ToUmkmEntities(umkmList), nil
 }

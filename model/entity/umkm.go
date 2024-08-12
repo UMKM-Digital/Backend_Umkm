@@ -39,4 +39,3 @@ func ToUmkmEntities(transaksiList []domain.UMKM) []UmkmEntity {
     }
     return umkmEntities
 }
-

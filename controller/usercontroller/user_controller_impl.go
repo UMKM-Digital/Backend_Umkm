@@ -184,3 +184,29 @@ func (controller *UserControllerImpl) VerifyOTPHandler(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, result)
 }
+
+
+func (controller *UserControllerImpl) SendOtpRegister(c echo.Context) error {
+    user := new(web.OtpRequest)
+
+    // Bind request body to user
+    if err := c.Bind(user); err != nil {
+        return c.JSON(http.StatusBadRequest, helper.ResponseToJsonOtp(http.StatusBadRequest, err.Error(), nil))
+    }
+
+    // Call service to send OTP and check for errors
+    otpResponse, err := controller.userService.SendOtpRegister(user.No_Phone)
+    if err != nil {
+        // Cek jika error menunjukkan nomor telepon sudah terdaftar
+        if otpResponse != nil && otpResponse["message"] == "Phone number already registered" {
+            return c.JSON(http.StatusBadRequest, helper.ResponseToJsonOtp(http.StatusBadRequest, "Phone number already registered", nil))
+        }
+        // Tangani error lainnya
+        return c.JSON(http.StatusInternalServerError, helper.ResponseToJsonOtp(http.StatusInternalServerError, "OTP tidak terkirim", nil))
+    }
+
+    // Jika OTP berhasil dikirim
+    return c.JSON(http.StatusOK, helper.ResponseToJsonOtp(http.StatusOK, "OTP berhasil dikirim", otpResponse))
+}
+
+

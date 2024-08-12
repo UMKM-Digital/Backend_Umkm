@@ -219,3 +219,27 @@ func (service *AuthServiceImpl) VerifyOTP(phone_number string, otpCode string) (
 //         "user":    user,
 //     }, nil
 // }
+
+func (service *AuthServiceImpl) SendOtpRegister(phone string) (map[string]interface{}, error) {
+    user, err := service.authrepository.FindUserByPhoneRegister(phone)
+    if err != nil {
+        return nil, err
+    }
+    
+    if user != nil {
+        return map[string]interface{}{
+            "message": "Phone number already registered",
+        }, nil
+    }
+
+    expirationTime := time.Now().Add(1 * time.Minute)
+    
+    if err := helper.SendWhatsAppOTP(service.db, phone, expirationTime); err != nil {
+        return nil, err
+    }
+
+    return map[string]interface{}{
+        "message":    "otp tidak ke kririm",
+        "expires_at": expirationTime.Format(time.RFC3339),
+    }, nil
+}

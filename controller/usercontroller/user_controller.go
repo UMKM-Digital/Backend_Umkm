@@ -10,4 +10,5 @@ type SellerController interface {
 	View(c echo.Context) error
 	// Update(c echo.Context) error
 	VerifyOTP(c echo.Context) error
+	SendOtpRegister(c echo.Context) error
 }

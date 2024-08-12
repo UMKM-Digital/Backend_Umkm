@@ -68,8 +68,8 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 
 	//userproduk
 	userProdukrepo := produkrepo.NewProdukRepositoryImpl(db)
-	userProdukService := produkservice.NewUmkmService(userProdukrepo)
-	userProdukController := produkcontroller.NewKategeoriUmkmController(userProdukService)
+	userProdukService := produkservice.NewProdukService(userProdukrepo)
+	userProdukController := produkcontroller.NewProdukController(userProdukService)
 
 	g := e.Group(prefix)
 
@@ -77,6 +77,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	authRoute.POST("/register", userAuthController.Register)
 	authRoute.POST("/login", userAuthController.Login)
 	authRoute.POST("/send-otp", userAuthController.SendOtp)
+	authRoute.POST("/sendotp-register", userAuthController.SendOtpRegister)
 	authRoute.POST("/verifyOtp", userAuthController.VerifyOTPHandler)
 	authRoute.POST("/logout", userAuthController.Logout, JWTProtection())
 
@@ -91,10 +92,10 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	KatUmkmRoute.DELETE("/umkm/delete/:id", userKategoriUmkmController.DeleteKategoriId, JWTProtection())
 
 	Umkm := g.Group("/umkm")
-	Umkm.Static("/uploads", "uploads")
+	// Umkm.Static("/uploads", "uploads")
 
 	Umkm.POST("/create", userUmkmController.Create, JWTProtection())
-	Umkm.GET("/list", userUmkmController.GetUmkmList)
+	Umkm.GET("/list", userUmkmController.GetUmkmList,JWTProtection())
 
 	Transaksi := g.Group("/transaksi")
 	Transaksi.POST("/umkm", userTransaksiController.Create)
@@ -108,19 +109,20 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	//produk
 	Produk := g.Group("/produk")
 	Produk.POST("/create", userProdukController.CreateProduk)
+	Produk.DELETE("/delete/:id", userProdukController.DeleteProdukId)
 }
 
-func JWTProtection() echo.MiddlewareFunc {
-	return echojwt.WithConfig(echojwt.Config{
-		NewClaimsFunc: func(c echo.Context) jwt.Claims {
-			return new(helper.JwtCustomClaims)
-		},
-		SigningKey: []byte(os.Getenv("SECRET_KEY")),
-		ErrorHandler: func(c echo.Context, err error) error {
-			return c.JSON(http.StatusUnauthorized, model.ResponseToClient(http.StatusUnauthorized, "unauthorized", nil))
-		},
-	})
-}
+	func JWTProtection() echo.MiddlewareFunc {
+		return echojwt.WithConfig(echojwt.Config{
+			NewClaimsFunc: func(c echo.Context) jwt.Claims {
+				return new(helper.JwtCustomClaims)
+			},
+			SigningKey: []byte(os.Getenv("SECRET_KEY")),
+			ErrorHandler: func(c echo.Context, err error) error {
+				return c.JSON(http.StatusUnauthorized, model.ResponseToClient(http.StatusUnauthorized, "unauthorized", nil))
+			},
+		})
+	}
 
 // func JWTProtection(tokenUseCase helper.TokenUseCase) echo.MiddlewareFunc {
 // 	return func(next echo.HandlerFunc) echo.HandlerFunc {

@@ -57,6 +57,22 @@ func (repo *AuthrepositoryImpl) GetByID(idUser int) (domain.Users, error) {
 	return user, nil
 }
 
+
+
+//send otp register
+func (repo *AuthrepositoryImpl) FindUserByPhoneRegister(phone string) (*domain.Users, error) {
+    user := new(domain.Users)
+    result := repo.db.Where("no_phone = ?", phone).Take(user)
+    if result.Error != nil {
+        if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+            return nil, nil // Nomor telepon tidak ditemukan
+        }
+        return nil, result.Error // Terjadi kesalahan lain
+    }
+    return user, nil
+}
+
+
 // repository/userrepo/auth_repository.go
 // func (repo *AuthrepositoryImpl) UpdateId(idUser int, user domain.Users) (domain.Users, error) {
 //     if err := repo.db.Model(&domain.Users{}).Where("id = ?", idUser).Updates(user).Error; err != nil {
