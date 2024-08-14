@@ -10,7 +10,7 @@ type ProdukEntity struct {
 	IdProduk uuid.UUID `json:"id"`
 	Name string `json:"nama"`
 	Images domain.JSONB `json:"gambar_id"`
-	harga int `json:"harga"`
+	Harga int `json:"harga"`
 	KategdoriProduk domain.JSONB `json:"kategori_produk_id"`
 	Satuan int `json:"satuan"`
 	MinPesanan int `json:"min_pesanan"`
@@ -23,19 +23,11 @@ func ToProdukEntity(produk domain.Produk) ProdukEntity {
 	 Name: produk.Nama,
 	 Images: produk.Gamabr,
 	 Deskripsi:  produk.Deskripsi,
-	 harga: produk.Harga,
+	 Harga: produk.Harga,
 	 Satuan: produk.Satuan,
 	 MinPesanan: produk.Min_pesanan,
 	}
 }
-
-// func ToprodukEntities(UmkmList []domain.Transaksi) []UmkmEntity {
-//     var produkEntities []UmkmEntity
-//     for _, UmkmList := range UmkmList {
-//         produkEntities = append(produkEntities, ToUmkmEntity(UmkmList))
-//     }
-//     return produkEntities
-// }
 
 func ToProdukEntities(produklist []domain.Produk) []ProdukEntity {
     var produkEntities []ProdukEntity

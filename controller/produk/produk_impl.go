@@ -13,6 +13,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"fmt"
 )
 
 type ProdukControllerImpl struct {
@@ -99,4 +100,46 @@ func (controller *ProdukControllerImpl) DeleteProdukId(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, helper.ResponseClient(http.StatusOK, "Delete Produk Success", nil))
+}
+
+// func (controller *ProdukControllerImpl) GetProdukId(c echo.Context) error{
+// 	IdProduk := c.Param("id")
+// 	id, err := uuid.Parse(IdProduk)
+
+// 	if err != nil{
+// 		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, "Id tidak ada", nil))
+// 	}
+
+// 	if errGetPorudk := controller.Produk.GetProdukId(id); errGetPorudk != nil{
+// 		return c.JSON(http.StatusBadRequest, helper.ResponseClient(http.StatusBadRequest, errGetPorudk.Error(), nil))
+// 	}
+// 	return c.JSON(http.StatusOK, helper.ResponseClient(http.StatusOK,"id ditemukan", nil))
+// }
+
+func (controller *ProdukControllerImpl) GetprodukList(c echo.Context) error {
+	produkIDStr := c.Param("umkm_id")
+    fmt.Println("Received PRODUK ID:", produkIDStr)
+
+    if produkIDStr == "" {
+        return echo.NewHTTPError(http.StatusBadRequest, "Produk ID cannot be empty")
+    }
+
+    produkId, err := uuid.Parse(produkIDStr)
+    if err != nil {
+        fmt.Println("Error parsing Produk ID:", err) // Debug log
+        return echo.NewHTTPError(http.StatusBadRequest, "Invalid Produk ID")
+    }
+
+    Produk, err := controller.Produk.GetProdukList(produkId)
+    if err != nil {
+        return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get kategori produk")
+    }
+
+    response := map[string]interface{}{
+        "code":   http.StatusOK,
+        "status": "success",
+        "data":   Produk,
+    }
+
+    return c.JSON(http.StatusOK, response)
 }

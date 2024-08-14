@@ -11,13 +11,17 @@ import (
 	"time"
 	"umkm/helper"
 	"umkm/model/domain"
+	"umkm/model/entity"
+
+	// "umkm/model/entity"
+
+	// "umkm/model/entity"
 	"umkm/model/web"
 	produkrepo "umkm/repository/produk"
 
 	"os"
 
 	"github.com/google/uuid"
-
 )
 
 type ProdukServiceImpl struct {
@@ -211,3 +215,22 @@ func (service *ProdukServiceImpl) DeleteProduk(id uuid.UUID) error {
 	return service.produkrepository.DeleteProdukId(id)
 }
 
+// func(service *ProdukServiceImpl)GetProdukId(id uuid.UUID)(entity.ProdukEntity, error){
+// 	GetProduk, errGetProduk := service.produkrepository.ProdukById(id)
+
+// 	if errGetProduk != nil {
+// 		return entity.ProdukEntity{}, errGetProduk
+// 	}
+
+// 	return entity.ToProdukEntity(GetProduk), nil
+// }
+
+func (service *ProdukServiceImpl) GetProdukList(Produkid uuid.UUID) ([]entity.ProdukEntity, error) {
+	getProdukList, err := service.produkrepository.GetProduk(Produkid)
+
+    if err != nil {
+        return nil, err
+    }
+
+	return entity.ToProdukEntities(getProdukList),nil
+}

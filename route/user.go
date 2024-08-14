@@ -87,7 +87,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	KatUmkmRoute := g.Group("/kategori")
 	KatUmkmRoute.POST("/umkm", userKategoriUmkmController.Create, JWTProtection())
 	KatUmkmRoute.GET("/list", userKategoriUmkmController.GetKategoriList, JWTProtection())
-	 
+	KatUmkmRoute.GET("/:id", userKategoriUmkmController.GetKategoriId, JWTProtection())
 	KatUmkmRoute.PUT("/umkm/:id", userKategoriUmkmController.UpdateKategoriId, JWTProtection())
 	KatUmkmRoute.DELETE("/umkm/delete/:id", userKategoriUmkmController.DeleteKategoriId, JWTProtection())
 
@@ -110,6 +110,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	Produk := g.Group("/produk")
 	Produk.POST("/create", userProdukController.CreateProduk)
 	Produk.DELETE("/delete/:id", userProdukController.DeleteProdukId)
+	Produk.GET("/list/:umkm_id", userProdukController.GetprodukList)
 }
 
 	func JWTProtection() echo.MiddlewareFunc {

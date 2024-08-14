@@ -2,8 +2,11 @@ package umkmservice
 
 import (
 	"context"
-	"encoding/json"
+	// "encoding/json"
 	"errors"
+	"math/rand"
+	"mime/multipart"
+	"path/filepath"
 
 	// "fmt"
 	// "os/user"
@@ -15,6 +18,8 @@ import (
 	umkmrepo "umkm/repository/umkm"
 
 	"github.com/google/uuid"
+    "time"
+    "fmt"
 )
 
 type UmkmServiceImpl struct {
@@ -102,7 +107,13 @@ func NewUmkmService(umkmrepository umkmrepo.CreateUmkm, hakaksesrepository hakak
 // }
 
 
-func (service *UmkmServiceImpl) CreateUmkm(umkm web.UmkmRequest, userID int) (map[string]interface{}, error) {
+func generateRandomFileName(ext string) string {
+	rand.Seed(time.Now().UnixNano())
+	randomString := fmt.Sprintf("%d", rand.Intn(1000000))
+	return randomString + ext
+}
+
+func (service *UmkmServiceImpl) CreateUmkm(umkm web.UmkmRequest, userID int, files map[string]*multipart.FileHeader) (map[string]interface{}, error) {
     kategoriUmkmId, err := helper.RawMessageToJSONB(umkm.Kategori_Umkm_Id)
     if err != nil {
         return nil, errors.New("invalid type for Kategori_Umkm_Id")
@@ -118,16 +129,37 @@ func (service *UmkmServiceImpl) CreateUmkm(umkm web.UmkmRequest, userID int) (ma
         return nil, errors.New("invalid type for Maps")
     }
 
+    // var Images domain.JSONB
+    // if len(umkm.Gambar) > 0 {
+    //     var imgURLs []string
+    //     if err := json.Unmarshal(umkm.Gambar, &imgURLs); err != nil {
+    //         return nil, errors.New("invalid type for Images")
+    //     }
+    //     Images = domain.JSONB{"urls": imgURLs}
+    // } else {
+    //     Images = domain.JSONB{"urls": []string{}}
+    // }
+    // Handle gambar files
     var Images domain.JSONB
-    if len(umkm.Gambar) > 0 {
-        var imgURLs []string
-        if err := json.Unmarshal(umkm.Gambar, &imgURLs); err != nil {
-            return nil, errors.New("invalid type for Images")
-        }
-        Images = domain.JSONB{"urls": imgURLs}
-    } else {
-        Images = domain.JSONB{"urls": []string{}}
-    }
+	var savedImageURLs []string
+	if len(files) > 0 {
+		for _, file := range files {
+			ext := filepath.Ext(file.Filename)
+			randomFileName := generateRandomFileName(ext)
+			newImagePath := filepath.Join("uploads", randomFileName)
+
+			if err := helper.SaveFile(file, newImagePath); err != nil {
+				return nil, errors.New("failed to save image")
+			}
+
+			// Save the image path in a format with forward slashes
+			savedImageURLs = append(savedImageURLs, filepath.ToSlash(newImagePath))
+		}
+
+		Images = domain.JSONB{"urls": savedImageURLs}
+	} else {
+		Images = domain.JSONB{"urls": []string{}}
+	}
 
     newUmkm := domain.UMKM{
         Name:                umkm.Name,

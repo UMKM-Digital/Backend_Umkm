@@ -10,4 +10,6 @@ type CreateProduk interface {
 	CreateRequest(produk domain.Produk)(domain.Produk, error)
 	DeleteProdukId(id uuid.UUID) error
 	FindById(id uuid.UUID) (domain.Produk, error)
+	// ProdukById(id uuid.UUID) (domain.Produk, error)
+	GetProduk(ProdukId uuid.UUID)([]domain.Produk, error)
 }
