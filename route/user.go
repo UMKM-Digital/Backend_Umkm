@@ -104,7 +104,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 
 	KatProdukRoute := g.Group("/kategoriproduk")
 	KatProdukRoute.POST("/poost", userKategoriProdukController.Create)
-	KatProdukRoute.GET("/:umkm_id/:tanggal", userKategoriProdukController.GetKategoriList)
+	KatProdukRoute.GET("/:umkm_id", userKategoriProdukController.GetKategoriList)
 
 	//produk
 	Produk := g.Group("/produk")
