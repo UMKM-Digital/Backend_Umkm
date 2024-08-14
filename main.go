@@ -28,6 +28,13 @@ func main() {
 
 
     route.RegisterUserRoute("/user", r)
-    r.Static("/uploads", "/uploads")
+    r.Static("/uploads", "uploads")
     r.Logger.Fatal(r.Start(fmt.Sprintf(":%s", os.Getenv("PORT"))))
+    
+    r.GET("/uploads/*", func(c echo.Context) error {
+        path := c.Param("*")
+        log.Printf("Requested path: %s", path)
+        return c.File("/Backend_Umkm/uploads/" + path)
+    })
+    
 }
