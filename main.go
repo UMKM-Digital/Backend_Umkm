@@ -28,6 +28,6 @@ func main() {
 
 
     route.RegisterUserRoute("/user", r)
-    r.Static("/uploads", "/api-golang/Backend_Umkm/uploads")
+    r.Static("/uploads", "/uploads")
     r.Logger.Fatal(r.Start(fmt.Sprintf(":%s", os.Getenv("PORT"))))
 }
