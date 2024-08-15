@@ -8,6 +8,7 @@ import (
 )
 
 type TransasksiFilterEntity struct {
+	Id int `json:"id"`
 	NoInvoice string `json:"no_invoice"`
 	Tanggal time.Time `json:"tanggal"`
 	TotalJml decimal.Decimal `json:"total_jml"`
@@ -16,6 +17,7 @@ type TransasksiFilterEntity struct {
 
 func ToTransaksiListEntity(transaksi domain.Transaksi) TransasksiFilterEntity {
 	return TransasksiFilterEntity{
+		Id: transaksi.IdTransaksi,
 		NoInvoice: transaksi.NoInvoice,
 		Tanggal: transaksi.Tanggal,
 		TotalJml: transaksi.TotalJml,
