@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"umkm/app"
+	homepagecontroller "umkm/controller/homepage"
 	kategoriprodukcontroller "umkm/controller/kategoriproduk"
 	kategoriumkmcontroller "umkm/controller/kategoriumkm"
 	produkcontroller "umkm/controller/produk"
@@ -18,12 +19,14 @@ import (
 
 	// querybuildertransaksi "umkm/query_builder/transaksi"
 	hakaksesrepo "umkm/repository/hakakses"
+	testimonialrepo "umkm/repository/homepage"
 	kategoriprodukrepo "umkm/repository/kategori_produk"
 	repokategoriumkm "umkm/repository/kategori_umkm"
 	produkrepo "umkm/repository/produk"
 	transaksirepo "umkm/repository/transaksi"
 	umkmrepo "umkm/repository/umkm"
 	"umkm/repository/userrepo"
+	homepageservice "umkm/service/homepage"
 	kategoriprodukservice "umkm/service/kategori_produk"
 	kategoriumkmservice "umkm/service/kategori_umkm"
 	produkservice "umkm/service/produk"
@@ -71,6 +74,11 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userProdukService := produkservice.NewProdukService(userProdukrepo)
 	userProdukController := produkcontroller.NewProdukController(userProdukService)
 
+	//testimonial
+	userTestimonial := testimonialrepo.NewTestimonal(db)
+	userTesimonialService := homepageservice.NewTestimonialService(userTestimonial)
+	userTesimonialController := homepagecontroller.NewTestimonialController(*userTesimonialService)
+
 	g := e.Group(prefix)
 
 	authRoute := g.Group("/auth")
@@ -111,6 +119,11 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	Produk.POST("/create", userProdukController.CreateProduk)
 	Produk.DELETE("/delete/:id", userProdukController.DeleteProdukId)
 	Produk.GET("/list/:umkm_id", userProdukController.GetprodukList)
+
+	//testimonial
+	Testimonial := g.Group("/testimonial")
+	Testimonial.POST("/create", userTesimonialController.Create)
+	Testimonial.GET("/list", userTesimonialController.GetKategoriList)
 }
 
 	func JWTProtection() echo.MiddlewareFunc {
