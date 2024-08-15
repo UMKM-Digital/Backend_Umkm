@@ -9,7 +9,7 @@ import (
 
 type TransasksiFilterEntity struct {
 	Id int `json:"id"`
-	Name string `json:"name_client"`
+	NameClient string `json:"name_client"`
 	NoInvoice string `json:"no_invoice"`
 	Tanggal time.Time `json:"tanggal"`
 	TotalJml decimal.Decimal `json:"total_jml"`
@@ -19,7 +19,7 @@ type TransasksiFilterEntity struct {
 func ToTransaksiListEntity(transaksi domain.Transaksi) TransasksiFilterEntity {
 	return TransasksiFilterEntity{
 		Id: transaksi.IdTransaksi,
-		Name: transaksi.Nameclient,
+		NameClient: transaksi.Nameclient,
 		NoInvoice: transaksi.NoInvoice,
 		Tanggal: transaksi.Tanggal,
 		TotalJml: transaksi.TotalJml,
