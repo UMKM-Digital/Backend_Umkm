@@ -8,4 +8,5 @@ import (
 type Testimonal interface {
 	CreateTestimonial(testimonal web.CreateTestimonial) (map[string]interface{}, error)
 	GetTestimonial() ([]entity.TesttimonialEntity, error)
+	DeleteTestimonial (id int) error
 }

@@ -42,3 +42,8 @@ func (service *TestimonalServiceImpl) GetTestimonial() ([]entity.TesttimonialEnt
     return entity.ToKategoriProdukEntities(GetTestimonialList), nil
 }
 
+//delete
+func (service *TestimonalServiceImpl) DeleteTestimonial (id int) error {
+	return service.testimonalrepository.DelTransaksi(id)
+}
+

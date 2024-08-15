@@ -30,3 +30,10 @@ func (repo *TestimonalRepoImpl) GetTestimonial()([]domain.Testimonal, error) {
     }
     return testimonal, nil
 }
+
+func (repo *TestimonalRepoImpl) DelTransaksi(id int)error{
+	if err := repo.db.Delete(&domain.Testimonal{}, id).Error; err != nil {
+        return err
+    }
+    return nil
+}

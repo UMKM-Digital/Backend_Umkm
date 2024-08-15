@@ -1,7 +1,9 @@
- package homepagecontroller
+package homepagecontroller
 
 import (
 	"net/http"
+	"strconv"
+	"umkm/helper"
 	"umkm/model"
 	web "umkm/model/web/homepage"
 	homepageservice "umkm/service/homepage"
@@ -43,4 +45,14 @@ func (controller *TestimonalControllerImpl) GetKategoriList(c echo.Context) erro
 	}
 
 	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, "success", getTestimoni))
+}
+
+func (controller *TestimonalControllerImpl) DeleteTestimonial(c echo.Context) error {
+    id, _ := strconv.Atoi(c.Param("id"))
+
+    if errTestimonial := controller.testimonal.DeleteTestimonial(id); errTestimonial != nil{
+        return c.JSON(http.StatusBadRequest, helper.ResponseClient(http.StatusBadRequest, errTestimonial.Error(), nil))
+    }
+
+    return c.JSON(http.StatusOK, helper.ResponseClient(http.StatusOK, "Delete Kategori Success", nil))
 }
