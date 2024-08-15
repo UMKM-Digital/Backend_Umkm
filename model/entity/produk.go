@@ -26,6 +26,7 @@ func ToProdukEntity(produk domain.Produk) ProdukEntity {
 	 Harga: produk.Harga,
 	 Satuan: produk.Satuan,
 	 MinPesanan: produk.Min_pesanan,
+	 KategdoriProduk: produk.KategoriProduk,
 	}
 }
 
