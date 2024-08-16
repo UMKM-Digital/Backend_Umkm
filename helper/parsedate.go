@@ -5,11 +5,11 @@ import (
     "errors"
 )
 
-// ParseDate parses a date string in the format "YYYY-MM-DD" to a time.Time object
+// ParseDate parses a date string in ISO 8601 format to a time.Time object
 func ParseDate(dateStr string) (time.Time, error) {
-    date, err := time.Parse("2006-01-02", dateStr)
+    date, err := time.Parse(time.RFC3339, dateStr)
     if err != nil {
-        return time.Time{}, errors.New("invalid date format, expected YYYY-MM-DD")
+        return time.Time{}, errors.New("invalid date format, expected ISO 8601")
     }
     return date, nil
 }

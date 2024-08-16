@@ -47,3 +47,50 @@ func (service *TestimonalServiceImpl) DeleteTestimonial (id int) error {
 	return service.testimonalrepository.DelTransaksi(id)
 }
 
+//get id
+func (service *TestimonalServiceImpl) GetTestimonialid(id int) (entity.TesttimonialEntity, error) {
+	GetTestimonial, errGetTestimonial := service.testimonalrepository.GetTransaksiByid(id)
+
+	if errGetTestimonial != nil {
+		return entity.TesttimonialEntity{}, errGetTestimonial
+	}
+
+	return entity.ToTestimonialEntity(GetTestimonial),nil
+}
+
+//update
+func (service *TestimonalServiceImpl) UpdateTestimonial(request web.UpdateTestimonial, Id int) (map[string]interface{}, error) {
+    // Ambil data testimonial berdasarkan ID
+    getTestimonialById, err := service.testimonalrepository.GetTransaksiByid(Id)
+    if err != nil {
+        return nil, err
+    }
+
+    // Gunakan nilai yang ada jika tidak ada perubahan dalam request
+    if request.Name == "" {
+        request.Name = getTestimonialById.Name
+    }
+    if request.Quotes == "" {
+        request.Quotes = getTestimonialById.Quotes
+    }
+    
+    // Buat objek Testimonal baru untuk pembaruan
+    TestimonalRequest := domain.Testimonal{
+        Id: Id,
+        Name:       request.Name,
+        Quotes: request.Quotes,
+    }
+
+    // Update testimonial
+    UpdateTestimonial, errUpdate := service.testimonalrepository.UpdateTransaksiId(Id, TestimonalRequest)
+    if errUpdate != nil {
+        return nil, errUpdate
+    }
+
+    // Bentuk respons yang akan dikembalikan
+    response := map[string]interface{}{
+        "name":   UpdateTestimonial.Name,
+        "quotes": UpdateTestimonial.Quotes,
+    }
+    return response, nil
+}

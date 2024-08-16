@@ -1,29 +1,60 @@
 package helper
 
 import (
-    "fmt"
-    "math/rand"
-    "time"
+	"fmt"
+	"strconv"
+	"time"
+	"umkm/model/domain"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
-// GenerateInvoiceNumber generates an invoice number with the format INV<YYYY><BULAN><NOACK>
-func GenerateInvoiceNumber() (string, error) {
-    now := time.Now()
-    year := now.Format("2006")
-    month := now.Format("01")
-    noAck := generateRandomNumber(3) // Generate a 3-digit number
-    
-    return fmt.Sprintf("INV%s%s%s", year, month, noAck), nil
-}
+// GenerateInvoiceNumber generates an invoice number with the format INVYYYYMMDDNNN
+func GenerateInvoiceNumber(db *gorm.DB, umkmID uuid.UUID) (string, error) {
+	now := time.Now()
+	yearMonthDay := now.Format("20060102") // Format as YYYYMMDD
+	prefix := "INV" + yearMonthDay         // Prefix for the invoice number
 
-// generateRandomNumber generates a random number with a fixed number of digits
-func generateRandomNumber(digits int) string {
-    rand.Seed(time.Now().UnixNano()) // Seed the random number generator
-    min := 1
-    max := 9
-    for i := 1; i < digits; i++ {
-        max *= 10
-    }
-    number := rand.Intn(max-min+1) + min
-    return fmt.Sprintf("%0*d", digits, number)
+	// Find the latest invoice number for the given UMKM ID
+	var latestInvoiceNumber string
+	result := db.Model(&domain.Transaksi{}).
+		Where("umkm_id = ?", umkmID).
+		Select("no_invoice").
+		Order("no_invoice desc").
+		Limit(1).
+		Scan(&latestInvoiceNumber)
+	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
+		return "", result.Error
+	}
+
+	// Debug log for verification
+	fmt.Printf("Latest Invoice Number from DB: %s\n", latestInvoiceNumber)
+
+	var nextNumber string
+	if latestInvoiceNumber == "" {
+		// No previous invoice found, start with 001
+		nextNumber = "001"
+	} else {
+		// Validate the format and extract number part
+		if len(latestInvoiceNumber) < len(prefix)+3 { // Adjust for 3 digits
+			return "", fmt.Errorf("invalid invoice number format: %s", latestInvoiceNumber)
+		}
+		// Extract number part
+		numberPart := latestInvoiceNumber[len(prefix):]
+		// Debug log for numberPart
+		fmt.Printf("Number part extracted: %s\n", numberPart)
+
+		currentNumber, err := strconv.Atoi(numberPart)
+		if err != nil {
+			return "", fmt.Errorf("error converting string to int: %s", numberPart)
+		}
+		nextNumber = fmt.Sprintf("%03d", currentNumber+1)
+	}
+
+	// Generate the new invoice number
+	invoiceNumber := fmt.Sprintf("%s%s", prefix, nextNumber)
+	fmt.Printf("Generated Invoice Number: %s\n", invoiceNumber) // Debug log
+
+	return invoiceNumber, nil
 }

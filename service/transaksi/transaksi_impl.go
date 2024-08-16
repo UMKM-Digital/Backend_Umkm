@@ -36,10 +36,10 @@ func (service *TranssaksiServiceImpl) CreateTransaksi(transaksi web.CreateTransa
 		return nil, errors.New("invalid type for idKategoriProduk")
 	}
 
-	invoiceNumber, err := helper.GenerateInvoiceNumber()
-	if err != nil {
-		return nil, errors.New("failed to generate invoice number")
-	}
+	invoiceNumber, err := helper.GenerateInvoiceNumber(service.db, transaksi.UmkmId)
+    if err != nil {
+        return nil, errors.New("failed to generate invoice number")
+    }
 
 	qrcode, err := helper.GenerateValidationTicket()
 	if err != nil {

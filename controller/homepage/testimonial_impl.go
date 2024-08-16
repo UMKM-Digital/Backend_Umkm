@@ -56,3 +56,31 @@ func (controller *TestimonalControllerImpl) DeleteTestimonial(c echo.Context) er
 
     return c.JSON(http.StatusOK, helper.ResponseClient(http.StatusOK, "Delete Kategori Success", nil))
 }
+
+func (controller *TestimonalControllerImpl) GetKategoriId(c echo.Context) error{
+	id, _ := strconv.Atoi(c.Param("id"))
+
+	getTestimoni, errGetTestimoni := controller.testimonal.GetTestimonialid(id)
+
+	if errGetTestimoni != nil {
+		return c.JSON(http.StatusNotFound, model.ResponseToClient(http.StatusNotFound, errGetTestimoni.Error(), nil))
+	}
+
+	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, "success", getTestimoni))
+}
+func (conntroller *TestimonalControllerImpl) UpdateTestimonial(c echo.Context) error{
+	testimonal := new(web.UpdateTestimonial)
+	id, _ := strconv.Atoi(c.Param("id"))
+
+	if err := c.Bind(testimonal); err != nil {
+		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, err.Error(), nil))
+	}
+
+	testimonalUpdate, errTestimonalUpdate := conntroller.testimonal.UpdateTestimonial(*testimonal, id)
+
+	if errTestimonalUpdate != nil {
+		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, errTestimonalUpdate.Error(), nil))
+	}
+
+	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, "data berhasil diupdate", testimonalUpdate))
+}

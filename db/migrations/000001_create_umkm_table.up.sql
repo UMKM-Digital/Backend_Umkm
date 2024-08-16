@@ -55,7 +55,7 @@ CREATE TABLE transaksi(
     id SERIAL PRIMARY KEY,
     umkm_id UUID NOT NULL,
     no_invoice VARCHAR(255) NOT NULL,
-    tanggal DATE NOT NULL,
+    tanggal TIMESTAMPTZ NOT NULL,
     name_client VARCHAR(255) NOT NULL,
     no_hp VARCHAR(255) NOT NULL
     id_kategori_produk JSONB NOT NULL,
