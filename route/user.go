@@ -55,7 +55,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 
 	userUmkmRepo := umkmrepo.NewUmkmRepositoryImpl(db)
 	userHakAksesRepo := hakaksesrepo.NewHakAksesRepositoryImpl(db) // Tambahkan repository HakAkses
-	userUmkmService := umkmservice.NewUmkmService(userUmkmRepo, userHakAksesRepo)
+	userUmkmService := umkmservice.NewUmkmService(userUmkmRepo, userHakAksesRepo, db)
 	userUmkmController := umkmcontroller.NewUmkmController(userUmkmService)
 
 	//  
@@ -104,6 +104,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 
 	Umkm.POST("/create", userUmkmController.Create, JWTProtection())
 	Umkm.GET("/list", userUmkmController.GetUmkmList,JWTProtection())
+	Umkm.GET("/filter", userUmkmController.GetUmkmFilter,JWTProtection())
 
 	Transaksi := g.Group("/transaksi")
 	Transaksi.POST("/umkm", userTransaksiController.Create)

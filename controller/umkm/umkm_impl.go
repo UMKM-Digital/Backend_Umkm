@@ -22,6 +22,7 @@ type UmkmControllerImpl struct {
 func NewUmkmController(umkm umkmservice.Umkm) *UmkmControllerImpl {
     return &UmkmControllerImpl{
         umkmservice: umkm,
+       
     }
 }
 
@@ -115,3 +116,21 @@ func (controller *UmkmControllerImpl) Create(c echo.Context) error {
     
         return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, "success", umkmList))
     }
+
+    func (controller *UmkmControllerImpl) GetUmkmFilter(c echo.Context) error {
+        userId, err := helper.GetAuthId(c)
+        if err != nil {
+            return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, err.Error(), nil))
+        }
+    
+        filters := map[string]string{"name": c.QueryParam("name")}
+        allowedFilters := []string{"name"}
+    
+        umkmList, err := controller.umkmservice.GetUmkmFilter(c.Request().Context(), userId, filters, allowedFilters)
+        if err != nil {
+            return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, err.Error(), nil))
+        }
+    
+        return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, "success", umkmList))
+    }
+    

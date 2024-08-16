@@ -23,34 +23,6 @@ func NewBaseQueryBuilder(db *gorm.DB) *BaseQueryBuilderImpl {
 	}
 }
 
-// func (baseQuerybuilder *BaseQueryBuilderImpl) GetQueryBuilder(filters map[string]string, allowedFilters []string) (*gorm.DB, error) {
-// 	query := baseQuerybuilder.db
-
-// 	// Filter berdasarkan tanggal jika ada
-// 	if dateStr, ok := filters["tanggal"]; ok {
-// 		if !slices.Contains(allowedFilters, "tanggal") {
-// 			return nil, fmt.Errorf("filter 'tanggal' tidak diizinkan")
-// 		}
-
-// 		date, err := time.Parse("2006-01-02", dateStr)
-// 		if err != nil {
-// 			return nil, fmt.Errorf("format tanggal tidak valid: %v", err)
-// 		}
-// 		query = query.Where("tanggal = ?", date)
-// 	}
-
-// 	// Filter untuk field lain
-// 	for field, value := range filters {
-// 		if !slices.Contains(allowedFilters, field) {
-// 			continue
-// 		}
-
-// 		pat := "%" + value + "%"
-// 		query = query.Where(fmt.Sprintf("%s ILIKE ?", field), pat)
-// 	}
-
-// 	return query, nil
-// }
 func (baseQuerybuilder *BaseQueryBuilderImpl) GetQueryBuilder(filters map[string]string, allowedFilters []string) (*gorm.DB, error) {
     query := baseQuerybuilder.db.Model(&domain.Transaksi{}) // Sesuaikan model jika perlu
 
