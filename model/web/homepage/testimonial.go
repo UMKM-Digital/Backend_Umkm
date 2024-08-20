@@ -8,4 +8,5 @@ type CreateTestimonial struct{
 type UpdateTestimonial struct{
 	Name string `validate:"required" json:"name"`
 	Quotes string `validate:"required" json:"quote"`
+	Active int `validate:"required" json:"active"`
 } 

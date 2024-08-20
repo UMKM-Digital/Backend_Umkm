@@ -1,6 +1,7 @@
 package homepageservice
 
 import (
+	"time"
 	domain "umkm/model/domain/homepage"
 	entity "umkm/model/entity/homepage"
 	web "umkm/model/web/homepage"
@@ -21,6 +22,8 @@ func (service *TestimonalServiceImpl) CreateTestimonial(testimonal web.CreateTes
     NewTestimonal := domain.Testimonal{
        Quotes: testimonal.Quotes,
 	   Name: testimonal.Name,
+       Active: 0,
+       Created_at: time.Now(),
     }
 
     saveTesttimonial, errSaveTesttimonial := service.testimonalrepository.CreateTestimonial(NewTestimonal)
@@ -31,6 +34,7 @@ func (service *TestimonalServiceImpl) CreateTestimonial(testimonal web.CreateTes
     return map[string]interface{}{
         "quotes": saveTesttimonial.Quotes, // Ensure field names are correct
         "nama":   saveTesttimonial.Name,
+        "active": saveTesttimonial.Active,
     }, nil
 }
 

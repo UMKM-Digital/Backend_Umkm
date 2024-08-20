@@ -10,7 +10,7 @@ import (
 )
 
 type KategoriProduk struct{
-	Id string `json:"id"`
+	// Id string `json:"id"`
 	Nama string `json:"nama"`
 }
 
@@ -45,14 +45,12 @@ func ToTransaksiEntity(transaksi domain.Transaksi) TransaksiEntity {
 	
         // Convert to desired format
         // idArray := kategoriProduk.ID
-        // namaArray := kategoriProduk.Nama
-		idArray := strings.Split(kategoriProduk.ID[0], ",")
         namaArray := strings.Split(kategoriProduk.Nama[0], ",")
 
-        for i := range idArray {
+        for i := range namaArray {
             if i < len(namaArray) {
                 kategori = append(kategori, KategoriProduk{
-                    Id:   strings.TrimSpace(idArray[i]),
+                    // Id:   strings.TrimSpace(idArray[i]),
                     Nama: strings.TrimSpace(namaArray[i]),
                 })
             }
