@@ -26,6 +26,7 @@ type JwtCustomClaims struct {
 	Email   string `json:"email"`
 	Phone   string `json:"no_phone"`
 	Picture string `json:"picture"`
+	Role string `json:"role"`
 	jwt.RegisteredClaims
 }
 
