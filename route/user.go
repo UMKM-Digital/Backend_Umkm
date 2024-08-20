@@ -140,6 +140,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	//brandlogo
 	Brandlogo := g.Group("/brandlogo")
 	Brandlogo.POST("/create", userLogoBrandController.Create)
+	Brandlogo.GET("/list", userLogoBrandController.GetBrandLogoList)
 }
 
 	func JWTProtection() echo.MiddlewareFunc {

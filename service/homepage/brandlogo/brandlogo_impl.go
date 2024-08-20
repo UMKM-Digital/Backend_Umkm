@@ -9,6 +9,7 @@ import (
 	"time"
 	"umkm/helper"
 	domain "umkm/model/domain/homepage"
+	entity "umkm/model/entity/homepage/brandlogo"
 	web "umkm/model/web/homepage"
 	brandrepo "umkm/repository/homepage/brandlogo"
 )
@@ -68,4 +69,16 @@ func (service *BrandLogoServiceImpl) CreateBrandlogo(brandlogo web.CreatedBrandL
 		"gambar":     saveBrandLogo.BrandLogo,
 		"active":     saveBrandLogo.Created_at,
 	}, nil
+}
+
+
+//list brand logo
+func (service *BrandLogoServiceImpl) GetBrandlogoList() ([]entity.BrandLogoEntity, error) {
+	getBrandLogo, err := service.brandlogorepo.GetBrandLogo()
+
+    if err != nil {
+        return nil, err
+    }
+
+	return entity.ToBrandLogoEntities(getBrandLogo), nil
 }
