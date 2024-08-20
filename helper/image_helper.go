@@ -49,3 +49,20 @@ func SaveFile(file *multipart.FileHeader, filePath string) error {
 	_, err = io.Copy(dst, src)
 	return err
 }
+
+func Savelogo(file *multipart.FileHeader, filePath string) error {
+	src, err := file.Open()
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+
+	dst, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer dst.Close()
+
+	_, err = io.Copy(dst, src)
+	return err
+}

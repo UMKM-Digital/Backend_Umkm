@@ -241,7 +241,7 @@ func (service *AuthServiceImpl) SendOtpRegister(phone string) (map[string]interf
     }
 
     return map[string]interface{}{
-        "message":    "otp tidak ke kririm",
+        "message":    "otp terkirim",
         "expires_at": expirationTime.Format(time.RFC3339),
     }, nil
 }

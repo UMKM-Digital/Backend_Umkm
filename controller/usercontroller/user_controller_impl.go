@@ -186,27 +186,29 @@ func (controller *UserControllerImpl) VerifyOTPHandler(c echo.Context) error {
 }
 
 
+//sendotp register
 func (controller *UserControllerImpl) SendOtpRegister(c echo.Context) error {
     user := new(web.OtpRequest)
 
-    // Bind request body to user
+    // Bind request body ke user
     if err := c.Bind(user); err != nil {
         return c.JSON(http.StatusBadRequest, helper.ResponseToJsonOtp(http.StatusBadRequest, err.Error(), nil))
     }
 
-    // Call service to send OTP and check for errors
+    // Panggil service untuk mengirim OTP
     otpResponse, err := controller.userService.SendOtpRegister(user.No_Phone)
     if err != nil {
-        // Cek jika error menunjukkan nomor telepon sudah terdaftar
-        if otpResponse != nil && otpResponse["message"] == "Phone number already registered" {
-            return c.JSON(http.StatusBadRequest, helper.ResponseToJsonOtp(http.StatusBadRequest, "Phone number already registered", nil))
-        }
-        // Tangani error lainnya
-        return c.JSON(http.StatusInternalServerError, helper.ResponseToJsonOtp(http.StatusInternalServerError, "OTP tidak terkirim", nil))
+        return c.JSON(http.StatusInternalServerError, helper.ResponseToJsonOtp(http.StatusInternalServerError, err.Error(), nil))
     }
 
-    // Jika OTP berhasil dikirim
-    return c.JSON(http.StatusOK, helper.ResponseToJsonOtp(http.StatusOK, "OTP berhasil dikirim", otpResponse))
+    // Cek apakah nomor telepon sudah terdaftar
+    if otpResponse["message"] == "Phone number already registered" {
+        return c.JSON(http.StatusInternalServerError, helper.ResponseToJsonOtp(http.StatusInternalServerError, "OTP tidak terkirim", otpResponse))
+    }
+
+    // Jika OTP berhasil dikirim, kembalikan status 200
+    return c.JSON(http.StatusOK, helper.ResponseToJsonOtp(http.StatusOK, "OTP terkirim", otpResponse))
 }
+
 
 

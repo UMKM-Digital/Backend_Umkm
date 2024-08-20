@@ -29,6 +29,7 @@ func main() {
 
     route.RegisterUserRoute("/user", r)
     r.Static("/uploads", "uploads")
+    r.Static("/uploads/logo", "uploads/logo")
     r.Logger.Fatal(r.Start(fmt.Sprintf(":%s", os.Getenv("PORT"))))
     
     r.GET("/uploads/*", func(c echo.Context) error {
