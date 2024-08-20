@@ -67,6 +67,8 @@ func (service *AuthServiceImpl) LoginRequest(username string, password string) (
 		Name:  user.Username,
 		Email: user.Email,
 		Phone: user.No_Phone,
+		Role: user.Role,
+		Picture: user.Picture,
 	}
 
 	token, tokenErr := service.tokenUseCase.GenerateAccessToken(claims)
