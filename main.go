@@ -29,7 +29,7 @@ func main() {
 
     route.RegisterUserRoute("/user", r)
     r.Static("/uploads", "uploads")
-    r.Static("/uploads/logo", "uploads/logo")
+    r.Static("/Backend_umkm/uploads/logo", "uploads/logo")
     r.Logger.Fatal(r.Start(fmt.Sprintf(":%s", os.Getenv("PORT"))))
     
     r.GET("/uploads/*", func(c echo.Context) error {
@@ -37,5 +37,11 @@ func main() {
         log.Printf("Requested path: %s", path)
         return c.File("/Backend_Umkm/uploads/" + path)
     })
+    
+    // r.GET("/uploads/logo/*", func(c echo.Context) error {
+    //     path := c.Param("*")
+    //     log.Printf("Requested path: %s", path)
+    //     return c.File("/Backend_Umkm/uploads/logo/" + path)
+    // })
     
 }
