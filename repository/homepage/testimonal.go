@@ -8,4 +8,5 @@ type Testimonal interface {
 	DelTransaksi(id int) error
 	GetTransaksiByid(id int) (domain.Testimonal, error)
 	UpdateTransaksiId(id int, kategori domain.Testimonal) (domain.Testimonal, error)
+	GetTestimonialActive(active int)([]domain.Testimonal, error)
 }

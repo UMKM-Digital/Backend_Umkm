@@ -30,3 +30,20 @@ func (repo *BrandLogoRepoImpl) GetBrandLogo() ([]domain.Brandlogo, error) {
     }
     return brandlogo, nil
 }
+
+//delete produk
+func (repo *BrandLogoRepoImpl) DeleteLogoId(id int) error {
+    if err := repo.db.Delete(&domain.Brandlogo{}, id).Error; err != nil {
+        return err
+    }
+    return nil
+}
+
+//
+func (repo *BrandLogoRepoImpl) FindById(id int) (domain.Brandlogo, error) {
+	var produk domain.Brandlogo
+	if err := repo.db.First(&produk, "id = ?", id).Error; err != nil {
+		return produk, err
+	}
+	return produk, nil
+}

@@ -132,15 +132,17 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	//testimonial
 	Testimonial := g.Group("/testimonial")
 	Testimonial.POST("/create", userTesimonialController.Create)
-	Testimonial.GET("/list", userTesimonialController.GetKategoriList)
+	Testimonial.GET("/list", userTesimonialController.GetTestimonial)
 	Testimonial.DELETE("/delete/:id", userTesimonialController.DeleteTestimonial)
-	Testimonial.GET("/:id", userTesimonialController.GetKategoriId)
+	Testimonial.GET("/:id", userTesimonialController.GetTestimonialId)
 	Testimonial.PUT("/update/:id", userTesimonialController.UpdateTestimonial)
+	Testimonial.PUT("/list/active", userTesimonialController.GetTestimonialActive)
 
 	//brandlogo
 	Brandlogo := g.Group("/brandlogo")
 	Brandlogo.POST("/create", userLogoBrandController.Create)
 	Brandlogo.GET("/list", userLogoBrandController.GetBrandLogoList)
+	Brandlogo.DELETE("/delet/:id", userLogoBrandController.DeleteProdukId)
 }
 
 	func JWTProtection() echo.MiddlewareFunc {

@@ -6,6 +6,7 @@ import (
 )
 
 type TesttimonialEntity struct {
+	ID int `json:"id"`
 	Name string `json:"name"`
 	Quotes string `json:"quote"`
 	Active int `json:"active"`
@@ -14,6 +15,7 @@ type TesttimonialEntity struct {
 
 func ToTestimonialEntity(testimony domain.Testimonal) TesttimonialEntity {
 	return TesttimonialEntity{
+		ID: testimony.Id,
 		Name: testimony.Name,
 		Quotes: testimony.Quotes,
 		Active: testimony.Active,

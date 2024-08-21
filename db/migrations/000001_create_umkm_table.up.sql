@@ -57,7 +57,7 @@ CREATE TABLE transaksi(
     no_invoice VARCHAR(255) NOT NULL,
     tanggal TIMESTAMPTZ NOT NULL,
     name_client VARCHAR(255) NOT NULL,
-    no_hp VARCHAR(255) NOT NULL
+    no_hp VARCHAR(255) NOT NULL,
     id_kategori_produk JSONB NOT NULL,
     total_jml NUMERIC(15,2) NOT NULL,
     keterangan text NOT NULL,

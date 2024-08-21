@@ -2,6 +2,7 @@ package brandlogo
 
 import (
 	"net/http"
+	"strconv"
 	"umkm/helper"
 	"umkm/model"
 	web "umkm/model/web/homepage"
@@ -48,4 +49,20 @@ func (controller *BrandLogoControllerImpl) GetBrandLogoList(c echo.Context) erro
 	}
 
 	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, "success", GetBrandLogo))
+}
+
+func (controller *BrandLogoControllerImpl) DeleteProdukId(c echo.Context) error {
+	// Ambil ID dari URL dan konversi ke integer
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseClient(http.StatusBadRequest, "Invalid ID format", nil))
+	}
+
+	// Hapus produk berdasarkan ID
+	if errDeleteBrandLogo := controller.brandlogoService.DeleteBrandLogo(id); errDeleteBrandLogo != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseClient(http.StatusBadRequest, errDeleteBrandLogo.Error(), nil))
+	}
+
+	return c.JSON(http.StatusOK, helper.ResponseClient(http.StatusOK, "Delete logo Success", nil))
 }

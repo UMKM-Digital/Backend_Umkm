@@ -1,6 +1,7 @@
 package homepagecontroller
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 	"umkm/helper"
@@ -37,7 +38,7 @@ if errSaveTestimonial != nil {
 }
 
 
-func (controller *TestimonalControllerImpl) GetKategoriList(c echo.Context) error {
+func (controller *TestimonalControllerImpl) GetTestimonial(c echo.Context) error {
 	getTestimoni, errGetTestimoni := controller.testimonal.GetTestimonial()
 
 	if errGetTestimoni != nil {
@@ -57,7 +58,7 @@ func (controller *TestimonalControllerImpl) DeleteTestimonial(c echo.Context) er
     return c.JSON(http.StatusOK, helper.ResponseClient(http.StatusOK, "Delete Kategori Success", nil))
 }
 
-func (controller *TestimonalControllerImpl) GetKategoriId(c echo.Context) error{
+func (controller *TestimonalControllerImpl) GetTestimonialId(c echo.Context) error{
 	id, _ := strconv.Atoi(c.Param("id"))
 
 	getTestimoni, errGetTestimoni := controller.testimonal.GetTestimonialid(id)
@@ -83,4 +84,16 @@ func (conntroller *TestimonalControllerImpl) UpdateTestimonial(c echo.Context) e
 	}
 
 	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, "data berhasil diupdate", testimonalUpdate))
+}
+
+func (controller *TestimonalControllerImpl) GetTestimonialActive(c echo.Context) error {
+	getTestimoni, errGetTestimoni := controller.testimonal.GetTestimonialActive()
+
+	if errGetTestimoni != nil {
+		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, errGetTestimoni.Error(), nil))
+	}
+
+	log.Println("Controller received testimonials:", getTestimoni) 
+
+	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, "success", getTestimoni))
 }

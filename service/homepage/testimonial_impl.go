@@ -1,11 +1,13 @@
 package homepageservice
 
 import (
+	
 	"time"
 	domain "umkm/model/domain/homepage"
 	entity "umkm/model/entity/homepage"
 	web "umkm/model/web/homepage"
 	testimonialrepo "umkm/repository/homepage"
+    "log"
 )
 
 type TestimonalServiceImpl struct {
@@ -98,3 +100,18 @@ func (service *TestimonalServiceImpl) UpdateTestimonial(request web.UpdateTestim
     }
     return response, nil
 }
+
+func (service *TestimonalServiceImpl) GetTestimonialActive() ([]entity.TesttimonialEntity, error) {
+    GetTestimonialList, err := service.testimonalrepository.GetTestimonialActive(1)
+    if err != nil {
+        return nil, err
+    }
+    if len(GetTestimonialList) == 0 {
+        log.Println("No testimonials found with active = 1")
+        return nil, nil
+    }
+    log.Printf("Found testimonials: %+v", GetTestimonialList)
+    return entity.ToKategoriProdukEntities(GetTestimonialList), nil
+}
+
+

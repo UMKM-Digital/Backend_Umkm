@@ -1,6 +1,7 @@
 package brandlogoservice
 
 import (
+	
 	"errors"
 	"fmt"
 	"math/rand"
@@ -8,6 +9,8 @@ import (
 	"path/filepath"
 	"time"
 	"umkm/helper"
+	"os"
+	"log"
 	domain "umkm/model/domain/homepage"
 	entity "umkm/model/entity/homepage/brandlogo"
 	web "umkm/model/web/homepage"
@@ -81,4 +84,29 @@ func (service *BrandLogoServiceImpl) GetBrandlogoList() ([]entity.BrandLogoEntit
     }
 
 	return entity.ToBrandLogoEntities(getBrandLogo), nil
+}
+
+//delete logo
+func (service *BrandLogoServiceImpl) DeleteBrandLogo(id int) error {
+	// Cari brand logo berdasarkan ID
+	brandlogo, err := service.brandlogorepo.FindById(id)
+	if err != nil {
+		return err
+	}
+
+	// Hapus file gambar (jika ada)
+	filePath := filepath.Clean(brandlogo.BrandLogo)
+
+	// Cek jika file ada sebelum menghapus
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		log.Printf("File does not exist: %s", filePath)
+	} else {
+		if err := os.Remove(filePath); err != nil {
+			log.Printf("Error removing file %s: %v", filePath, err)
+			return err
+		}
+	}
+
+	// Hapus brand logo dari database
+	return service.brandlogorepo.DeleteLogoId(id)
 }

@@ -11,4 +11,5 @@ type Testimonal interface {
 	DeleteTestimonial(id int) error
 	GetTestimonialid(id int) (entity.TesttimonialEntity, error)
 	UpdateTestimonial(request web.UpdateTestimonial, Id int) (map[string]interface{}, error)
+	GetTestimonialActive() ([]entity.TesttimonialEntity, error)
 }
