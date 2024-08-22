@@ -11,6 +11,7 @@ import (
     "github.com/joho/godotenv"
     "github.com/labstack/echo/v4"
     // "github.com/labstack/echo/v4/middleware"
+    "github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
@@ -25,7 +26,21 @@ func main() {
 
     // Atur handler kesalahan kustom
     r.HTTPErrorHandler = helper.BindAndValidate
-
+	r.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"}, // Ganti dengan domain frontend kamu
+		AllowMethods: []string{
+			echo.GET,
+			echo.POST,
+			echo.PUT,
+			echo.DELETE,
+			echo.OPTIONS,
+		},
+		AllowHeaders: []string{
+			echo.HeaderContentType,
+			echo.HeaderAuthorization,
+			echo.HeaderAccept,
+		},
+	}))
 
     route.RegisterUserRoute("/user", r)
     r.Static("/uploads", "uploads")

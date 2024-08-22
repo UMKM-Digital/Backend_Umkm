@@ -24,7 +24,7 @@ func (service *TestimonalServiceImpl) CreateTestimonial(testimonal web.CreateTes
     NewTestimonal := domain.Testimonal{
        Quotes: testimonal.Quotes,
 	   Name: testimonal.Name,
-       Active: 0,
+       Active: 1,
        Created_at: time.Now(),
     }
 
