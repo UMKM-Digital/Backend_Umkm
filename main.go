@@ -42,10 +42,10 @@ func main() {
 		},
 	}))
 
-    route.RegisterUserRoute("/user", r)
+    route.RegisterUserRoute("/api", r)
     r.Static("/uploads", "uploads")
     r.Static("/uploads/logo", "uploads/logo")
-    r.Logger.Fatal(r.Start(fmt.Sprintf(":%s", os.Getenv("PORT"))))
+    r.Logger.Fatal(r.Start(fmt.Sprintf("0.0.0.0:%s", os.Getenv("PORT"))))
     
     r.GET("/uploads/*", func(c echo.Context) error {
         path := c.Param("*")
