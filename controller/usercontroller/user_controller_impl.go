@@ -2,7 +2,7 @@ package usercontroller
 
 import (
 	"net/http"
-	"strings"
+	// "strings"
 	"umkm/helper"
 	"umkm/model"
 	"umkm/model/web"
@@ -12,14 +12,13 @@ import (
 )
 
 type UserControllerImpl struct {
-	userService userservice.AuthUserService
+	userService  userservice.AuthUserService
 	tokenUseCase helper.TokenUseCase
-
 }
 
 func NewAuthController(service userservice.AuthUserService, tokenUseCase helper.TokenUseCase) *UserControllerImpl {
 	return &UserControllerImpl{
-		userService: service,
+		userService:  service,
 		tokenUseCase: tokenUseCase,
 	}
 }
@@ -28,7 +27,7 @@ func (controller *UserControllerImpl) Register(c echo.Context) error {
 	user := new(web.RegisterRequest)
 
 	if err := c.Bind(user); err != nil {
-		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, err.Error(), nil))
+		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, err.Error(), nil))
 	}
 
 	if err := c.Validate(user); err != nil {
@@ -38,85 +37,82 @@ func (controller *UserControllerImpl) Register(c echo.Context) error {
 	userUser, errSaveuser := controller.userService.RegisterRequest(*user)
 
 	if errSaveuser != nil {
-		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, errSaveuser.Error(), nil))
+		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, errSaveuser.Error(), nil))
 	}
-	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, "Register Success", userUser))
+	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "register berhasil", userUser))
 }
-
 
 func (controller *UserControllerImpl) Login(c echo.Context) error {
-    user := new(web.LoginRequest)
+	user := new(web.LoginRequest)
 
-    if err := c.Bind(&user); err != nil {
-        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, err.Error(), nil))
-    }
-    userRes, errLogin := controller.userService.LoginRequest(user.Username, user.Password,)
+	if err := c.Bind(&user); err != nil {
+		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, err.Error(), nil))
+	}
+	userRes, errLogin := controller.userService.LoginRequest(user.Username, user.Password)
 
-    if errLogin != nil {
-        
-        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, errLogin.Error(), nil))
-    }
-
-    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, "login berhasil", userRes))
-}
-
-//send otp
-	func (controller *UserControllerImpl) SendOtp(c echo.Context) error {
-		user := new(web.OtpRequest)
-
-		if err := c.Bind(user); err != nil {
-			return c.JSON(http.StatusBadRequest, helper.ResponseToJsonOtp(http.StatusBadRequest, err.Error(), nil))
-		}
-
-		otpResponse, err := controller.userService.SendOtp(user.No_Phone)
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, helper.ResponseToJsonOtp(http.StatusInternalServerError, err.Error(), nil))
-		}
-
-		return c.JSON(http.StatusOK, helper.ResponseToJsonOtp(http.StatusOK, "login berhasil", otpResponse))
+	if errLogin != nil {
+		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, errLogin.Error(), nil))
 	}
 
-//melihat isi profile
+	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "login berhasil", userRes))
+}
+
+// send otp login
+func (controller *UserControllerImpl) SendOtp(c echo.Context) error {
+	user := new(web.OtpRequest)
+
+	if err := c.Bind(user); err != nil {
+		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, err.Error(), nil))
+	}
+
+	otpResponse, err := controller.userService.SendOtp(user.No_Phone)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
+	}
+
+	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "berasil send otp login", otpResponse))
+}
+
+// melihat isi profile
 func (controller *UserControllerImpl) View(c echo.Context) error {
 	adminID, _ := helper.GetAuthId(c)
 
 	result, err := controller.userService.ViewMe(adminID)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, err.Error(),nil))
+		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, err.Error(), nil))
 	}
 
-	return c.JSON(http.StatusOK, helper.ResponseToJsonOtp(http.StatusOK, "Success", result))
+	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "Profile dapat dilihat", result))
 }
 
 //logout
 
-func (controller *UserControllerImpl) Logout(c echo.Context) error {
-    authHeader := c.Request().Header.Get("Authorization")
-    if authHeader == "" {
-        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, "Authorization header is required", nil))
-    }
+// func (controller *UserControllerImpl) Logout(c echo.Context) error {
+//     authHeader := c.Request().Header.Get("Authorization")
+//     if authHeader == "" {
+//         return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, "Authorization header is required", nil))
+//     }
 
-    // Extract the token from the header
-    tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+//     // Extract the token from the header
+//     tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 
-    // Blacklist the token
-    err := controller.tokenUseCase.BlacklistAccessToken(tokenString)
-    if err != nil {
-        return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, err.Error(), nil))
-    }
+//     // Blacklist the token
+//     err := controller.tokenUseCase.BlacklistAccessToken(tokenString)
+//     if err != nil {
+//         return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, err.Error(), nil))
+//     }
 
-    // Return a success message without a new token
-    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, "You have been logged out", nil))
-}
-
+//     // Return a success message without a new token
+//     return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, "You have been logged out", nil))
+// }
 
 //update
 // controller/usercontroller/user_controller_impl.go
 // func (controller *UserControllerImpl) Update(c echo.Context) error {
 //     userId, _ := helper.GetAuthId(c)
 //     request := new(web.UpdateUserRequest)
-    
+
 //     // Bind and validate request
 //     if err := c.Bind(request); err != nil {
 //         return c.JSON(http.StatusBadRequest, helper.ResponseToJsonOtp(http.StatusBadRequest, err.Error(), nil))
@@ -157,58 +153,94 @@ func (controller *UserControllerImpl) Logout(c echo.Context) error {
 //     return c.JSON(http.StatusOK, helper.ResponseToJsonOtp(http.StatusOK, "Success", result))
 // }
 
-
-//verivy otp
+// verivy otp login
 func (controller *UserControllerImpl) VerifyOTPHandler(c echo.Context) error {
 	// Bind request body to a struct
 	var req struct {
-		Phone      string `json:"phone_number"`
-		OTP        string `json:"otp_code"`
+		Phone string `json:"phone_number"`
+		OTP   string `json:"otp_code"`
 	}
 
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"status":  false,
 			"message": "Invalid request",
-			"error":   err.Error(),
+			"code":    http.StatusBadRequest,
 		})
 	}
 
-	// Call the AuthService to verify OTP and password
+	// Call the AuthService to verify OTP and phone number
 	result, err := controller.userService.VerifyOTP(req.Phone, req.OTP)
 	if err != nil {
 		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+			"status":  false,
 			"message": "Verification failed",
-			"error":   err.Error(),
+			"code":    http.StatusUnauthorized,
 		})
 	}
 
-	return c.JSON(http.StatusOK, result)
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"status":  true,
+		"message": "Verification successful",
+		"data":    result,
+		"code":    http.StatusOK,
+	})
 }
 
-
-//sendotp register
+// sendotp register
 func (controller *UserControllerImpl) SendOtpRegister(c echo.Context) error {
-    user := new(web.OtpRequest)
+	user := new(web.OtpRequest)
 
-    // Bind request body ke user
-    if err := c.Bind(user); err != nil {
-        return c.JSON(http.StatusBadRequest, helper.ResponseToJsonOtp(http.StatusBadRequest, err.Error(), nil))
-    }
+	// Bind request body ke user
+	if err := c.Bind(user); err != nil {
+		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, err.Error(), nil))
+	}
 
-    // Panggil service untuk mengirim OTP
-    otpResponse, err := controller.userService.SendOtpRegister(user.No_Phone)
-    if err != nil {
-        return c.JSON(http.StatusInternalServerError, helper.ResponseToJsonOtp(http.StatusInternalServerError, err.Error(), nil))
-    }
+	// Panggil service untuk mengirim OTP
+	otpResponse, err := controller.userService.SendOtpRegister(user.No_Phone)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
+	}
 
-    // Cek apakah nomor telepon sudah terdaftar
-    if otpResponse["message"] == "Phone number already registered" {
-        return c.JSON(http.StatusInternalServerError, helper.ResponseToJsonOtp(http.StatusInternalServerError, "OTP tidak terkirim", otpResponse))
-    }
+	// Cek apakah nomor telepon sudah terdaftar
+	if otpResponse["message"] == "Phone number already registered" {
+		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, "OTP tidak terkirim", otpResponse))
+	}
 
-    // Jika OTP berhasil dikirim, kembalikan status 200
-    return c.JSON(http.StatusOK, helper.ResponseToJsonOtp(http.StatusOK, "OTP terkirim", otpResponse))
+	// Jika OTP berhasil dikirim, kembalikan status 200
+	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "OTP terkirim", otpResponse))
 }
 
+// verify otp register
+func (controller *UserControllerImpl) VerifyOTPHandlerRegister(c echo.Context) error {
+	// Bind request body to a struct
+	var req struct {
+		Phone string `json:"phone_number"`
+		OTP   string `json:"otp_code"`
+	}
 
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"status":  false,
+			"message": "Invalid request",
+			"code":    http.StatusBadRequest,
+		})
+	}
 
+	// Call the AuthService to verify OTP and phone number
+	result, err := controller.userService.VerifyOTPRegister(req.Phone, req.OTP)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+			"status":  false,
+			"message": "Verification failed",
+			"code":    http.StatusUnauthorized,
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"status":  true,
+		"message": "Verification successful",
+		"data":    result,
+		"code":    http.StatusOK,
+	})
+}

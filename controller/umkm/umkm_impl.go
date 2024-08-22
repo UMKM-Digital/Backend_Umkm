@@ -69,7 +69,7 @@ func (controller *UmkmControllerImpl) Create(c echo.Context) error {
     // gambarURLsJSON, err := json.Marshal(gambarURLs)
     	// Handle image upload
 	if err := c.Request().ParseMultipartForm(32 << 20); err != nil {
-		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, "Failed to parse form", nil))
+		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, "Failed to parse form", nil))
 	}
 
 	files := c.Request().MultipartForm.File["images"]
@@ -91,36 +91,38 @@ func (controller *UmkmControllerImpl) Create(c echo.Context) error {
     // Get authenticated user ID
     userID, err := helper.GetAuthId(c)
     if err != nil {
-        return c.JSON(http.StatusUnauthorized, model.ResponseToClient(http.StatusUnauthorized, "Failed to get user ID", nil))
+        return c.JSON(http.StatusUnauthorized, model.ResponseToClient(http.StatusUnauthorized, false, "Failed to get user ID", nil))
     }
 
     // Call service to create UMKM
     result, errSaveKategori := controller.umkmservice.CreateUmkm(*umkm, userID, fileHeaders)
     if errSaveKategori != nil {
-        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, errSaveKategori.Error(), nil))
+        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, errSaveKategori.Error(), nil))
     }
 
-    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, "Create UMKM Success", result))
+    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "Pembuatan Umkm Berhasil", result))
 }
 
-    func (controller *UmkmControllerImpl) GetUmkmList(c echo.Context) error {
+// //umkm list
+func (controller *UmkmControllerImpl) GetUmkmList(c echo.Context) error {
         userId, err := helper.GetAuthId(c)
         if err != nil {
-            return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, err.Error(), nil))
+            return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
         }
     
         umkmList, err := controller.umkmservice.GetUmkmListByUserId(c.Request().Context(), userId)
         if err != nil {
-            return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, err.Error(), nil))
+            return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
         }
     
-        return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, "success", umkmList))
-    }
+        return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success melihat seluruh umkm yang login", umkmList))
+}
 
-    func (controller *UmkmControllerImpl) GetUmkmFilter(c echo.Context) error {
+//filter umkm name
+func (controller *UmkmControllerImpl) GetUmkmFilter(c echo.Context) error {
         userId, err := helper.GetAuthId(c)
         if err != nil {
-            return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, err.Error(), nil))
+            return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
         }
     
         filters := map[string]string{"name": c.QueryParam("name")}
@@ -128,9 +130,9 @@ func (controller *UmkmControllerImpl) Create(c echo.Context) error {
     
         umkmList, err := controller.umkmservice.GetUmkmFilter(c.Request().Context(), userId, filters, allowedFilters)
         if err != nil {
-            return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, err.Error(), nil))
+            return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
         }
     
-        return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, "success", umkmList))
+        return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success mendapatkan umkm", umkmList))
     }
     

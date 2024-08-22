@@ -13,4 +13,5 @@ type AuthUserService interface {
 	// Update(userId int, req web.UpdateUserRequest, profilePicturePath string) (helper.ResponseToJson, error
 	VerifyOTP(phone string, otp_code string)(map[string]interface{}, error)
 	SendOtpRegister(phone string) (map[string]interface{}, error)
+	VerifyOTPRegister(otp_code string, phone_number string)(map[string]interface{}, error)
 }

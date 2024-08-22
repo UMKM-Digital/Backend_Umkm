@@ -114,4 +114,3 @@ func (service *TestimonalServiceImpl) GetTestimonialActive() ([]entity.Testtimon
     return entity.ToKategoriProdukEntities(GetTestimonialList), nil
 }
 
-

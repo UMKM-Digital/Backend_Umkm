@@ -1,6 +1,7 @@
 package kategoriumkmservice
 
 import (
+	"errors"
 	"umkm/helper"
 	"umkm/model/domain"
 	"umkm/model/entity"
@@ -20,6 +21,10 @@ func NewKategoriUmkmService(kategorirepository repokategoriumkm.CreateCategoryUm
 
 // post katgeori
 func (service *KategoriUmkmServiceImpl) CreateKategori(kategori web.CreateCategoriUmkm) (map[string]interface{}, error) {
+	if kategori.Name == "" {
+		return nil, errors.New("kategori name cannot be empty")
+	}
+
 	newKategori := domain.Kategori_Umkm{
 		Name: kategori.Name,
 	}

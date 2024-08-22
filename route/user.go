@@ -5,12 +5,12 @@ import (
 	"os"
 
 	"umkm/app"
-	homepagecontroller "umkm/controller/homepage"
-	brandlogo "umkm/controller/homepage/logo"
+	// homepagecontroller "umkm/controller/homepage"
+	// brandlogo "umkm/controller/homepage/logo"
 	kategoriprodukcontroller "umkm/controller/kategoriproduk"
 	kategoriumkmcontroller "umkm/controller/kategoriumkm"
-	produkcontroller "umkm/controller/produk"
-	transaksicontroller "umkm/controller/transaksi"
+	// produkcontroller "umkm/controller/produk"
+	// transaksicontroller "umkm/controller/transaksi"
 	umkmcontroller "umkm/controller/umkm"
 	"umkm/controller/usercontroller"
 	"umkm/helper"
@@ -20,20 +20,20 @@ import (
 
 	// querybuildertransaksi "umkm/query_builder/transaksi"
 	hakaksesrepo "umkm/repository/hakakses"
-	testimonialrepo "umkm/repository/homepage"
-	brandrepo "umkm/repository/homepage/brandlogo"
+	// testimonialrepo "umkm/repository/homepage"
+	// brandrepo "umkm/repository/homepage/brandlogo"
 	kategoriprodukrepo "umkm/repository/kategori_produk"
 	repokategoriumkm "umkm/repository/kategori_umkm"
-	produkrepo "umkm/repository/produk"
-	transaksirepo "umkm/repository/transaksi"
+	// produkrepo "umkm/repository/produk"
+	// transaksirepo "umkm/repository/transaksi"
 	umkmrepo "umkm/repository/umkm"
 	"umkm/repository/userrepo"
-	homepageservice "umkm/service/homepage"
-	brandlogoservice "umkm/service/homepage/brandlogo"
+	// homepageservice "umkm/service/homepage"
+	// brandlogoservice "umkm/service/homepage/brandlogo"
 	kategoriprodukservice "umkm/service/kategori_produk"
 	kategoriumkmservice "umkm/service/kategori_umkm"
-	produkservice "umkm/service/produk"
-	transaksiservice "umkm/service/transaksi"
+	// produkservice "umkm/service/produk"
+	// transaksiservice "umkm/service/transaksi"
 	umkmservice "umkm/service/umkm"
 	userservice "umkm/service/user"
 
@@ -63,9 +63,9 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 
 	//  
 	// userQuerBuilder := querybuilder.NewBaseQueryBuilder(db)
-	userTransaksiRepo := transaksirepo.NewTransaksiRepositoryImpl(db)
-	userTransaksiService := transaksiservice.NewTransaksiservice(userTransaksiRepo, db)
-	userTransaksiController := transaksicontroller.NewUmkmController(userTransaksiService, db)
+	// userTransaksiRepo := transaksirepo.NewTransaksiRepositoryImpl(db)
+	// userTransaksiService := transaksiservice.NewTransaksiservice(userTransaksiRepo, db)
+	// userTransaksiController := transaksicontroller.NewUmkmController(userTransaksiService, db)
 
 	//userkategori produk
 	userKategoriProdukRepo := kategoriprodukrepo.NewKategoriProdukRepo(db)
@@ -73,19 +73,19 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userKategoriProdukController := kategoriprodukcontroller.NewKategeoriProdukController(*userKategoriProdukService)
 
 	//userproduk
-	userProdukrepo := produkrepo.NewProdukRepositoryImpl(db)
-	userProdukService := produkservice.NewProdukService(userProdukrepo)
-	userProdukController := produkcontroller.NewProdukController(userProdukService)
+	// userProdukrepo := produkrepo.NewProdukRepositoryImpl(db)
+	// userProdukService := produkservice.NewProdukService(userProdukrepo)
+	// userProdukController := produkcontroller.NewProdukController(userProdukService)
 
 	//testimonial
-	userTestimonial := testimonialrepo.NewTestimonal(db)
-	userTesimonialService := homepageservice.NewTestimonialService(userTestimonial)
-	userTesimonialController := homepagecontroller.NewTestimonialController(*userTesimonialService)
+	// userTestimonial := testimonialrepo.NewTestimonal(db)
+	// userTesimonialService := homepageservice.NewTestimonialService(userTestimonial)
+	// userTesimonialController := homepagecontroller.NewTestimonialController(*userTesimonialService)
 
 	//logo
-	userLogo := brandrepo.NewBrandlogo(db)
-	userLogoBrandService := brandlogoservice.NewBrandLogoService(userLogo)
-	userLogoBrandController := brandlogo.NewBrandLogoController(userLogoBrandService)
+	// userLogo := brandrepo.NewBrandlogo(db)
+	// userLogoBrandService := brandlogoservice.NewBrandLogoService(userLogo)
+	// userLogoBrandController := brandlogo.NewBrandLogoController(userLogoBrandService)
 	
 	g := e.Group(prefix)
 
@@ -93,56 +93,58 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	authRoute.POST("/register", userAuthController.Register)
 	authRoute.POST("/login", userAuthController.Login)
 	authRoute.POST("/send-otp", userAuthController.SendOtp)
-	authRoute.POST("/sendotp-register", userAuthController.SendOtpRegister)
 	authRoute.POST("/verifyOtp", userAuthController.VerifyOTPHandler)
-	authRoute.POST("/logout", userAuthController.Logout, JWTProtection())
+	authRoute.POST("/sendotp-register", userAuthController.SendOtpRegister)
+	authRoute.POST("/verifyOtpRegister", userAuthController.VerifyOTPHandlerRegister)
+	// authRoute.POST("/logout", userAuthController.Logout, JWTProtection())
 
 	meRoute := g.Group("/me")
 	meRoute.GET("", userAuthController.View, JWTProtection())
 
 	KatUmkmRoute := g.Group("/kategori")
 	KatUmkmRoute.POST("/umkm", userKategoriUmkmController.Create, JWTProtection())
-	KatUmkmRoute.GET("/list", userKategoriUmkmController.GetKategoriList, JWTProtection())
-	KatUmkmRoute.GET("/:id", userKategoriUmkmController.GetKategoriId, JWTProtection())
+	KatUmkmRoute.GET("/umkm/list", userKategoriUmkmController.GetKategoriList, JWTProtection())
+	KatUmkmRoute.GET("/umkm/:id", userKategoriUmkmController.GetKategoriId, JWTProtection())
 	KatUmkmRoute.PUT("/umkm/:id", userKategoriUmkmController.UpdateKategoriId, JWTProtection())
 	KatUmkmRoute.DELETE("/umkm/delete/:id", userKategoriUmkmController.DeleteKategoriId, JWTProtection())
 
 	Umkm := g.Group("/umkm")
-	// Umkm.Static("/uploads", "uploads")
+	Umkm.Static("/uploads", "uploads")
 
 	Umkm.POST("/create", userUmkmController.Create, JWTProtection())
 	Umkm.GET("/list", userUmkmController.GetUmkmList,JWTProtection())
 	Umkm.GET("/filter", userUmkmController.GetUmkmFilter,JWTProtection())
 
-	Transaksi := g.Group("/transaksi")
-	Transaksi.POST("/umkm", userTransaksiController.Create)
-	Transaksi.GET("/:id", userTransaksiController.GetKategoriId)
-	Transaksi.GET("/:umkm_id/:date", userTransaksiController.GetTransaksiFilterList)
+	// Transaksi := g.Group("/transaksi")
+	// Transaksi.POST("/umkm", userTransaksiController.Create)
+	// Transaksi.GET("/:id", userTransaksiController.GetKategoriId)
+	// Transaksi.GET("/:umkm_id/:date", userTransaksiController.GetTransaksiFilterList)
 
 	KatProdukRoute := g.Group("/kategoriproduk")
-	KatProdukRoute.POST("/poost", userKategoriProdukController.Create)
+	KatProdukRoute.POST("/create	", userKategoriProdukController.Create)
 	KatProdukRoute.GET("/:umkm_id", userKategoriProdukController.GetKategoriList)
 
 	//produk
-	Produk := g.Group("/produk")
-	Produk.POST("/create", userProdukController.CreateProduk)
-	Produk.DELETE("/delete/:id", userProdukController.DeleteProdukId)
-	Produk.GET("/list/:umkm_id", userProdukController.GetprodukList)
+	// Produk := g.Group("/produk")
+	// Produk.POST("/create", userProdukController.CreateProduk)
+	// Produk.DELETE("/delete/:id", userProdukController.DeleteProdukId)
+	// Produk.GET("/list/:umkm_id", userProdukController.GetprodukList)
 
 	//testimonial
-	Testimonial := g.Group("/testimonial")
-	Testimonial.POST("/create", userTesimonialController.Create)
-	Testimonial.GET("/list", userTesimonialController.GetTestimonial)
-	Testimonial.DELETE("/delete/:id", userTesimonialController.DeleteTestimonial)
-	Testimonial.GET("/:id", userTesimonialController.GetTestimonialId)
-	Testimonial.PUT("/update/:id", userTesimonialController.UpdateTestimonial)
-	Testimonial.PUT("/list/active", userTesimonialController.GetTestimonialActive)
+	// Testimonial := g.Group("/testimonial")
+	// Testimonial.POST("/create", userTesimonialController.Create)
+	// Testimonial.GET("/list", userTesimonialController.GetTestimonial)
+	// Testimonial.DELETE("/delete/:id", userTesimonialController.DeleteTestimonial)
+	// Testimonial.GET("/:id", userTesimonialController.GetTestimonialId)
+	// Testimonial.PUT("/update/:id", userTesimonialController.UpdateTestimonial)
+	// Testimonial.GET("/list/active", userTesimonialController.GetTestimonialActive)
+	// Testimonial.PUT("/update/active/:id", userTesimonialController.UpdateTestimonialActive)
 
 	//brandlogo
-	Brandlogo := g.Group("/brandlogo")
-	Brandlogo.POST("/create", userLogoBrandController.Create)
-	Brandlogo.GET("/list", userLogoBrandController.GetBrandLogoList)
-	Brandlogo.DELETE("/delet/:id", userLogoBrandController.DeleteProdukId)
+	// Brandlogo := g.Group("/brandlogo")
+	// Brandlogo.POST("/create", userLogoBrandController.Create)
+	// Brandlogo.GET("/list", userLogoBrandController.GetBrandLogoList)
+	// Brandlogo.DELETE("/delet/:id", userLogoBrandController.DeleteProdukId)
 }
 
 	func JWTProtection() echo.MiddlewareFunc {
@@ -152,10 +154,11 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 			},
 			SigningKey: []byte(os.Getenv("SECRET_KEY")),
 			ErrorHandler: func(c echo.Context, err error) error {
-				return c.JSON(http.StatusUnauthorized, model.ResponseToClient(http.StatusUnauthorized, "unauthorized", nil))
+				return c.JSON(http.StatusUnauthorized, model.ResponseToClient(http.StatusUnauthorized, false, "unauthorized", nil))
 			},
 		})
 	}
+	
 
 // func JWTProtection(tokenUseCase helper.TokenUseCase) echo.MiddlewareFunc {
 // 	return func(next echo.HandlerFunc) echo.HandlerFunc {

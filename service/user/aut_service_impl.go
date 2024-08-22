@@ -41,7 +41,7 @@ func (service *AuthServiceImpl) RegisterRequest(user web.RegisterRequest) (map[s
 		Username: user.Username,
 		Password: user.Password,
 		Email:    user.Email,
-		Role:     user.Role,
+		Role:     "umkm",
 		No_Phone: user.No_Phone,
 	}
 
@@ -203,27 +203,12 @@ func (service *AuthServiceImpl) VerifyOTP(phone_number string, otpCode string) (
 		"expired time": expirationTime,
 	}, nil
 }
-// func (service *AuthServiceImpl) VerifyOTP(otp_code string)(map[string]interface{}, error) {
-//     // Verifikasi OTP
-//     isValid, phoneNumber, err := helper.VerifyOTP(service.db, otp_code)
-//     if err != nil || !isValid {
-//         return nil, errors.New("invalid OTP")
-//     }
-
-//     // Temukan pengguna berdasarkan nomor telepon
-//     user, err := service.authrepository.FindUserByPhone(phoneNumber)
-//     if err != nil {
-//         return nil, errors.New("user not found")
-//     }
-
-//     return map[string]interface{}{
-//         "message": "OTP verified successfully",
-//         "user":    user,
-//     }, nil
-// }
 
 func (service *AuthServiceImpl) SendOtpRegister(phone string) (map[string]interface{}, error) {
     user, err := service.authrepository.FindUserByPhoneRegister(phone)
+	if phone == "" {
+		return nil, errors.New("no telepon kosong")
+	}
     if err != nil {
         return nil, err
     }
@@ -243,5 +228,18 @@ func (service *AuthServiceImpl) SendOtpRegister(phone string) (map[string]interf
     return map[string]interface{}{
         "message":    "otp terkirim",
         "expires_at": expirationTime.Format(time.RFC3339),
+    }, nil
+}
+
+//verify otp register
+func (service *AuthServiceImpl) VerifyOTPRegister(otp_code string, phone_code string)(map[string]interface{}, error) {
+    // Verifikasi OTP
+    isValid, err := helper.VerifyOTP(service.db, otp_code, phone_code)
+    if err != nil || !isValid {
+        return nil, errors.New("invalid OTP")
+    }
+
+    return map[string]interface{}{
+        "message": "OTP verified successfully",
     }, nil
 }

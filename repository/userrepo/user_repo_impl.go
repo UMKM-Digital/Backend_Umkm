@@ -16,7 +16,7 @@ func NewAuthRepositoryImpl(db *gorm.DB) *AuthrepositoryImpl{
 	return &AuthrepositoryImpl{db:db}
 }
 
-//regoster
+//register
 func (repo *AuthrepositoryImpl) RegisterRequest(user domain.Users)(domain.Users, error){
 	err := repo.db.Create(&user).Error
 	if err != nil {
@@ -56,7 +56,6 @@ func (repo *AuthrepositoryImpl) GetByID(idUser int) (domain.Users, error) {
 	}
 	return user, nil
 }
-
 
 
 //send otp register
