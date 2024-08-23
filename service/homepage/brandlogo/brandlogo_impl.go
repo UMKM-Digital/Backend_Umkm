@@ -119,3 +119,70 @@ func (service *BrandLogoServiceImpl) GetBrandLogoid(id int) (entity.BrandLogoEnt
 
 	return entity.ToBrandEntity(getBrandlogo), nil
 }
+
+func (service *BrandLogoServiceImpl) UpdateBrandLogo(request web.UpdateBrandLogo, Id int,file *multipart.FileHeader) (map[string]interface{}, error) {
+    // Ambil data testimonial berdasarkan ID
+    getBrandLogolById, err := service.brandlogorepo.FindById(Id)
+    if err != nil {
+        return nil, err
+    }
+
+    // Gunakan nilai yang ada jika tidak ada perubahan dalam request
+  
+    if request.BrandName == "" {
+        request.BrandName = getBrandLogolById.BrandName
+    }
+
+    var Logo string
+    if file != nil {
+        // Hapus gambar lama jika ada
+        if getBrandLogolById.BrandLogo != "" {
+            err := os.Remove(getBrandLogolById.BrandLogo)
+            if err != nil {
+                return nil, errors.New("failed to remove old image")
+            }
+        }
+
+        // Proses gambar baru
+        src, err := file.Open()
+        if err != nil {
+            return nil, errors.New("failed to open the uploaded file")
+        }
+        defer src.Close()
+
+        // Menghasilkan nama file acak untuk file yang diunggah
+        ext := filepath.Ext(file.Filename)
+        randomFileName := generateRandomFileName(ext)
+        Logo = filepath.Join("uploads/logo", randomFileName)
+
+        // Menyimpan file ke server
+        if err := helper.SaveFile(file, Logo); err != nil {
+            return nil, errors.New("failed to save image")
+        }
+
+        // Mengonversi path untuk menggunakan forward slashes
+        Logo = filepath.ToSlash(Logo)
+    } else {
+        // Gunakan gambar lama jika tidak ada gambar baru
+        Logo = getBrandLogolById.BrandLogo
+    }
+
+    // Buat objek Testimonal baru untuk pembaruan
+    BrandLogoRequest := domain.Brandlogo{
+        Id: Id,
+		BrandName: request.BrandName,
+		BrandLogo: Logo,
+    }
+
+    // Update testimonial
+    UpdateBrandLogo, errUpdate := service.brandlogorepo.UpdateBrandLogoId(Id, BrandLogoRequest)
+    if errUpdate != nil {
+        return nil, errUpdate
+    }
+    // Bentuk respons yang akan dikembalikan
+    response := map[string]interface{}{
+        "name":   UpdateBrandLogo.BrandName,
+		"brand_logo": UpdateBrandLogo.BrandLogo,
+    }
+    return response, nil
+}

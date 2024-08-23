@@ -4,6 +4,7 @@ import (
 	domain "umkm/model/domain/homepage"
 
 	"gorm.io/gorm"
+	"errors"
 )
 
 type BrandLogoRepoImpl struct {
@@ -46,4 +47,22 @@ func (repo *BrandLogoRepoImpl) FindById(id int) (domain.Brandlogo, error) {
 		return produk, err
 	}
 	return produk, nil
+}
+
+func (repo *BrandLogoRepoImpl)  UpdateBrandLogoId(id int, brandlogo domain.Brandlogo) (domain.Brandlogo, error) {
+   
+    var existingBrandLogo domain.Brandlogo
+    if err := repo.db.First(&existingBrandLogo, id).Error; err != nil {
+        if errors.Is(err, gorm.ErrRecordNotFound) {
+            return domain.Brandlogo{}, errors.New("brandlogo not found")
+        }
+        return domain.Brandlogo{}, err
+    }
+
+    // Lakukan pembaruan
+    if err := repo.db.Model(&existingBrandLogo).Updates(brandlogo).Error; err != nil {
+        return domain.Brandlogo{}, errors.New("failed to update brandlogo")
+    }
+
+    return brandlogo, nil
 }

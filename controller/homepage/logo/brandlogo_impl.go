@@ -80,3 +80,32 @@ func (controller *BrandLogoControllerImpl ) GetBrandLogoId(c echo.Context) error
 
 	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success", getTestimoni))
 }
+
+//update brand logo
+
+func (controller *BrandLogoControllerImpl) UpdateBrandLogo(c echo.Context) error {
+    // Parse ID dari parameter URL
+    id, _ := strconv.Atoi(c.Param("id"))
+
+    // Ambil nilai dari form-data
+    name := c.FormValue("brand_name")
+    
+    // Ambil file dari form-data jika ada
+    file, err := c.FormFile("gambar")
+    if err != nil && err != http.ErrMissingFile {
+        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "failed to get uploaded file", nil))
+    }
+
+    // Buat objek request manual
+    request := web.UpdateBrandLogo{
+        BrandName: name,
+    }
+
+    // Panggil fungsi UpdateTestimonial dari service
+    testimonalUpdate, errTestimonalUpdate := controller.brandlogoService.UpdateBrandLogo(request, id, file)
+    if errTestimonalUpdate != nil {
+        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, errTestimonalUpdate.Error(), nil))
+    }
+
+    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "data berhasil diupdate", testimonalUpdate))
+}

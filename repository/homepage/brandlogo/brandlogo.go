@@ -7,4 +7,5 @@ type Brandlogo interface {
 	GetBrandLogo() ([]domain.Brandlogo, error)
 	DeleteLogoId(id int) error
 	FindById(id int) (domain.Brandlogo, error)
+	UpdateBrandLogoId(id int, brandlogo domain.Brandlogo) (domain.Brandlogo, error) 
 }

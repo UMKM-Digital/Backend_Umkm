@@ -142,6 +142,8 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	Brandlogo.POST("/create", userLogoBrandController.Create)
 	Brandlogo.GET("/list", userLogoBrandController.GetBrandLogoList)
 	Brandlogo.DELETE("/delet/:id", userLogoBrandController.DeleteProdukId)
+	Brandlogo.GET("/:id", userLogoBrandController.GetBrandLogoId)
+	Brandlogo.PUT("/edit/:id", userLogoBrandController.UpdateBrandLogo)
 }
 
 	func JWTProtection() echo.MiddlewareFunc {

@@ -11,4 +11,5 @@
 		GetBrandlogoList() ([]entity.BrandLogoEntity, error)
 		DeleteBrandLogo(id int) error
 		GetBrandLogoid(id int) (entity.BrandLogoEntity, error)
+		UpdateBrandLogo(request web.UpdateBrandLogo, Id int,file *multipart.FileHeader) (map[string]interface{}, error)
 	}

@@ -7,4 +7,5 @@ type BrandLogoController interface {
 	GetBrandLogoList(c echo.Context) error
 	DeleteProdukId(c echo.Context) error
 	GetBrandLogoId(c echo.Context) error
+	UpdateBrandLogo(c echo.Context) error
 }
