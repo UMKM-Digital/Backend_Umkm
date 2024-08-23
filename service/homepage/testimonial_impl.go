@@ -201,3 +201,33 @@ func (service *TestimonalServiceImpl) GetTestimonialActive() ([]entity.Testtimon
     log.Printf("Found testimonials: %+v", GetTestimonialList)
     return entity.ToKategoriProdukEntities(GetTestimonialList), nil
 }
+
+func (service *TestimonalServiceImpl) UpdateTestimonialActive(request web.UpdateActive, Id int) (map[string]interface{}, error) {
+    // Ambil data testimonial berdasarkan ID
+    getTestimonialById, err := service.testimonalrepository.GetTransaksiByid(Id)
+    if err != nil {
+        return nil, err
+    }
+
+    // Jika request.Active tidak di-set (misalnya `request.Active` adalah nilai default atau nilai tertentu yang menunjukkan "tidak ada perubahan")
+    // maka gunakan nilai yang ada dari getTestimonialById
+    if request.Active == getTestimonialById.Active {
+        // Tidak ada perubahan yang perlu dilakukan
+        response := map[string]interface{}{
+            "active": getTestimonialById.Active,
+        }
+        return response, nil
+    }
+
+    // Update testimonial dengan nilai active baru
+    errUpdate := service.testimonalrepository.UpdateActiveId(Id, request.Active)
+    if errUpdate != nil {
+        return nil, errUpdate
+    }
+
+    // Bentuk respons yang akan dikembalikan
+    response := map[string]interface{}{
+        "active": request.Active,
+    }
+    return response, nil
+}

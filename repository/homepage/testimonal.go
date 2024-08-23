@@ -9,5 +9,5 @@ type Testimonal interface {
 	GetTransaksiByid(id int) (domain.Testimonal, error)
 	UpdateTestimonialId(id int, testimonal domain.Testimonal) (domain.Testimonal, error)
 	GetTestimonialActive(active int)([]domain.Testimonal, error)
-	UpdateActiveByID(id int, active int) error
+	UpdateActiveId(idTestimonial int, active int) error
 }

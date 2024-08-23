@@ -12,6 +12,7 @@ type UpdateTestimonial struct{
 	Gambar string `validate:"required" json:"gambar_testi"`
 } 
 
-type UpdateActive struct{
-	Active int `validate:"required" json:"active"`
+
+type UpdateActive struct {
+    Active int `json:"active"`
 }

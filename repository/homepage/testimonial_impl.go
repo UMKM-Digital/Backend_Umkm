@@ -86,10 +86,10 @@ func (repo *TestimonalRepoImpl) GetTestimonialActive(active int)([]domain.Testim
 }
 
 // TestimonalRepoImpl adalah implementasi dari repository untuk testimonial
-func (repo *TestimonalRepoImpl) UpdateActiveByID(id int, active int) error {
-    // Update status 'Active' berdasarkan ID
-    if err := repo.db.Model(&domain.Testimonal{}).Where("id = ?", id).Update("active", active).Error; err != nil {
+func (repo *TestimonalRepoImpl) UpdateActiveId(idTestimonial int, active int) error {
+    if err := repo.db.Model(&domain.Testimonal{}).Where("id = ?", idTestimonial).Update("active", active).Error; err != nil {
         return errors.New("failed to update testimonial active status")
     }
     return nil
 }
+

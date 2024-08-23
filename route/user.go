@@ -135,7 +135,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	Testimonial.GET("/:id", userTesimonialController.GetTestimonialId)
 	Testimonial.PUT("/update/:id", userTesimonialController.UpdateTestimonial)
 	Testimonial.GET("/list/active", userTesimonialController.GetTestimonialActive)
-	// Testimonial.PUT("/update/active/:id", userTesimonialController.UpdateTestimonialActive)
+	Testimonial.PUT("/update/active/:id", userTesimonialController.UpdateTestimonialActive)
 
 	//brandlogo
 	Brandlogo := g.Group("/brandlogo")

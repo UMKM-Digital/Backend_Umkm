@@ -111,3 +111,20 @@ func (controller *TestimonalControllerImpl) GetTestimonialActive(c echo.Context)
 
     return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success", getTestimoni))
 }
+
+func (conntroller *TestimonalControllerImpl) UpdateTestimonialActive(c echo.Context) error {
+    testimonal := new(web.UpdateActive)
+    id, _ := strconv.Atoi(c.Param("id"))
+
+    if err := c.Bind(testimonal); err != nil {
+        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, err.Error(), nil))
+    }
+
+    testimonalUpdate, errTestimonalUpdate := conntroller.testimonal.UpdateTestimonialActive(*testimonal, id)
+
+    if errTestimonalUpdate != nil {
+        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, errTestimonalUpdate.Error(), nil))
+    }
+
+    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "data berhasil diupdate", testimonalUpdate))
+}
