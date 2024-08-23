@@ -68,3 +68,15 @@ func (controller *BrandLogoControllerImpl) DeleteProdukId(c echo.Context) error 
 	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "Delete logo Success", nil))
 }
 
+//get brandlogo id
+func (controller *BrandLogoControllerImpl ) GetBrandLogoId(c echo.Context) error{
+	id, _ := strconv.Atoi(c.Param("id"))
+
+	getTestimoni, errGetTestimoni := controller.brandlogoService.GetBrandLogoid(id)
+
+	if errGetTestimoni != nil {
+		return c.JSON(http.StatusNotFound, model.ResponseToClient(http.StatusNotFound, false, errGetTestimoni.Error(), nil))
+	}
+
+	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success", getTestimoni))
+}

@@ -10,7 +10,5 @@
 		CreateBrandlogo(brandlogo web.CreatedBrandLogo, file *multipart.FileHeader) (map[string]interface{}, error)
 		GetBrandlogoList() ([]entity.BrandLogoEntity, error)
 		DeleteBrandLogo(id int) error
-		// DeleteTestimonial(id int) error
-		// GetTestimonialid(id int) (entity.TesttimonialEntity, error)
-		// UpdateTestimonial(request web.UpdateTestimonial, Id int) (map[string]interface{}, error)
+		GetBrandLogoid(id int) (entity.BrandLogoEntity, error)
 	}

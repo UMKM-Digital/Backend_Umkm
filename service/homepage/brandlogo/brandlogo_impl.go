@@ -108,3 +108,14 @@ func (service *BrandLogoServiceImpl) DeleteBrandLogo(id int) error {
 	// Hapus brand logo dari database
 	return service.brandlogorepo.DeleteLogoId(id)
 }
+
+//get id
+func (service *BrandLogoServiceImpl) GetBrandLogoid(id int) (entity.BrandLogoEntity, error) {
+	getBrandlogo, errgetBrandlogo := service.brandlogorepo.FindById(id)
+
+	if errgetBrandlogo != nil {
+		return entity.BrandLogoEntity{}, errgetBrandlogo
+	}
+
+	return entity.ToBrandEntity(getBrandlogo), nil
+}
