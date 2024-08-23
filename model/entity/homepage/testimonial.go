@@ -10,6 +10,7 @@ type TesttimonialEntity struct {
 	Name string `json:"name"`
 	Quotes string `json:"quote"`
 	Active int `json:"active"`
+	GambarTesti string `json:"gambar_testi"`
 	Created time.Time `json:"created_at"`
 }
 
@@ -19,6 +20,7 @@ func ToTestimonialEntity(testimony domain.Testimonal) TesttimonialEntity {
 		Name: testimony.Name,
 		Quotes: testimony.Quotes,
 		Active: testimony.Active,
+		GambarTesti: testimony.GambarTesti,
 		Created: testimony.Created_at,
 	}
 }

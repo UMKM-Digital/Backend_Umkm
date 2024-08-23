@@ -6,33 +6,31 @@ import (
 
 	"umkm/app"
 	homepagecontroller "umkm/controller/homepage"
-	// brandlogo "umkm/controller/homepage/logo"
+	brandlogo "umkm/controller/homepage/logo"
 	kategoriprodukcontroller "umkm/controller/kategoriproduk"
 	kategoriumkmcontroller "umkm/controller/kategoriumkm"
-	// produkcontroller "umkm/controller/produk"
+	produkcontroller "umkm/controller/produk"
 	transaksicontroller "umkm/controller/transaksi"
 	umkmcontroller "umkm/controller/umkm"
 	"umkm/controller/usercontroller"
 	"umkm/helper"
 	"umkm/model"
 
-	// querybuilder "umkm/query_builder"
 
-	// querybuildertransaksi "umkm/query_builder/transaksi"
 	hakaksesrepo "umkm/repository/hakakses"
 	testimonialrepo "umkm/repository/homepage"
-	// brandrepo "umkm/repository/homepage/brandlogo"
+	brandrepo "umkm/repository/homepage/brandlogo"
 	kategoriprodukrepo "umkm/repository/kategori_produk"
 	repokategoriumkm "umkm/repository/kategori_umkm"
-	// produkrepo "umkm/repository/produk"
+	produkrepo "umkm/repository/produk"
 	transaksirepo "umkm/repository/transaksi"
 	umkmrepo "umkm/repository/umkm"
 	"umkm/repository/userrepo"
 	homepageservice "umkm/service/homepage"
-	// brandlogoservice "umkm/service/homepage/brandlogo"
+	brandlogoservice "umkm/service/homepage/brandlogo"
 	kategoriprodukservice "umkm/service/kategori_produk"
 	kategoriumkmservice "umkm/service/kategori_umkm"
-	// produkservice "umkm/service/produk"
+	produkservice "umkm/service/produk"
 	transaksiservice "umkm/service/transaksi"
 	umkmservice "umkm/service/umkm"
 	userservice "umkm/service/user"
@@ -72,9 +70,9 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userKategoriProdukController := kategoriprodukcontroller.NewKategeoriProdukController(*userKategoriProdukService)
 
 	//userproduk
-	// userProdukrepo := produkrepo.NewProdukRepositoryImpl(db)
-	// userProdukService := produkservice.NewProdukService(userProdukrepo)
-	// userProdukController := produkcontroller.NewProdukController(userProdukService)
+	userProdukrepo := produkrepo.NewProdukRepositoryImpl(db)
+	userProdukService := produkservice.NewProdukService(userProdukrepo)
+	userProdukController := produkcontroller.NewProdukController(userProdukService)
 
 	//testimonial
 	userTestimonial := testimonialrepo.NewTestimonal(db)
@@ -82,9 +80,9 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userTesimonialController := homepagecontroller.NewTestimonialController(*userTesimonialService)
 
 	//logo
-	// userLogo := brandrepo.NewBrandlogo(db)
-	// userLogoBrandService := brandlogoservice.NewBrandLogoService(userLogo)
-	// userLogoBrandController := brandlogo.NewBrandLogoController(userLogoBrandService)
+	userLogo := brandrepo.NewBrandlogo(db)
+	userLogoBrandService := brandlogoservice.NewBrandLogoService(userLogo)
+	userLogoBrandController := brandlogo.NewBrandLogoController(userLogoBrandService)
 	
 	g := e.Group(prefix)
 
@@ -124,26 +122,26 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	KatProdukRoute.GET("/:umkm_id", userKategoriProdukController.GetKategoriList)
 
 	//produk
-	// Produk := g.Group("/produk")
-	// Produk.POST("/create", userProdukController.CreateProduk)
-	// Produk.DELETE("/delete/:id", userProdukController.DeleteProdukId)
-	// Produk.GET("/list/:umkm_id", userProdukController.GetprodukList)
+	Produk := g.Group("/produk")
+	Produk.POST("/create", userProdukController.CreateProduk)
+	Produk.DELETE("/delete/:id", userProdukController.DeleteProdukId)
+	Produk.GET("/list/:umkm_id", userProdukController.GetprodukList)
 
 	//testimonial
 	Testimonial := g.Group("/testimonial")
-	Testimonial.POST("/create", userTesimonialController.Create)
+	Testimonial.POST("/create", userTesimonialController.Create)//
 	Testimonial.GET("/list", userTesimonialController.GetTestimonial)
 	Testimonial.DELETE("/delete/:id", userTesimonialController.DeleteTestimonial)
 	Testimonial.GET("/:id", userTesimonialController.GetTestimonialId)
 	Testimonial.PUT("/update/:id", userTesimonialController.UpdateTestimonial)
 	Testimonial.GET("/list/active", userTesimonialController.GetTestimonialActive)
-	Testimonial.PUT("/update/active/:id", userTesimonialController.UpdateTestimonialActive)
+	// Testimonial.PUT("/update/active/:id", userTesimonialController.UpdateTestimonialActive)
 
 	//brandlogo
-	// Brandlogo := g.Group("/brandlogo")
-	// Brandlogo.POST("/create", userLogoBrandController.Create)
-	// Brandlogo.GET("/list", userLogoBrandController.GetBrandLogoList)
-	// Brandlogo.DELETE("/delet/:id", userLogoBrandController.DeleteProdukId)
+	Brandlogo := g.Group("/brandlogo")
+	Brandlogo.POST("/create", userLogoBrandController.Create)
+	Brandlogo.GET("/list", userLogoBrandController.GetBrandLogoList)
+	Brandlogo.DELETE("/delet/:id", userLogoBrandController.DeleteProdukId)
 }
 
 	func JWTProtection() echo.MiddlewareFunc {

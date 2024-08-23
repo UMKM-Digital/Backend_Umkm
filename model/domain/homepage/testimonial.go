@@ -7,6 +7,7 @@ type Testimonal struct {
 	Quotes     string `gorm:"column:quote"`
 	Name       string `gorm:"column:name"`
 	Active     int `gorm:"column:active"`
+	GambarTesti string `gorm:"column:gambar_testi"`
 	Created_at time.Time`gorm:"column:created_at"`
 }
 

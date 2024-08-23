@@ -1,16 +1,15 @@
 package brandlogoservice
 
 import (
-	
 	"errors"
 	"fmt"
+	"log"
 	"math/rand"
 	"mime/multipart"
+	"os"
 	"path/filepath"
 	"time"
 	"umkm/helper"
-	"os"
-	"log"
 	domain "umkm/model/domain/homepage"
 	entity "umkm/model/entity/homepage/brandlogo"
 	web "umkm/model/web/homepage"
@@ -68,25 +67,24 @@ func (service *BrandLogoServiceImpl) CreateBrandlogo(brandlogo web.CreatedBrandL
 	}
 
 	return map[string]interface{}{
-		"Nama Brand": saveBrandLogo.BrandName,
-		"gambar":     saveBrandLogo.BrandLogo,
-		"active":     saveBrandLogo.Created_at,
+		"nama_barang": saveBrandLogo.BrandName,
+		"gambar":      saveBrandLogo.BrandLogo,
+		"created_at":      saveBrandLogo.Created_at,
 	}, nil
 }
 
-
-//list brand logo
+// list brand logo
 func (service *BrandLogoServiceImpl) GetBrandlogoList() ([]entity.BrandLogoEntity, error) {
 	getBrandLogo, err := service.brandlogorepo.GetBrandLogo()
 
-    if err != nil {
-        return nil, err
-    }
+	if err != nil {
+		return nil, err
+	}
 
 	return entity.ToBrandLogoEntities(getBrandLogo), nil
 }
 
-//delete logo
+// delete logo
 func (service *BrandLogoServiceImpl) DeleteBrandLogo(id int) error {
 	// Cari brand logo berdasarkan ID
 	brandlogo, err := service.brandlogorepo.FindById(id)

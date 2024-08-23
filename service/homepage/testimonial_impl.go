@@ -1,13 +1,19 @@
 package homepageservice
 
 import (
-	
+	"errors"
+	"fmt"
+	"log"
+	"math/rand"
+	"mime/multipart"
+	"path/filepath"
 	"time"
+	"umkm/helper"
 	domain "umkm/model/domain/homepage"
 	entity "umkm/model/entity/homepage"
 	web "umkm/model/web/homepage"
 	testimonialrepo "umkm/repository/homepage"
-    "log"
+    "os"
 )
 
 type TestimonalServiceImpl struct {
@@ -20,11 +26,38 @@ func NewTestimonialService(testimonalrepository testimonialrepo.Testimonal) *Tes
     }
 }
 
-func (service *TestimonalServiceImpl) CreateTestimonial(testimonal web.CreateTestimonial) (map[string]interface{}, error) {
+func generateRandomFileName(ext string) string {
+	rand.Seed(time.Now().UnixNano())
+	randomString := fmt.Sprintf("%d", rand.Intn(1000000))
+	return randomString + ext
+}
+
+func (service *TestimonalServiceImpl) CreateTestimonial(testimonal web.CreateTestimonial, file *multipart.FileHeader) (map[string]interface{}, error) {
+   // Membuka file yang diunggah
+	src, err := file.Open()
+	if err != nil {
+		return nil, errors.New("failed to open the uploaded file")
+	}
+	defer src.Close()
+
+	// Menghasilkan nama file acak untuk file yang diunggah
+	ext := filepath.Ext(file.Filename)
+	randomFileName := generateRandomFileName(ext)
+	logoPath := filepath.Join("uploads/logo", randomFileName)
+
+	// Menyimpan file ke server
+	if err := helper.SaveFile(file, logoPath); err != nil {
+		return nil, errors.New("failed to save image")
+	}
+
+	// Mengonversi path untuk menggunakan forward slashes
+	logoPath = filepath.ToSlash(logoPath)
+
     NewTestimonal := domain.Testimonal{
        Quotes: testimonal.Quotes,
 	   Name: testimonal.Name,
        Active: 1,
+       GambarTesti: logoPath,
        Created_at: time.Now(),
     }
 
@@ -37,6 +70,7 @@ func (service *TestimonalServiceImpl) CreateTestimonial(testimonal web.CreateTes
         "quotes": saveTesttimonial.Quotes, // Ensure field names are correct
         "nama":   saveTesttimonial.Name,
         "active": saveTesttimonial.Active,
+        "gambar": saveTesttimonial.GambarTesti,
     }, nil
 }
 
@@ -50,7 +84,26 @@ func (service *TestimonalServiceImpl) GetTestimonial() ([]entity.TesttimonialEnt
 
 //delete
 func (service *TestimonalServiceImpl) DeleteTestimonial (id int) error {
-	return service.testimonalrepository.DelTransaksi(id)
+
+    gambartesti, err := service.testimonalrepository.GetTransaksiByid(id)
+	if err != nil {
+		return err
+	}
+
+	// Hapus file gambar (jika ada)
+	filePath := filepath.Clean(gambartesti.GambarTesti)
+
+	// Cek jika file ada sebelum menghapus
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		log.Printf("File does not exist: %s", filePath)
+	} else {
+		if err := os.Remove(filePath); err != nil {
+			log.Printf("Error removing file %s: %v", filePath, err)
+			return err
+		}
+	}
+
+	return service.testimonalrepository.DelTestimonial(id)
 }
 
 //get id
@@ -65,7 +118,7 @@ func (service *TestimonalServiceImpl) GetTestimonialid(id int) (entity.Testtimon
 }
 
 //update
-func (service *TestimonalServiceImpl) UpdateTestimonial(request web.UpdateTestimonial, Id int) (map[string]interface{}, error) {
+func (service *TestimonalServiceImpl) UpdateTestimonial(request web.UpdateTestimonial, Id int,file *multipart.FileHeader) (map[string]interface{}, error) {
     // Ambil data testimonial berdasarkan ID
     getTestimonialById, err := service.testimonalrepository.GetTransaksiByid(Id)
     if err != nil {
@@ -79,24 +132,59 @@ func (service *TestimonalServiceImpl) UpdateTestimonial(request web.UpdateTestim
     if request.Quotes == "" {
         request.Quotes = getTestimonialById.Quotes
     }
-    
+
+    var Logo string
+    if file != nil {
+        // Hapus gambar lama jika ada
+        if getTestimonialById.GambarTesti != "" {
+            err := os.Remove(getTestimonialById.GambarTesti)
+            if err != nil {
+                return nil, errors.New("failed to remove old image")
+            }
+        }
+
+        // Proses gambar baru
+        src, err := file.Open()
+        if err != nil {
+            return nil, errors.New("failed to open the uploaded file")
+        }
+        defer src.Close()
+
+        // Menghasilkan nama file acak untuk file yang diunggah
+        ext := filepath.Ext(file.Filename)
+        randomFileName := generateRandomFileName(ext)
+        Logo = filepath.Join("uploads/logo", randomFileName)
+
+        // Menyimpan file ke server
+        if err := helper.SaveFile(file, Logo); err != nil {
+            return nil, errors.New("failed to save image")
+        }
+
+        // Mengonversi path untuk menggunakan forward slashes
+        Logo = filepath.ToSlash(Logo)
+    } else {
+        // Gunakan gambar lama jika tidak ada gambar baru
+        Logo = getTestimonialById.GambarTesti
+    }
+
     // Buat objek Testimonal baru untuk pembaruan
     TestimonalRequest := domain.Testimonal{
-        Id: Id,
-        Name:       request.Name,
-        Quotes: request.Quotes,
+        Id:          Id,
+        Name:        request.Name,
+        Quotes:      request.Quotes,
+        GambarTesti: Logo,
     }
 
     // Update testimonial
-    UpdateTestimonial, errUpdate := service.testimonalrepository.UpdateTransaksiId(Id, TestimonalRequest)
+    UpdateTestimonial, errUpdate := service.testimonalrepository.UpdateTestimonialId(Id, TestimonalRequest)
     if errUpdate != nil {
         return nil, errUpdate
     }
-
     // Bentuk respons yang akan dikembalikan
     response := map[string]interface{}{
         "name":   UpdateTestimonial.Name,
         "quotes": UpdateTestimonial.Quotes,
+        "gambar": UpdateTestimonial.GambarTesti,
     }
     return response, nil
 }
@@ -113,4 +201,3 @@ func (service *TestimonalServiceImpl) GetTestimonialActive() ([]entity.Testtimon
     log.Printf("Found testimonials: %+v", GetTestimonialList)
     return entity.ToKategoriProdukEntities(GetTestimonialList), nil
 }
-

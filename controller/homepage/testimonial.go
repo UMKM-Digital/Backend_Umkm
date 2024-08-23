@@ -9,5 +9,5 @@ type KategoriUmkmController interface {
 	UpdateTestimonial(c echo.Context) error
 	GetKategoriId(c echo.Context) error
 	GetTestimonialActive(c echo.Context) error
-	UpdateTestimonialActive(c echo.Context) error
+	// UpdateTestimonialActive(c echo.Context) error
 }
