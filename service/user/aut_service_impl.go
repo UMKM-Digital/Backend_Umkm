@@ -31,12 +31,14 @@ func Newauthservice(authrepository userrepo.AuthUserRepo, token helper.TokenUseC
 
 // register
 func (service *AuthServiceImpl) RegisterRequest(user web.RegisterRequest) (map[string]interface{}, error) {
+	// Hash password menggunakan bcrypt
 	passHash, errHash := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.MinCost)
 	if errHash != nil {
 		return nil, errHash
 	}
-
 	user.Password = string(passHash)
+
+	// Membuat object User baru
 	newUser := domain.Users{
 		Username: user.Username,
 		Password: user.Password,
@@ -45,13 +47,38 @@ func (service *AuthServiceImpl) RegisterRequest(user web.RegisterRequest) (map[s
 		No_Phone: user.No_Phone,
 	}
 
+	// Menyimpan user ke database
 	saveUser, errSaveUser := service.authrepository.RegisterRequest(newUser)
 	if errSaveUser != nil {
 		return nil, errSaveUser
 	}
 
-	return helper.ResponseToJson{"username": saveUser.Username, "email": saveUser.Email}, nil
+	// Membuat claims untuk token JWT
+	claims := helper.JwtCustomClaims{
+		ID:      strconv.Itoa(saveUser.IdUser),  // Menggunakan ID dari saveUser setelah disimpan ke DB
+		Name:    saveUser.Username,
+		Email:   saveUser.Email,
+		Phone:   saveUser.No_Phone,
+		Role:    saveUser.Role,
+		Picture: saveUser.Picture,
+	}
+
+	// Menghasilkan token JWT
+	token, tokenErr := service.tokenUseCase.GenerateAccessToken(claims)
+	if tokenErr != nil {
+		return nil, tokenErr
+	}
+
+	// Menghitung waktu kedaluwarsa token
+	expirationTime := time.Now().Add(1 * time.Hour).Format(time.RFC3339)
+
+	// Mengembalikan token dan informasi user
+	return map[string]interface{}{
+		"token":      token,
+		"expires_at": expirationTime, // Sertakan waktu kedaluwarsa yang sebenarnya
+	}, nil
 }
+
 
 func (service *AuthServiceImpl) LoginRequest(username string, password string) (map[string]interface{}, error) {
 	user, getUserErr := service.authrepository.FindUserByUsername(username)
