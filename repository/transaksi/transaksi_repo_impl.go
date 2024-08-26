@@ -52,5 +52,14 @@ func (repo *TransaksirepositoryImpl) GetFilterTransaksiWebTahun(umkmId uuid.UUID
 	return transaksi, nil
 }
 
+func (repo *TransaksirepositoryImpl) GetFilterTransaksiWebBulan(umkmId uuid.UUID, mounth int) ([]domain.Transaksi, error) {
+	var transaksi []domain.Transaksi
+	err := repo.db.Where("umkm_id = ? AND EXTRACT(MONTH FROM tanggal) = ?", umkmId, mounth).Find(&transaksi).Error
+	if err != nil {
+		return nil, err
+	}
+	return transaksi, nil
+}
+
 
 

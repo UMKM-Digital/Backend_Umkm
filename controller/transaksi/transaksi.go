@@ -7,4 +7,5 @@ type UmkmController interface {
 	GetKategoriId(c echo.Context) error
 	GetTransaksiFilterList(c echo.Context) error
 	GetTransaksiByYear(c echo.Context) error
+	GetTransaksiByMounth(c echo.Context) error
 }

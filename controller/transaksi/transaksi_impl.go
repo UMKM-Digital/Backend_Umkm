@@ -151,3 +151,39 @@ func (controller *TransaksiControllerImpl) GetTransaksiByYear(c echo.Context) er
     // Mengembalikan hasil dalam format JSON
     return c.JSON(http.StatusOK, response)
 }
+
+
+
+func (controller *TransaksiControllerImpl) GetTransaksiByMounth(c echo.Context) error {
+    umkmID := c.Param("umkm_id")
+    yearParam := c.QueryParam("year")
+    
+
+    year, err := strconv.Atoi(yearParam)
+    if err != nil || year <= 0 {
+        return c.JSON(http.StatusBadRequest, map[string]interface{}{
+            "status":  false,
+            "message": "Invalid year parameter",
+        })
+    }
+
+    // Memanggil service untuk mendapatkan jumlah transaksi per bulan di tahun tertentu
+    transaksiPerTahun, err := controller.transaksiservice.GetTransaksiByMounth(umkmID, year)
+    if err != nil {
+        return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+            "status":  false,
+            "message": "Failed to retrieve transactions",
+            "data":    transaksiPerTahun,
+        })
+    }
+
+    response := map[string]interface{}{
+        "code":    http.StatusOK,
+        "status":  true,
+        "message": "Menampilkan transaksi berdasarkan tahun",
+        "data":    transaksiPerTahun,
+    }
+    // Mengembalikan hasil dalam format JSON
+    return c.JSON(http.StatusOK, response)
+}
+

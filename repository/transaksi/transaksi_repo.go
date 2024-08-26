@@ -11,4 +11,5 @@ type TransaksiRepo interface {
 	GetRequestTransaksi(idTransaksi int)(domain.Transaksi, error)
 	GetFilterTransaksi(umkmID uuid.UUID) ([]domain.Transaksi, error)
 	GetFilterTransaksiWebTahun(umkmId uuid.UUID, year int) ([]domain.Transaksi, error)
+	GetFilterTransaksiWebBulan(umkmId uuid.UUID, mounth int) ([]domain.Transaksi, error)
 }
