@@ -80,7 +80,7 @@ func (service *TranssaksiServiceImpl) CreateTransaksi(transaksi web.CreateTransa
 		"tanggal":            saveTransaksi.Tanggal,
 		"name_client":        saveTransaksi.Nameclient,
 		"id_kategori_produk": saveTransaksi.IdKategoriProduk,
-		"total":              saveTransaksi.TotalJml,
+		"total_jml":              saveTransaksi.TotalJml,
 		"keterangan":         saveTransaksi.Keterangan,
 		"no_hp":         saveTransaksi.NoHp,
 	}, nil
@@ -109,6 +109,8 @@ func (service *TranssaksiServiceImpl) GetKategoriUmkmId(id int)(entity.Transaksi
 //     // Konversi dari domain.Transaksi ke entity.TransasksiFilterEntity
 //     return entity.ToTransaksiFilterEntities(domainTransaksiList), nil
 // }
+
+
 func (service *TranssaksiServiceImpl) GetTransaksiFilter(umkmID uuid.UUID, filters map[string]string, allowedFilters []string) ([]entity.TransasksiFilterEntity, error) {
     queryBuilder := querybuilder.NewBaseQueryBuilder(service.db)
 
@@ -135,3 +137,62 @@ func (service *TranssaksiServiceImpl) GetTransaksiFilter(umkmID uuid.UUID, filte
 
     return transaksiList, nil
 }
+
+//transaksi web
+func (service *TranssaksiServiceImpl) GetTransaksiByYear(umkmID string) ([]map[string]interface{}, error) {
+    var results []map[string]interface{}
+
+    // Query untuk menghitung jumlah transaksi per tahun
+    rows, err := service.db.Model(&domain.Transaksi{}).
+        Select(`
+            EXTRACT(YEAR FROM tanggal) as year,
+            COUNT(*) as jumlah_transaksi,
+            SUM(CASE WHEN status = 1 THEN 1 ELSE 0 END) as jml_transaksi_berlaku,
+            SUM(CASE WHEN status = 0 THEN 1 ELSE 0 END) as jml_transaksi_batal,
+            SUM(CASE WHEN status = 1 THEN total_jml ELSE 0 END) as total_berlaku,
+            SUM(CASE WHEN status = 0 THEN total_jml ELSE 0 END) as total_batal
+        `).
+        Where("umkm_id = ?", umkmID).
+        Group("year").
+        Order("year").
+        Rows()
+    if err != nil {
+        fmt.Println("Error executing query:", err)
+        return nil, fmt.Errorf("Failed to retrieve transactions: %w", err)
+    }
+    defer rows.Close()
+
+    // Parsing hasil query ke dalam format yang diinginkan
+    for rows.Next() {
+        var year int
+        var jumlahTransaksi int64
+        var jumlahTransaksiBerlaku int64
+        var jumlahTransaksiBatal int64
+        var totalTransaksiBerlaku decimal.Decimal
+        var totalTransaksiBatal decimal.Decimal
+
+        // Pastikan tipe data sesuai
+        if err := rows.Scan(&year, &jumlahTransaksi, &jumlahTransaksiBerlaku, &jumlahTransaksiBatal, &totalTransaksiBerlaku, &totalTransaksiBatal); err != nil {
+            fmt.Println("Error scanning row:", err)
+            return nil, fmt.Errorf("Failed to parse transaction data: %w", err)
+        }
+
+        result := map[string]interface{}{
+            "year":               year,
+            "jumlah_transaksi":   jumlahTransaksi,
+            "jml_transaksi_berlaku": jumlahTransaksiBerlaku,
+            "jml_transaksi_batal": jumlahTransaksiBatal,
+            "total_berlaku":      totalTransaksiBerlaku.String(), // Konversi Decimal ke string
+            "total_batal":        totalTransaksiBatal.String(),   // Konversi Decimal ke string
+        }
+        results = append(results, result)
+    }
+
+    if err := rows.Err(); err != nil {
+        fmt.Println("Error iterating over rows:", err)
+        return nil, fmt.Errorf("Failed to retrieve transactions: %w", err)
+    }
+
+    return results, nil
+}
+

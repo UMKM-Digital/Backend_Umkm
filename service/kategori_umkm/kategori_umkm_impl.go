@@ -34,7 +34,7 @@ func (service *KategoriUmkmServiceImpl) CreateKategori(kategori web.CreateCatego
 		return nil, errSaveKategoriUmkm
 	}
 
-	return helper.ResponseToJson{"Name": saveKategoriUmkm.Name}, nil
+	return helper.ResponseToJson{"id": saveKategoriUmkm.IdKategori, "Name": saveKategoriUmkm.Name}, nil
 }
 
 // baca seluruh kategori

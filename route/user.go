@@ -116,6 +116,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	Transaksi.POST("/umkm", userTransaksiController.Create)
 	Transaksi.GET("/:id", userTransaksiController.GetKategoriId)
 	Transaksi.GET("/:umkm_id/:date", userTransaksiController.GetTransaksiFilterList)
+	Transaksi.GET("/web/:umkm_id", userTransaksiController.GetTransaksiByYear)
 
 	KatProdukRoute := g.Group("/kategoriproduk")
 	KatProdukRoute.POST("/create	", userKategoriProdukController.Create)
