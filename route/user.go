@@ -15,7 +15,7 @@ import (
 	"umkm/controller/usercontroller"
 	"umkm/helper"
 	"umkm/model"
-
+	general_query_builder "umkm/query_builder/transaksi"
 
 	hakaksesrepo "umkm/repository/hakakses"
 	testimonialrepo "umkm/repository/homepage"
@@ -60,9 +60,10 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userUmkmController := umkmcontroller.NewUmkmController(userUmkmService)
  
 	// userQuerBuilder := querybuilder.NewBaseQueryBuilder(db)
-	userTransaksiRepo := transaksirepo.NewTransaksiRepositoryImpl(db)
+	eventQueryBuilder := general_query_builder.NewEventQueryBuilder(db)
+	userTransaksiRepo := transaksirepo.NewTransaksiRepositoryImpl(db, eventQueryBuilder)
 	userTransaksiService := transaksiservice.NewTransaksiservice(userTransaksiRepo, db)
-	userTransaksiController := transaksicontroller.NewUmkmController(userTransaksiService, db)
+	userTransaksiController := transaksicontroller.NewTransaksiController(userTransaksiService, db)
 
 	//userkategori produk
 	userKategoriProdukRepo := kategoriprodukrepo.NewKategoriProdukRepo(db)
@@ -118,9 +119,10 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	Transaksi.GET("/:umkm_id/:date", userTransaksiController.GetTransaksiFilterList)
 	Transaksi.GET("/web/:umkm_id", userTransaksiController.GetTransaksiByYear)
 	Transaksi.GET("/web/mounth/:umkm_id", userTransaksiController.GetTransaksiByMounth)
+	Transaksi.GET("/web/date/:umkm_id", userTransaksiController.GetTransaksiByDate)
 
 	KatProdukRoute := g.Group("/kategoriproduk")
-	KatProdukRoute.POST("/create	", userKategoriProdukController.Create)
+	KatProdukRoute.POST("/create", userKategoriProdukController.Create)
 	KatProdukRoute.GET("/:umkm_id", userKategoriProdukController.GetKategoriList)
 
 	//produk
