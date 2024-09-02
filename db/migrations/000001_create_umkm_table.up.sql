@@ -61,7 +61,7 @@ CREATE TABLE transaksi(
     id_kategori_produk JSONB NOT NULL,
     total_jml NUMERIC(15,2) NOT NULL,
     keterangan text NOT NULL,
-    status INT NOT NULL,
+    status INT,
     alasan_perubahan INT,
     tiket_validasi VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

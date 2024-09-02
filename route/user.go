@@ -55,12 +55,12 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userKategoriUmkmController := kategoriumkmcontroller.NewKategeoriUmkmController(userKatgoriUmkmService)
 
 	userUmkmRepo := umkmrepo.NewUmkmRepositoryImpl(db)
-	userHakAksesRepo := hakaksesrepo.NewHakAksesRepositoryImpl(db) // Tambahkan repository HakAkses
+	userHakAksesRepo := hakaksesrepo.NewHakAksesRepositoryImpl(db) 
 	userUmkmService := umkmservice.NewUmkmService(userUmkmRepo, userHakAksesRepo, db)
 	userUmkmController := umkmcontroller.NewUmkmController(userUmkmService)
  
 	// userQuerBuilder := querybuilder.NewBaseQueryBuilder(db)
-	eventQueryBuilder := general_query_builder.NewEventQueryBuilder(db)
+	eventQueryBuilder := general_query_builder.NewTransaksiQueryBuilder(db)
 	userTransaksiRepo := transaksirepo.NewTransaksiRepositoryImpl(db, eventQueryBuilder)
 	userTransaksiService := transaksiservice.NewTransaksiservice(userTransaksiRepo, db)
 	userTransaksiController := transaksicontroller.NewTransaksiController(userTransaksiService, db)
@@ -106,6 +106,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	KatUmkmRoute.PUT("/umkm/:id", userKategoriUmkmController.UpdateKategoriId, JWTProtection())
 	KatUmkmRoute.DELETE("/umkm/delete/:id", userKategoriUmkmController.DeleteKategoriId, JWTProtection())
 
+	//umkm
 	Umkm := g.Group("/umkm")
 	Umkm.Static("/uploads", "uploads")
 
@@ -113,6 +114,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	Umkm.GET("/list", userUmkmController.GetUmkmList,JWTProtection())
 	Umkm.GET("/filter", userUmkmController.GetUmkmFilter,JWTProtection())
 
+	//transaksi
 	Transaksi := g.Group("/transaksi")
 	Transaksi.POST("/umkm", userTransaksiController.Create)
 	Transaksi.GET("/:id", userTransaksiController.GetKategoriId)
@@ -121,6 +123,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	Transaksi.GET("/web/mounth/:umkm_id", userTransaksiController.GetTransaksiByMounth)
 	Transaksi.GET("/web/date/:umkm_id", userTransaksiController.GetTransaksiByDate)
 
+	//kategoriproduk
 	KatProdukRoute := g.Group("/kategoriproduk")
 	KatProdukRoute.POST("/create", userKategoriProdukController.Create)
 	KatProdukRoute.GET("/:umkm_id", userKategoriProdukController.GetKategoriList)

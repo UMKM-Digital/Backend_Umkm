@@ -1,36 +1,34 @@
 package general_query_builder
 
 import (
+	querybuilder "umkm/query_builder"
+
+	
 	"gorm.io/gorm"
-	"umkm/query_builder"
 )
 
-type EventQueryBuilder interface {
-	querybuilder.BaseQueryBuilderTransaksi
-	GetQueryBuilder(filters map[string]string, limit string, page int) (*gorm.DB, error)
-	getAllowedFilters() []string
+type TransaksiQueryBuilder interface {
+	querybuilder.BaseQueryBuilderList
+	GetBuilder(filters string, limit int, page int, status int) (*gorm.DB, error)
 }
 
-type EventQueryBuilderImpl struct {
-	*querybuilder.BaseQueryBuilderMain
+type TransaksiQueryBuilderImpl struct {
+	querybuilder.BaseQueryBuilderList
 }
 
-func NewEventQueryBuilder(db *gorm.DB) *EventQueryBuilderImpl {
-	return &EventQueryBuilderImpl{
-		BaseQueryBuilderMain: querybuilder.NewBaseQueryBuilderMain(db),
+func NewTransaksiQueryBuilder(db *gorm.DB) *TransaksiQueryBuilderImpl {
+	return &TransaksiQueryBuilderImpl{
+		BaseQueryBuilderList: querybuilder.NewBaseQueryBuilderList(db),
 	}
 }
 
-// Implementasi GetQueryBuilder sesuai dengan signature interface
-func (impl *EventQueryBuilderImpl) GetQueryBuilder(filters map[string]string, limit string, page int) (*gorm.DB, error) {
-	allowedFilters := impl.getAllowedFilters()
-	return impl.BaseQueryBuilderMain.GetQueryBuilder(filters, limit, page, allowedFilters)
-}
+func (transaksiQueryBuilder *TransaksiQueryBuilderImpl) GetBuilder(filters string,  limit int, page int, status int) (*gorm.DB, error) {
 
-func (eventQueryBuilder *EventQueryBuilderImpl) getAllowedFilters() []string {
-	return []string{
-		"year",  // Filter berdasarkan tahun
-		"month", // Filter berdasarkan bulan
-		"day",   // Filter berdasarkan hari
+	query, err := transaksiQueryBuilder.GetQueryBuilderList(filters,limit, page, status)
+	if err != nil {
+		return nil, err
 	}
+	query = query.Preload("Umkm")
+
+	return query, nil
 }

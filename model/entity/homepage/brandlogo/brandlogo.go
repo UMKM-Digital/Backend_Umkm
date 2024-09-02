@@ -6,6 +6,7 @@ import (
 )
 
 type BrandLogoEntity struct {
+	
 	BrandName string    `json:"brand_name"`
 	BrandLogo string    `json:"brand_logo"`
 	Created   time.Time `json:"created_at"`
