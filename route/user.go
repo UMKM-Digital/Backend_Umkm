@@ -16,6 +16,7 @@ import (
 	"umkm/helper"
 	"umkm/model"
 	general_query_builder "umkm/query_builder/transaksi"
+	query_builder_produk "umkm/query_builder/produk"
 
 	hakaksesrepo "umkm/repository/hakakses"
 	testimonialrepo "umkm/repository/homepage"
@@ -60,8 +61,8 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userUmkmController := umkmcontroller.NewUmkmController(userUmkmService)
  
 	// userQuerBuilder := querybuilder.NewBaseQueryBuilder(db)
-	eventQueryBuilder := general_query_builder.NewTransaksiQueryBuilder(db)
-	userTransaksiRepo := transaksirepo.NewTransaksiRepositoryImpl(db, eventQueryBuilder)
+	transaksiQueryBuilder := general_query_builder.NewTransaksiQueryBuilder(db)
+	userTransaksiRepo := transaksirepo.NewTransaksiRepositoryImpl(db, transaksiQueryBuilder)
 	userTransaksiService := transaksiservice.NewTransaksiservice(userTransaksiRepo, db)
 	userTransaksiController := transaksicontroller.NewTransaksiController(userTransaksiService, db)
 
@@ -71,7 +72,8 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userKategoriProdukController := kategoriprodukcontroller.NewKategeoriProdukController(*userKategoriProdukService)
 
 	//userproduk
-	userProdukrepo := produkrepo.NewProdukRepositoryImpl(db)
+	produkQueryBuilder := query_builder_produk.NewProdukQueryBuilder(db)
+	userProdukrepo := produkrepo.NewProdukRepositoryImpl(db, produkQueryBuilder)
 	userProdukService := produkservice.NewProdukService(userProdukrepo)
 	userProdukController := produkcontroller.NewProdukController(userProdukService)
 

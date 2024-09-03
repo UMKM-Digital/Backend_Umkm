@@ -30,10 +30,26 @@ func ToProdukEntity(produk domain.Produk) ProdukEntity {
 	}
 }
 
-func ToProdukEntities(produklist []domain.Produk) []ProdukEntity {
-    var produkEntities []ProdukEntity
+
+type ProdukList struct{
+	IdProduk uuid.UUID `json:"id"`
+	Name string `json:"nama"`
+	Images domain.JSONB `json:"gambar_id"`
+	KategdoriProduk domain.JSONB `json:"kategori_produk_id"`
+}
+
+func ToProdukList(produk domain.Produk) ProdukList{
+	return ProdukList{
+		IdProduk: produk.IdUmkm,
+		Name: produk.Nama,
+		KategdoriProduk: produk.KategoriProduk,
+	}
+}
+
+func ToProdukEntities(produklist []domain.Produk) []ProdukList {
+    var produkEntities []ProdukList
     for _, produk := range produklist {
-        produkEntities = append(produkEntities, ToProdukEntity(produk))
+        produkEntities = append(produkEntities, ToProdukList(produk))
     }
     return produkEntities
 }

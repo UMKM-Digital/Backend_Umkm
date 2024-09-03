@@ -18,6 +18,7 @@ type Produk struct {
 	Deskripsi string `gorm:"column:deskripsi"`
 	Created_at  time.Time`gorm:"column:created_at"`
     Updated_at  time.Time `gorm:"column:updated_at"`
+	Umkm    UMKM `gorm:"foreignKey:umkm_id"`
 }
 
 func (Produk) TableName() string {

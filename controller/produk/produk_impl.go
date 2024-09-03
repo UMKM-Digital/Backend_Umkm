@@ -7,13 +7,15 @@ import (
 	"strconv"
 
 	// "umkm/helper"
+	"umkm/helper"
 	"umkm/model"
 	"umkm/model/web"
 	produkservice "umkm/service/produk"
 
+	"fmt"
+
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	"fmt"
 )
 
 type ProdukControllerImpl struct {
@@ -118,7 +120,10 @@ func (controller *ProdukControllerImpl) DeleteProdukId(c echo.Context) error {
 
 func (controller *ProdukControllerImpl) GetprodukList(c echo.Context) error {
 	produkIDStr := c.Param("umkm_id")
-    fmt.Println("Received PRODUK ID:", produkIDStr)
+	kategori_produk_id := c.QueryParam("kategori")
+	fmt.Println("Seacrh:", kategori_produk_id)
+    // fmt.Println("Received PRODUK ID:", produkIDStr)
+	filters,  limit, page := helper.ExtractFilter(c.QueryParams())
 
     if produkIDStr == "" {
         return echo.NewHTTPError(http.StatusBadRequest, "Produk ID cannot be empty")
@@ -130,7 +135,7 @@ func (controller *ProdukControllerImpl) GetprodukList(c echo.Context) error {
         return echo.NewHTTPError(http.StatusBadRequest, "Invalid Produk ID")
     }
 
-    Produk, err := controller.Produk.GetProdukList(produkId)
+    Produk, err := controller.Produk.GetProdukList(produkId, filters, limit,page, kategori_produk_id)
     if err != nil {
         return echo.NewHTTPError(http.StatusInternalServerError, false, "Failed to get kategori produk")
     }
