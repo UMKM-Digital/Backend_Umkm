@@ -6,7 +6,7 @@ import (
 )
 
 type BrandLogoEntity struct {
-	
+	Id int `json:"id"`
 	BrandName string    `json:"brand_name"`
 	BrandLogo string    `json:"brand_logo"`
 	Created   time.Time `json:"created_at"`
@@ -15,6 +15,7 @@ type BrandLogoEntity struct {
 // Mengonversi satu instance dari domain.Brandlogo ke BrandLogoEntity
 func ToBrandEntity(brandlogo domain.Brandlogo) BrandLogoEntity {
 	return BrandLogoEntity{
+		Id: brandlogo.Id,
 		BrandName: brandlogo.BrandName,
 		BrandLogo: brandlogo.BrandLogo,
 		Created:   brandlogo.Created_at,
