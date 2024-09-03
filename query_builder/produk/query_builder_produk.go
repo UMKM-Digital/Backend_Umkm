@@ -51,7 +51,7 @@ func (produkQueryBuilder *ProdukQueryBuilderImpl) GetBuilderProduk(filters strin
 		return nil, err
 	}
 
-	query = query.Preload("Umkm")
+	query = query.Preload("umkm")
 
 	return query, nil
 }
