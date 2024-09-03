@@ -23,6 +23,8 @@ type UMKM struct {
     UpdatedAt            time.Time `gorm:"column:updated_at"`
     HakAkses             []HakAkses `gorm:"foreignKey:umkm_id"`
     KategoriProduk        []KategoriProduk `gorm:"foreignkey:umkm_id"`
+    Produk               []Produk  `gorm:"foreignkey:UmkmId"`
+    Transaksi            []Transaksi `gorm:"foreignkey:UmkmId"`
 }
 
 func (UMKM) TableName() string {

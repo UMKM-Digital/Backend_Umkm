@@ -78,7 +78,7 @@ func (transaksiQueryBuilder *TransaksiQueryBuilderImpl) GetBuilder(filters strin
 		return nil, err
 	}
 
-	query = query.Preload("umkm")
+	query = query.Preload("Umkm")
 
 	return query, nil
 }
