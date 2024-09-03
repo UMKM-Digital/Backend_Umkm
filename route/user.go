@@ -115,6 +115,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	Umkm.POST("/create", userUmkmController.Create, JWTProtection())
 	Umkm.GET("/list", userUmkmController.GetUmkmList,JWTProtection())
 	Umkm.GET("/filter", userUmkmController.GetUmkmFilter,JWTProtection())
+	Umkm.GET("/web/list", userUmkmController.GetUmkmListWeb, JWTProtection())
 
 	//transaksi
 	Transaksi := g.Group("/transaksi")

@@ -51,3 +51,13 @@ func(repo *RepoUmkmImpl) GetUmkmFilterName(ctx context.Context,  umkmIDs []uuid.
 	}
 	return umkm, nil
 }
+
+func(repo *RepoUmkmImpl) GetUmkmListWeb(ctx context.Context, umkmIds []uuid.UUID)([]domain.UMKM, error){
+	var umkm []domain.UMKM
+
+	err := repo.db.Where("id IN (?)", umkmIds).Find(&umkm).Error
+	if err != nil{
+		return []domain.UMKM{}, err
+	}
+	return umkm, nil
+}

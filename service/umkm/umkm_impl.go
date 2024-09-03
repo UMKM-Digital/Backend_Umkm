@@ -163,27 +163,22 @@ func (s *UmkmServiceImpl) GetUmkmListByUserId(ctx context.Context, userId int) (
 func (service *UmkmServiceImpl) GetUmkmFilter(ctx context.Context, userID int, filters map[string]string, allowedFilters []string) ([]entity.UmkmFilterEntity, error) {
     queryBuilder := querybuilder.NewBaseQueryBuilderName(service.db)
 
-    // Menggunakan queryBuilder untuk menerapkan filter
     query, err := queryBuilder.GetQueryBuilderName(filters, allowedFilters)
     if err != nil {
         return nil, err
     }
 
-    // Ambil hak akses berdasarkan userID
     hakakseslist, err := service.hakaksesrepository.GetHakAksesByUserId(ctx, userID)
     if err != nil {
         return nil, err
     }
 
-    // Ambil daftar UmkmId dari hak akses
     var umkmIds []uuid.UUID
     for _, hakakses := range hakakseslist {
         umkmIds = append(umkmIds, hakakses.UmkmId)
     }
 
-    // Tambahkan filter untuk ID UMKM yang dapat diakses
-
-    // Eksekusi query dan ambil hasilnya
+    
     var umkmList []entity.UmkmFilterEntity
     result := query.Find(&umkmList)
     if result.Error != nil {
@@ -191,4 +186,26 @@ func (service *UmkmServiceImpl) GetUmkmFilter(ctx context.Context, userID int, f
     }
 
     return umkmList, nil
+}
+
+func(service *UmkmServiceImpl) GetUmkmListWeb(ctx context.Context, userId int)([]entity.UmkmEntityList, error){
+    hakAksesList, err := service.hakaksesrepository.GetHakAksesByUserId(ctx, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	// Collect UMKM IDs from HakAkses
+	var umkmIDs []uuid.UUID
+	for _, hakAkses := range hakAksesList {
+		umkmIDs = append(umkmIDs, hakAkses.UmkmId)
+	}
+
+	// Fetch UMKM entities based on the collected IDs
+	umkmList, err := service.umkmrepository.GetUmkmListWeb(ctx, umkmIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert UMKM entities to UmkmEntity format
+	return entity.ToUmkmListEntities(umkmList), nil
 }

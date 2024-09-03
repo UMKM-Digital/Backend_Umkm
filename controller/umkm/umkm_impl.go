@@ -136,3 +136,17 @@ func (controller *UmkmControllerImpl) GetUmkmFilter(c echo.Context) error {
         return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success mendapatkan umkm", umkmList))
     }
     
+func (controller *UmkmControllerImpl) GetUmkmListWeb(c echo.Context) error{
+    userId, err := helper.GetAuthId(c)
+
+    if err != nil {
+        return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
+    }
+
+    umkmList, err := controller.umkmservice.GetUmkmListWeb(c.Request().Context(), userId)
+    if err != nil {
+        return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
+    }
+
+    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success melihat list Umkm", umkmList))
+}
