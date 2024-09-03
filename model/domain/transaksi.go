@@ -24,7 +24,7 @@ type Transaksi struct{
 	TiketValidasi     	   	string    `gorm:"column:tiket_validasi"`
     Created_at time.Time `gorm:"column:created_at"`
     Updated_at time.Time `gorm:"column:updated_at"`
-    Umkm    UMKM `gorm:"foreignKey:umkm_id"`
+    Umkm    UMKM `gorm:"foreignKey:UmkmId"`
 }
 
 type Kategori_Produk struct {
