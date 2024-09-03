@@ -43,7 +43,7 @@ import (
 
 type TransaksiQueryBuilder interface {
 	querybuilder.BaseQueryBuilderList
-	GetBuilder(filters string, limit int, page int, status int) (*gorm.DB, error)
+	GetBuilder(filters string, limit int, page int, status string) (*gorm.DB, error)
 }
 
 type TransaksiQueryBuilderImpl struct {
@@ -58,7 +58,7 @@ func NewTransaksiQueryBuilder(db *gorm.DB) *TransaksiQueryBuilderImpl {
 	}
 }
 
-func (transaksiQueryBuilder *TransaksiQueryBuilderImpl) GetBuilder(filters string, limit int, page int, status int) (*gorm.DB, error) {
+func (transaksiQueryBuilder *TransaksiQueryBuilderImpl) GetBuilder(filters string, limit int, page int, status string) (*gorm.DB, error) {
 	query := transaksiQueryBuilder.db
 
 	// Implementasi filter di sini
@@ -67,9 +67,7 @@ func (transaksiQueryBuilder *TransaksiQueryBuilderImpl) GetBuilder(filters strin
 		query = query.Where("no_invoice ILIKE ? OR name_client ILIKE ?", searchPattern, searchPattern)
 	}
 
-	if status == 0 {
-		query = query.Where("status = ?", status)
-	} else {
+	if status != "" { 
 		query = query.Where("status = ?", status)
 	}
 
@@ -78,7 +76,7 @@ func (transaksiQueryBuilder *TransaksiQueryBuilderImpl) GetBuilder(filters strin
 		return nil, err
 	}
 
-	query = query.Preload("Umkm")
+	query = query.Debug().Preload("Umkm")
 
 	return query, nil
 }

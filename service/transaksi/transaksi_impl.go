@@ -121,7 +121,7 @@ type TransaksiFilterResult struct {
 	TotalRecords int                      `json:"total_records"`
 }
 
-func (service *TranssaksiServiceImpl) GetTransaksiFilter(umkmID uuid.UUID, filtersTanggal map[string]string, allowedfiltersTanggal []string, filters string, limit int, page int, status int) (*TransaksiFilterResult, error) {
+func (service *TranssaksiServiceImpl) GetTransaksiFilter(umkmID uuid.UUID, filtersTanggal map[string]string, allowedfiltersTanggal []string, filters string, limit int, page int, status string) (*TransaksiFilterResult, error) {
 	var filterTanggal string
 	if tanggal, ok := filtersTanggal["tanggal"]; ok {
 		filterTanggal = tanggal

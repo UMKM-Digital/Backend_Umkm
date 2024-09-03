@@ -61,7 +61,7 @@ func (repo *TransaksirepositoryImpl) GetRequestTransaksi(idTransaksi int) (domai
 
 // 	return transaksi, nil
 // }
-func (repo *TransaksirepositoryImpl) GetFilterTransaksi(umkmID uuid.UUID, filters string, filterTanggal string, limit int, page int, status int) ([]domain.Transaksi, int, error) {
+func (repo *TransaksirepositoryImpl) GetFilterTransaksi(umkmID uuid.UUID, filters string, filterTanggal string, limit int, page int, status string) ([]domain.Transaksi, int, error) {
 	var transaksi []domain.Transaksi
 	var totalCount int64
 

@@ -5,10 +5,11 @@ import (
 	"strconv"
 )
 
-func ExtractFilterSort(params url.Values) (string, int, int, int) {
+func ExtractFilterSort(params url.Values) (string, string, int, int) {
 	// Ambil filter tunggal dari URL
 	filter := params.Get("filter")
-	status, _:= strconv.Atoi(params.Get("status"))
+	status := params.Get("status")
+	// status, _:= strconv.Atoi(params.Get("status"))
 	limit, _ := strconv.Atoi(params.Get("limit"))
 	page, _ := strconv.Atoi(params.Get("page"))
 
