@@ -225,18 +225,22 @@ func (service *ProdukServiceImpl) DeleteProduk(id uuid.UUID) error {
 // 	return entity.ToProdukEntity(GetProduk), nil
 // }
 
-func (service *ProdukServiceImpl) GetProdukList(Produkid uuid.UUID, filters string, limit int, page int, kategori_produk_id string) ([]entity.ProdukList, error) {
-	// getProdukList, err := service.produkrepository.GetProduk(Produkid)
-
-    // if err != nil {
-    //     return nil, err
-    // }
-
-	getProdukList, errGetProdukList := service.produkrepository.GetProduk(Produkid,filters,limit,page, kategori_produk_id)
-
+func (service *ProdukServiceImpl) GetProdukList(Produkid uuid.UUID, filters string, limit int, page int, kategori_produk_id string) (map[string]interface{}, error) {
+	getProdukList, totalCount, errGetProdukList := service.produkrepository.GetProduk(Produkid, filters, limit, page, kategori_produk_id)
 	if errGetProdukList != nil {
-		return []entity.ProdukList{}, errGetProdukList
+		return nil, errGetProdukList
 	}
 
-	return entity.ToProdukEntities(getProdukList),nil
+	// Konversi hasil produk ke entitas
+	produkEntities := entity.ToProdukEntities(getProdukList)
+
+	// Membuat map untuk hasil akhir
+	result := map[string]interface{}{
+		"total_records": totalCount,
+		"produk_list":   produkEntities,
+	}
+
+	return result, nil
 }
+
+

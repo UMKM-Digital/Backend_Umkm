@@ -11,5 +11,5 @@ type CreateProduk interface {
 	DeleteProdukId(id uuid.UUID) error
 	FindById(id uuid.UUID) (domain.Produk, error)
 	// ProdukById(id uuid.UUID) (domain.Produk, error)
-	GetProduk(ProdukId uuid.UUID, filters string, limit int, page int, kategori_produk_id string) ([]domain.Produk, error)
+	GetProduk(ProdukId uuid.UUID, filters string, limit int, page int, kategori_produk_id string) ([]domain.Produk, int, error)
 }

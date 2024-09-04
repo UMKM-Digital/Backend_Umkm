@@ -20,7 +20,7 @@ type TransaksiEntity struct {
 	Nameclient       string          `json:"name_client"`
 	IdKategoriProduk []KategoriProduk    ` json:"id_kategori_produk"`
 	TotalBelanja     decimal.Decimal `json:"total_jml"`
-	 TiketValidasi  string    `json:"tiket_validasi"`
+	TiketValidasi  string    `json:"tiket_validasi"`
 
 }
 

@@ -63,20 +63,31 @@ func (repo *ProdukRepoImpl) FindById(id uuid.UUID) (domain.Produk, error) {
 // 	return produk, nil
 // }
 
-func (repo *ProdukRepoImpl) GetProduk(ProdukId uuid.UUID, filters string, limit int, page int, kategori_produk_id string) ([]domain.Produk, error) {
+func (repo *ProdukRepoImpl) GetProduk(ProdukId uuid.UUID, filters string, limit int, page int, kategori_produk_id string) ([]domain.Produk, int, error) {
 	var produk []domain.Produk
+	var totalcount int64
 
-	// Memanggil produkQueryBuilder.GetBuilderProduk dengan parameter yang sesuai
+	// Mendapatkan query dengan limit dan pagination
 	query, err := repo.produkQueryBuilder.GetBuilderProduk(filters, limit, page, kategori_produk_id)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	 // Debug query sebelum dijalankan
-	// Menerapkan filter umkm_id
+	// Mendapatkan data produk
 	err = query.Where("umkm_id = ?", ProdukId).Find(&produk).Error
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return produk, nil
+
+	ProdukQueryBuilder, err := repo.produkQueryBuilder.GetBuilderProduk(filters, 0, 0, kategori_produk_id)
+	if err != nil {
+		return nil, 0, err
+	}
+	
+	err = ProdukQueryBuilder.Model(&domain.Produk{}).Where("umkm_id = ?", ProdukId).Count(&totalcount).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return produk, int(totalcount), nil
 }

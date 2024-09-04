@@ -12,8 +12,6 @@ import (
 	"umkm/model/web"
 	produkservice "umkm/service/produk"
 
-	"fmt"
-
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
@@ -118,34 +116,34 @@ func (controller *ProdukControllerImpl) DeleteProdukId(c echo.Context) error {
 // 	return c.JSON(http.StatusOK, helper.ResponseClient(http.StatusOK,"id ditemukan", nil))
 // }
 
+
 func (controller *ProdukControllerImpl) GetprodukList(c echo.Context) error {
 	produkIDStr := c.Param("umkm_id")
-	kategori_produk_id := c.QueryParam("kategori")
-	fmt.Println("Seacrh:", kategori_produk_id)
-    // fmt.Println("Received PRODUK ID:", produkIDStr)
-	filters,  limit, page := helper.ExtractFilter(c.QueryParams())
+	kategoriProdukID := c.QueryParam("kategori")
 
-    if produkIDStr == "" {
-        return echo.NewHTTPError(http.StatusBadRequest, "Produk ID cannot be empty")
-    }
+	filters, limit, page := helper.ExtractFilter(c.QueryParams())
 
-    produkId, err := uuid.Parse(produkIDStr)
-    if err != nil {
-        fmt.Println("Error parsing Produk ID:", err) // Debug log
-        return echo.NewHTTPError(http.StatusBadRequest, "Invalid Produk ID")
-    }
+	if produkIDStr == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Produk ID cannot be empty")
+	}
 
-    Produk, err := controller.Produk.GetProdukList(produkId, filters, limit,page, kategori_produk_id)
-    if err != nil {
-        return echo.NewHTTPError(http.StatusInternalServerError, false, "Failed to get kategori produk")
-    }
+	produkId, err := uuid.Parse(produkIDStr)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid Produk ID")
+	}
 
-    response := map[string]interface{}{
-        "code":   http.StatusOK,
-        "status": true,
-		"message": "berhasil melihat seluruh produk berdasarkan umkmid",
-        "data":   Produk,
-    }
+	// Panggil service untuk mendapatkan daftar produk dan total count
+	result, err := controller.Produk.GetProdukList(produkId, filters, limit, page, kategoriProdukID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get produk list")
+	}
 
-    return c.JSON(http.StatusOK, response)
+	response := map[string]interface{}{
+		"code":    http.StatusOK,
+		"status":  true,
+		"message": "Berhasil melihat seluruh produk berdasarkan umkm_id",
+		"data":    result,
+	}
+
+	return c.JSON(http.StatusOK, response)
 }
