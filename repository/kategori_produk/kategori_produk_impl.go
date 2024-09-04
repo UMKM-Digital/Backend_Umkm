@@ -39,34 +39,27 @@ func (repo *KategoriProdukRepoImpl) CreateKategoriProduk(kategoriproduk domain.K
 
 //     return kategori, nil
 // }
-
 func (repo *KategoriProdukRepoImpl) GetKategoriProduk(umkmID uuid.UUID, filters string, limit int, page int) ([]domain.KategoriProduk, int, error) {
     var kategori []domain.KategoriProduk
-	var totalcount int64
+    var totalcount int64
 
-	query, err := repo.KategoriProdukQueryBuilder.GetBuilder(filters, limit, page)
-	if err != nil {
-		return nil, 0, err
-	}
+    // Gunakan satu query builder untuk semua operasi
+    query, err := repo.KategoriProdukQueryBuilder.GetBuilder(filters, limit, page)
+    if err != nil {
+        return nil, 0, err
+    }
 
+    // Terapkan filter untuk mendapatkan data
     err = query.Where("umkm_id = ?", umkmID).Find(&kategori).Error
     if err != nil {
         return nil, 0, err
     }
 
-	KategoriProdukQueryBuilder, err := repo.KategoriProdukQueryBuilder.GetBuilder(filters, 0, 0)
-	if err != nil {
-		return nil, 0, err
-	}
-	
-	err = KategoriProdukQueryBuilder.Model(&domain.Produk{}).Where("umkm_id = ?", umkmID).Count(&totalcount).Error
-	if err != nil {
-		return nil, 0, err
-	}
+    // Terapkan filter yang sama untuk menghitung total count
+    err = query.Model(&domain.KategoriProduk{}).Where("umkm_id = ?", umkmID).Count(&totalcount).Error
+    if err != nil {
+        return nil, 0, err
+    }
 
-    return kategori,int(totalcount), nil
+    return kategori, int(totalcount), nil
 }
-
-
-
-
