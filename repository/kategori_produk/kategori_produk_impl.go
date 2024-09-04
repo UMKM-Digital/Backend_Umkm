@@ -1,6 +1,7 @@
 package kategoriprodukrepo
 
 import (
+	"errors"
 	"umkm/model/domain"
 	query_builder_kategori_produk "umkm/query_builder/kategoriproduk"
 
@@ -28,17 +29,6 @@ func (repo *KategoriProdukRepoImpl) CreateKategoriProduk(kategoriproduk domain.K
 	return kategoriproduk, nil
 }
 
-// func (repo *KategoriProdukRepoImpl) GetKategoriUmkm(umkmID uuid.UUID) ([]domain.KategoriProduk, error) {
-//     var kategori []domain.KategoriProduk
-
-//     // Query dengan filter berdasarkan umkm_id
-//     err := repo.db.Where("umkm_id = ?", umkmID).Find(&kategori).Error
-//     if err != nil {
-//         return nil, err
-//     }
-
-//     return kategori, nil
-// }
 func (repo *KategoriProdukRepoImpl) GetKategoriProduk(umkmID uuid.UUID, filters string, limit int, page int) ([]domain.KategoriProduk, int, error) {
     var kategori []domain.KategoriProduk
     var totalcount int64
@@ -62,4 +52,23 @@ func (repo *KategoriProdukRepoImpl) GetKategoriProduk(umkmID uuid.UUID, filters 
     }
 
     return kategori, int(totalcount), nil
+}
+
+func (repo *KategoriProdukRepoImpl) GetKategoriProdukId(idproduk int) (domain.KategoriProduk, error){
+    var KategoriUmkmData domain.KategoriProduk
+
+    err := repo.db.Find(&KategoriUmkmData, "id = ?", idproduk).Error
+
+	if err != nil {
+		return domain.KategoriProduk{},errors.New("kategori tidak ditemukan")
+	}
+
+	return KategoriUmkmData, nil
+}
+
+func (repo *KategoriProdukRepoImpl) UpdateKategoriId(idProduk int, kategori domain.KategoriProduk) (domain.KategoriProduk, error) {
+	if err := repo.db.Model(&domain.KategoriProduk {}).Where("id = ?", idProduk).Updates(kategori).Error; err != nil {
+        return domain.KategoriProduk{}, errors.New("failed to update kategori produk")
+    }
+    return kategori, nil
 }

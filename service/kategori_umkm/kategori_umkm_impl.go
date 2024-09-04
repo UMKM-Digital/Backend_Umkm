@@ -67,30 +67,27 @@ func (service *KategoriUmkmServiceImpl) GetKategoriUmkmId(id int) (entity.Katego
 
 // update
 func (service *KategoriUmkmServiceImpl) UpdateKategori(request web.UpdateCategoriUmkm, pathId int) (map[string]interface{}, error) {
-	// Ambil data kategori berdasarkan ID
 	getKategoriById, err := service.kategorirepository.GetKategoriUmkmId(pathId)
 	if err != nil {
 		return nil, err
 	}
 
-	// Gunakan nama kategori yang ada jika tidak ada perubahan
 	if request.Name == "" {
 		request.Name = getKategoriById.Name
 	}
 
-	// Buat objek Kategori_Umkm baru untuk pembaruan
+	
 	KategoriumkmRequest := domain.Kategori_Umkm{
-		IdKategori: pathId,
 		Name:       request.Name,
 	}
 
-	// Update kategori UMKM
+	
 	updateKategoriUmkm, errUpdate := service.kategorirepository.UpdateKategoriId(pathId, KategoriumkmRequest)
 	if errUpdate != nil {
 		return nil, errUpdate
 	}
 
-	// Membentuk respons yang akan dikembalikan
+	
 	response := map[string]interface{}{"name": updateKategoriUmkm.Name}
 	return response, nil
 }

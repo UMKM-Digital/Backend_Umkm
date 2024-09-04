@@ -53,4 +53,36 @@ func (service *KategoriProdukServiceImpl) GetKategoriProdukList(umkmID uuid.UUID
 }
 
 
+func (service *KategoriProdukServiceImpl) GetKategoriProdukId(id int) (entity.KategoriProdukEntity, error){
+    GetKategoriProduk, errGetKategoriProduk := service.kategoriprodukrepository.GetKategoriProdukId(id)
 
+	if errGetKategoriProduk != nil {
+		return entity.KategoriProdukEntity{}, errGetKategoriProduk
+	}
+
+	return entity.ToKategoriProdukEntity(GetKategoriProduk), nil
+}
+
+func (service *KategoriProdukServiceImpl) UpdateKategoriProduk(request web.UpdateCategoriProduk, pathId int) (map[string]interface{}, error){
+    getkategoriprodukId, err := service.kategoriprodukrepository.GetKategoriProdukId(pathId)
+	if err != nil {
+		return nil, err
+	}
+
+	if request.Name == "" {
+		request.Name = getkategoriprodukId.Nama
+	}
+
+	KategoriumkmRequest := domain.KategoriProduk{
+		Nama: request.Name,
+	}
+
+	updateKategoriProduk, errUpdate := service.kategoriprodukrepository.UpdateKategoriId(pathId, KategoriumkmRequest)
+	if errUpdate != nil {
+		return nil, errUpdate
+	}
+
+	
+	response := map[string]interface{}{"name": updateKategoriProduk.Nama}
+	return response, nil
+}

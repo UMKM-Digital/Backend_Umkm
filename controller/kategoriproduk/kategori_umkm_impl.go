@@ -2,6 +2,7 @@ package kategoriprodukcontroller
 
 import (
 	"net/http"
+	"strconv"
 	"umkm/helper"
 	"umkm/model"
 	"umkm/model/web"
@@ -71,3 +72,31 @@ func (controller *KategoriProdukControllerImpl) GetKategoriList(c echo.Context) 
     return c.JSON(http.StatusOK, response)
 }
 
+func (controller *KategoriProdukControllerImpl) GetKategoriId(c echo.Context) error{
+	id, _ := strconv.Atoi(c.Param("id"))
+
+	getUser, errGetUser := controller.kategoriprodukService.GetKategoriProdukId(id)
+
+	if errGetUser != nil {
+		return c.JSON(http.StatusNotFound, model.ResponseToClient(http.StatusNotFound, false, errGetUser.Error(), nil))
+	}
+
+	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "berhasil melihat kategori produk", getUser))
+}
+
+func (controller *KategoriProdukControllerImpl) UpdateKategoriProduk(c echo.Context) error{
+	kategori := new(web.UpdateCategoriProduk)
+    id, _ := strconv.Atoi(c.Param("id"))
+
+    if err := c.Bind(kategori); err != nil {
+        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, err.Error(), nil))
+    }
+
+    userUpdate, errUserUpdate := controller.kategoriprodukService.UpdateKategoriProduk(*kategori, id)
+
+    if errUserUpdate != nil {
+        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, errUserUpdate.Error(), nil))
+    }
+
+    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "data kategoriproduk berhasil diperbaharui", userUpdate))
+}
