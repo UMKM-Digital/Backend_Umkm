@@ -38,14 +38,20 @@ func (service *KategoriUmkmServiceImpl) CreateKategori(kategori web.CreateCatego
 }
 
 // baca seluruh kategori
-func (service *KategoriUmkmServiceImpl) GetKategoriUmkmList() ([]entity.KategoriEntity, error) {
-	getKategoriUmkmList, errGetKategoriUmkmList := service.kategorirepository.GetKategoriUmkm()
+func (service *KategoriUmkmServiceImpl) GetKategoriUmkmList(filters string, limit int, page int) (map[string]interface{}, error) {
+	getKategoriUmkmList, totalcount, errGetKategoriUmkmList := service.kategorirepository.GetKategoriUmkm(filters, limit, page)
 
 	if errGetKategoriUmkmList != nil {
-		return []entity.KategoriEntity{}, errGetKategoriUmkmList
+		return nil, errGetKategoriUmkmList
 	}
 
-	return entity.ToKategoriEntities(getKategoriUmkmList), nil
+	kategoriUmkmEntitis := entity.ToKategoriEntities(getKategoriUmkmList)
+	result := map[string]interface{}{
+		"total_records": totalcount,
+		"produk_list":   kategoriUmkmEntitis,
+	}
+
+	return result, nil
 }
 
 // get by id

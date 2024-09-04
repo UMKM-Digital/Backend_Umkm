@@ -3,6 +3,7 @@ package kategoriumkmcontroller
 import (
 	"net/http"
 	"strconv"
+	"umkm/helper"
 	"umkm/model"
 	"umkm/model/web"
 	kategoriumkmservice "umkm/service/kategori_umkm"
@@ -36,7 +37,9 @@ func (controller *KategoriUmkmControllerImpl) Create(c echo.Context) error {
 
 //melihat isi kategori
 func (controller *KategoriUmkmControllerImpl) GetKategoriList(c echo.Context) error {
-	getKategoriUmkm, errGetKategoriUmkm := controller.kategoriService.GetKategoriUmkmList()
+	filters, limit, page := helper.ExtractFilter(c.QueryParams())
+	
+	getKategoriUmkm, errGetKategoriUmkm := controller.kategoriService.GetKategoriUmkmList(filters, limit, page)
 
 	if errGetKategoriUmkm != nil {
 		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, errGetKategoriUmkm.Error(), nil))
@@ -44,6 +47,8 @@ func (controller *KategoriUmkmControllerImpl) GetKategoriList(c echo.Context) er
 
 	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "berhasil melihat seluruh list kategori umkm", getKategoriUmkm))
 }
+
+
 
 // //melihat isi kategori
 func (controller *KategoriUmkmControllerImpl) GetKategoriId(c echo.Context) error{
