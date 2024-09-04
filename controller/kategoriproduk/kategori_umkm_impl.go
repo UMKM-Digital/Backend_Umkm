@@ -2,12 +2,14 @@ package kategoriprodukcontroller
 
 import (
 	"net/http"
+	"umkm/helper"
 	"umkm/model"
 	"umkm/model/web"
 	kategoriprodukservice "umkm/service/kategori_produk"
 
-	"github.com/google/uuid"
 	"fmt"
+
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -38,6 +40,7 @@ func (controller *KategoriProdukControllerImpl) Create(c echo.Context) error {
 func (controller *KategoriProdukControllerImpl) GetKategoriList(c echo.Context) error {
     umkmIDStr := c.Param("umkm_id")
     fmt.Println("Received UMKM ID:", umkmIDStr) // Debug log
+	filters, limit, page := helper.ExtractFilter(c.QueryParams())
 
     if umkmIDStr == "" {
         return echo.NewHTTPError(http.StatusBadRequest, "UMKM ID cannot be empty")
@@ -49,7 +52,7 @@ func (controller *KategoriProdukControllerImpl) GetKategoriList(c echo.Context) 
         return echo.NewHTTPError(http.StatusBadRequest, "Invalid UMKM ID")
     }
 
-    kategoriProduk, err := controller.kategoriprodukService.GetKategoriProdukList(umkmID)
+    kategoriProduk, err := controller.kategoriprodukService.GetKategoriProdukList(umkmID, filters, limit, page)
     if err != nil {
         return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"status":  false,

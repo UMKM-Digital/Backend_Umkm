@@ -8,5 +8,5 @@ import (
 
 type KategoriProdukRepository interface {
 	CreateKategoriProduk(kategoriproduk domain.KategoriProduk) (domain.KategoriProduk, error)
-	GetKategoriUmkm(umkmID uuid.UUID)([]domain.KategoriProduk, error)
+	GetKategoriProduk(umkmID uuid.UUID, filters string, limit int, page int) ([]domain.KategoriProduk, int, error)
 }

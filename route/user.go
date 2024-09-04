@@ -15,6 +15,7 @@ import (
 	"umkm/controller/usercontroller"
 	"umkm/helper"
 	"umkm/model"
+	query_builder_kategori_produk "umkm/query_builder/kategoriproduk"
 	query_builder_kategori_umkm "umkm/query_builder/kategoriumkm"
 	query_builder_produk "umkm/query_builder/produk"
 	general_query_builder "umkm/query_builder/transaksi"
@@ -69,7 +70,8 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userTransaksiController := transaksicontroller.NewTransaksiController(userTransaksiService, db)
 
 	//userkategori produk
-	userKategoriProdukRepo := kategoriprodukrepo.NewKategoriProdukRepo(db)
+	KategoriProdukQueryBuilder := query_builder_kategori_produk.NewKategoriProdukQueryBuilder(db)
+	userKategoriProdukRepo := kategoriprodukrepo.NewKategoriProdukRepo(db,KategoriProdukQueryBuilder)
 	userKategoriProdukService := kategoriprodukservice.NewKategoriProdukService(userKategoriProdukRepo)
 	userKategoriProdukController := kategoriprodukcontroller.NewKategeoriProdukController(*userKategoriProdukService)
 

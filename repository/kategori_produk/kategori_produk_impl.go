@@ -2,6 +2,7 @@ package kategoriprodukrepo
 
 import (
 	"umkm/model/domain"
+	query_builder_kategori_produk "umkm/query_builder/kategoriproduk"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -9,10 +10,14 @@ import (
 
 type KategoriProdukRepoImpl struct {
 	db *gorm.DB
+	KategoriProdukQueryBuilder query_builder_kategori_produk.KategoriProdukQueryBuilder
 }
 
-func NewKategoriProdukRepo(db *gorm.DB) *KategoriProdukRepoImpl {
-	return &KategoriProdukRepoImpl{db: db}
+func NewKategoriProdukRepo(db *gorm.DB, KategoriProdukQueryBuilder query_builder_kategori_produk.KategoriProdukQueryBuilder) *KategoriProdukRepoImpl {
+	return &KategoriProdukRepoImpl{
+		db: db,
+		KategoriProdukQueryBuilder: KategoriProdukQueryBuilder,
+	}
 }
 
 func (repo *KategoriProdukRepoImpl) CreateKategoriProduk(kategoriproduk domain.KategoriProduk) (domain.KategoriProduk, error) {
@@ -35,13 +40,31 @@ func (repo *KategoriProdukRepoImpl) CreateKategoriProduk(kategoriproduk domain.K
 //     return kategori, nil
 // }
 
-func (repo *KategoriProdukRepoImpl) GetKategoriUmkm(umkmID uuid.UUID) ([]domain.KategoriProduk, error) {
+func (repo *KategoriProdukRepoImpl) GetKategoriProduk(umkmID uuid.UUID, filters string, limit int, page int) ([]domain.KategoriProduk, int, error) {
     var kategori []domain.KategoriProduk
-    err := repo.db.Where("umkm_id = ?", umkmID).Find(&kategori).Error
+	var totalcount int64
+
+	query, err := repo.KategoriProdukQueryBuilder.GetBuilder(filters, limit, page)
+	if err != nil {
+		return nil, 0, err
+	}
+
+    err = query.Where("umkm_id = ?", umkmID).Find(&kategori).Error
     if err != nil {
-        return nil, err
+        return nil, 0, err
     }
-    return kategori, nil
+
+	KategoriProdukQueryBuilder, err := repo.KategoriProdukQueryBuilder.GetBuilder(filters, 0, 0)
+	if err != nil {
+		return nil, 0, err
+	}
+	
+	err = KategoriProdukQueryBuilder.Model(&domain.Produk{}).Where("umkm_id = ?", umkmID).Count(&totalcount).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+    return kategori,int(totalcount), nil
 }
 
 
