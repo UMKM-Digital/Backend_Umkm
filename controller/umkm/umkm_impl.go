@@ -106,11 +106,12 @@ func (controller *UmkmControllerImpl) Create(c echo.Context) error {
 // //umkm list
 func (controller *UmkmControllerImpl) GetUmkmList(c echo.Context) error {
         userId, err := helper.GetAuthId(c)
+        filters, limit, page := helper.ExtractFilter(c.QueryParams())
         if err != nil {
             return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
         }
     
-        umkmList, err := controller.umkmservice.GetUmkmListByUserId(c.Request().Context(), userId)
+        umkmList, err := controller.umkmservice.GetUmkmListByUserId(c.Request().Context(), userId, filters, limit, page)
         if err != nil {
             return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
         }

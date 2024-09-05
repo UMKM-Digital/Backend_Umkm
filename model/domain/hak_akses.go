@@ -12,6 +12,10 @@ type HakAkses struct {
     Status         int       `gorm:"column:status"`
     CreatedAt      time.Time `gorm:"column:created_at"`
     UpdatedAt      time.Time `gorm:"column:updated_at"`
-	User   Users `gorm:"foreignKey:user_id"`
-	UMKM   UMKM `gorm:"foreignKey:umkm_id"`
+	User       Users     `gorm:"foreignKey:UserId;references:IdUser"`
+    UMKM       UMKM      `gorm:"foreignKey:UmkmId;references:IdUmkm"`
+}
+
+func (HakAkses) TableName() string {
+    return "hak_akses"
 }

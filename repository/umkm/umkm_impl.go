@@ -3,6 +3,7 @@ package umkmrepo
 import (
 	"context"
 	"umkm/model/domain"
+	query_builder_umkm "umkm/query_builder/umkm"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -10,10 +11,14 @@ import (
 
 type RepoUmkmImpl struct {
 	db *gorm.DB
+	umkmQueryBuilder query_builder_umkm.UmkmQueryBuilder
 }
 
-func NewUmkmRepositoryImpl(db *gorm.DB) *RepoUmkmImpl {
-	return &RepoUmkmImpl{db: db}
+func NewUmkmRepositoryImpl(db *gorm.DB, umkmQueryBuilder query_builder_umkm.UmkmQueryBuilder) *RepoUmkmImpl {
+	return &RepoUmkmImpl{
+		db: db,
+		umkmQueryBuilder: umkmQueryBuilder,
+	}
 }
 
 func (repo *RepoUmkmImpl) CreateRequest(umkm domain.UMKM)(domain.UMKM, error) {
@@ -33,13 +38,32 @@ func (repo *RepoUmkmImpl) CreateRequest(umkm domain.UMKM)(domain.UMKM, error) {
 // 	}
 // 	return umkm, nil
 // }
-func (repo *RepoUmkmImpl) GetUmkmListByIds(ctx context.Context, umkmIDs []uuid.UUID) ([]domain.UMKM, error) {
+
+func (repo *RepoUmkmImpl) GetUmkmListByIds(ctx context.Context, umkmIDs []uuid.UUID, filters string, limit int, page int) ([]domain.UMKM, int, error) {
 	var umkm []domain.UMKM
-	err := repo.db.Where("id IN (?)", umkmIDs).Find(&umkm).Error
+	var totalcount int64
+
+	query, err := repo.umkmQueryBuilder.GetBuilder(filters, limit, page)
 	if err != nil {
-		return []domain.UMKM{}, err
+		return nil, 0, err
 	}
-	return umkm, nil
+
+	err = query.Where("id IN (?)", umkmIDs).Find(&umkm).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	umkmQueryBuilder, err := repo.umkmQueryBuilder.GetBuilder(filters, 0, 0)
+	if err != nil {
+		return nil, 0, err
+	}
+	
+	err = umkmQueryBuilder.Model(&domain.UMKM{}).Where("id IN (?)", umkmIDs).Count(&totalcount).Error
+	if err != nil {	
+		return nil, 0, err
+	}
+
+	return umkm, int(totalcount), nil
 }
 
 //

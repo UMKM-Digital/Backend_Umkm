@@ -19,6 +19,7 @@ import (
 	query_builder_kategori_umkm "umkm/query_builder/kategoriumkm"
 	query_builder_produk "umkm/query_builder/produk"
 	general_query_builder "umkm/query_builder/transaksi"
+	query_builder_umkm "umkm/query_builder/umkm"
 
 	hakaksesrepo "umkm/repository/hakakses"
 	testimonialrepo "umkm/repository/homepage"
@@ -58,7 +59,8 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userKatgoriUmkmService := kategoriumkmservice.NewKategoriUmkmService(userKategoriUmkmRepo)
 	userKategoriUmkmController := kategoriumkmcontroller.NewKategeoriUmkmController(userKatgoriUmkmService)
 
-	userUmkmRepo := umkmrepo.NewUmkmRepositoryImpl(db)
+	umkmQueryBuilder := query_builder_umkm.NewUmkmQueryBuilder(db)
+	userUmkmRepo := umkmrepo.NewUmkmRepositoryImpl(db, umkmQueryBuilder)
 	userHakAksesRepo := hakaksesrepo.NewHakAksesRepositoryImpl(db) 
 	userUmkmService := umkmservice.NewUmkmService(userUmkmRepo, userHakAksesRepo, db)
 	userUmkmController := umkmcontroller.NewUmkmController(userUmkmService)

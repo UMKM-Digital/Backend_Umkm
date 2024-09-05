@@ -135,7 +135,7 @@ func (service *UmkmServiceImpl) CreateUmkm(umkm web.UmkmRequest, userID int, fil
     }, nil
 }
 
-func (s *UmkmServiceImpl) GetUmkmListByUserId(ctx context.Context, userId int) ([]entity.UmkmEntity, error) {
+func (s *UmkmServiceImpl) GetUmkmListByUserId(ctx context.Context, userId int,filters string, limit int, page int) (map[string]interface{}, error) {
 	// Fetch HakAkses for the given user ID
 	hakAksesList, err := s.hakaksesrepository.GetHakAksesByUserId(ctx, userId)
 	if err != nil {
@@ -149,13 +149,19 @@ func (s *UmkmServiceImpl) GetUmkmListByUserId(ctx context.Context, userId int) (
 	}
 
 	// Fetch UMKM entities based on the collected IDs
-	umkmList, err := s.umkmrepository.GetUmkmListByIds(ctx, umkmIDs)
+	umkmList,totalCount, err := s.umkmrepository.GetUmkmListByIds(ctx, umkmIDs, filters, limit, page)
 	if err != nil {
 		return nil, err
 	}
 
+	umkmEntitesList := entity.ToUmkmEntities(umkmList)
 	// Convert UMKM entities to UmkmEntity format
-	return entity.ToUmkmEntities(umkmList), nil
+	result := map[string]interface{}{
+		"total_records": totalCount,
+		"produk_list":   umkmEntitesList,
+	}
+
+	return result, nil
 }
 
 
@@ -189,7 +195,7 @@ func (service *UmkmServiceImpl) GetUmkmFilter(ctx context.Context, userID int, f
 }
 
 func(service *UmkmServiceImpl) GetUmkmListWeb(ctx context.Context, userId int)([]entity.UmkmEntityList, error){
-    hakAksesList, err := service.hakaksesrepository.GetHakAksesByUserId(ctx, userId)
+	hakAksesList, err := service.hakaksesrepository.GetHakAksesByUserId(ctx, userId)
 	if err != nil {
 		return nil, err
 	}
