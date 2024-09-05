@@ -86,3 +86,7 @@ func (service *KategoriProdukServiceImpl) UpdateKategoriProduk(request web.Updat
 	response := map[string]interface{}{"name": updateKategoriProduk.Nama}
 	return response, nil
 }
+
+func (service *KategoriProdukServiceImpl) DeleteKategoriProdukId(idproduk int) error{
+	return service.kategoriprodukrepository.DeleteKategoriProdukId(idproduk)
+}

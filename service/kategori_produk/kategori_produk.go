@@ -12,4 +12,5 @@ type KategoriUmkm interface {
 	GetKategoriProdukList(umkmID uuid.UUID, filters string, limit int, page int) (map[string]interface{}, error) 
 	GetKategoriProdukId(id int) (entity.KategoriProduk, error)
 	UpdateKategoriProduk(request web.UpdateCategoriProduk, pathId int) (map[string]interface{}, error)
+	DeleteKategoriProdukId(idproduk int) error
 }

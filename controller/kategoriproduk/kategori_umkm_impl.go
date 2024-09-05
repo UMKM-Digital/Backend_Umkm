@@ -100,3 +100,13 @@ func (controller *KategoriProdukControllerImpl) UpdateKategoriProduk(c echo.Cont
 
     return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "data kategoriproduk berhasil diperbaharui", userUpdate))
 }
+
+func (controller *KategoriProdukControllerImpl)Delete( c echo.Context) error{
+	id, _ := strconv.Atoi(c.Param("id"))
+
+	if errDeleteKategoriProduk := controller.kategoriprodukService.DeleteKategoriProdukId(id); errDeleteKategoriProduk != nil {
+        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, errDeleteKategoriProduk.Error(), nil))
+    }
+
+    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "Penghapusan Kategori produk berhasil", nil))
+}

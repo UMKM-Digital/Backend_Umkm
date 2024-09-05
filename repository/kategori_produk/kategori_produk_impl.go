@@ -72,3 +72,10 @@ func (repo *KategoriProdukRepoImpl) UpdateKategoriId(idProduk int, kategori doma
     }
     return kategori, nil
 }
+
+func (repo *KategoriProdukRepoImpl) DeleteKategoriProdukId(idproduk int) error {
+    if err := repo.db.Delete(&domain.KategoriProduk{}, idproduk).Error; err != nil{
+        return err
+    }
+    return nil
+}
