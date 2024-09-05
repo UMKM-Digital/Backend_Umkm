@@ -102,19 +102,18 @@ func (controller *ProdukControllerImpl) DeleteProdukId(c echo.Context) error {
 	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "Delete Produk Success", nil))
 }
 
-// func (controller *ProdukControllerImpl) GetProdukId(c echo.Context) error{
-// 	IdProduk := c.Param("id")
-// 	id, err := uuid.Parse(IdProduk)
+func (controller *ProdukControllerImpl) GetProdukId(c echo.Context) error{
+	IdProduk := c.Param("id")
+	id, _ := uuid.Parse(IdProduk)
 
-// 	if err != nil{
-// 		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, "Id tidak ada", nil))
-// 	}
+	getProduk, errGetProduk := controller.Produk.GetProdukId(id)
 
-// 	if errGetPorudk := controller.Produk.GetProdukId(id); errGetPorudk != nil{
-// 		return c.JSON(http.StatusBadRequest, helper.ResponseClient(http.StatusBadRequest, errGetPorudk.Error(), nil))
-// 	}
-// 	return c.JSON(http.StatusOK, helper.ResponseClient(http.StatusOK,"id ditemukan", nil))
-// }
+	if errGetProduk != nil {
+		return c.JSON(http.StatusNotFound, model.ResponseToClient(http.StatusNotFound, false, errGetProduk.Error(), nil))
+	}
+
+	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "berhasil mengambil id transaksi", getProduk))
+}
 
 
 func (controller *ProdukControllerImpl) GetprodukList(c echo.Context) error {

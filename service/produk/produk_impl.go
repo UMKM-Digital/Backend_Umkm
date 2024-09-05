@@ -215,15 +215,16 @@ func (service *ProdukServiceImpl) DeleteProduk(id uuid.UUID) error {
 	return service.produkrepository.DeleteProdukId(id)
 }
 
-// func(service *ProdukServiceImpl)GetProdukId(id uuid.UUID)(entity.ProdukEntity, error){
-// 	GetProduk, errGetProduk := service.produkrepository.ProdukById(id)
+func(service *ProdukServiceImpl) GetProdukId(id uuid.UUID)(entity.ProdukEntity, error){
+	GetProduk, errGetProduk := service.produkrepository.FindById(id)
 
-// 	if errGetProduk != nil {
-// 		return entity.ProdukEntity{}, errGetProduk
-// 	}
+	if errGetProduk != nil {
+		return entity.ProdukEntity{}, errGetProduk
+	}
 
-// 	return entity.ToProdukEntity(GetProduk), nil
-// }
+	return entity.ToProdukEntity(GetProduk), nil
+}
+
 
 func (service *ProdukServiceImpl) GetProdukList(Produkid uuid.UUID, filters string, limit int, page int, kategori_produk_id string) (map[string]interface{}, error) {
 	getProdukList, totalCount, errGetProdukList := service.produkrepository.GetProduk(Produkid, filters, limit, page, kategori_produk_id)

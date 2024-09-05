@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"time"
 	"umkm/model/domain"
 
 	"github.com/google/uuid"
@@ -15,6 +16,8 @@ type ProdukEntity struct {
 	Satuan int `json:"satuan"`
 	MinPesanan int `json:"min_pesanan"`
 	Deskripsi string `json:"deskripsi"`
+	Created time.Time `json:"created_at"`
+	Update time.Time `josn:"updated_at"`
 }
 
 func ToProdukEntity(produk domain.Produk) ProdukEntity {
@@ -27,6 +30,8 @@ func ToProdukEntity(produk domain.Produk) ProdukEntity {
 	 Satuan: produk.Satuan,
 	 MinPesanan: produk.Min_pesanan,
 	 KategdoriProduk: produk.KategoriProduk,
+	 Created: produk.Created_at,
+	 Update: produk.Updated_at,
 	}
 }
 
