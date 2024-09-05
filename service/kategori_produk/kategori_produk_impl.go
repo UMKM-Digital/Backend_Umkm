@@ -46,7 +46,7 @@ func (service *KategoriProdukServiceImpl) GetKategoriProdukList(umkmID uuid.UUID
 
     result := map[string]interface{}{
 		"total_records": totalcount,
-		"produk_list":   KatgeoriEntitie,
+		"kategori_produk":   KatgeoriEntitie,
 	}
 
 	return result, nil

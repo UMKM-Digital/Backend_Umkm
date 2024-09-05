@@ -135,7 +135,7 @@ func (service *UmkmServiceImpl) CreateUmkm(umkm web.UmkmRequest, userID int, fil
     }, nil
 }
 
-func (s *UmkmServiceImpl) GetUmkmListByUserId(ctx context.Context, userId int,filters string, limit int, page int) (map[string]interface{}, error) {
+func (s *UmkmServiceImpl) GetUmkmListByUserId(ctx context.Context, userId int, filters string, limit int, page int) (map[string]interface{}, error) {
 	// Fetch HakAkses for the given user ID
 	hakAksesList, err := s.hakaksesrepository.GetHakAksesByUserId(ctx, userId)
 	if err != nil {
@@ -149,20 +149,26 @@ func (s *UmkmServiceImpl) GetUmkmListByUserId(ctx context.Context, userId int,fi
 	}
 
 	// Fetch UMKM entities based on the collected IDs
-	umkmList,totalCount, err := s.umkmrepository.GetUmkmListByIds(ctx, umkmIDs, filters, limit, page)
+	umkmList, totalCount, err := s.umkmrepository.GetUmkmListByIds(ctx, umkmIDs, filters, limit, page)
 	if err != nil {
 		return nil, err
 	}
 
-	umkmEntitesList := entity.ToUmkmEntities(umkmList)
 	// Convert UMKM entities to UmkmEntity format
+	umkmEntitiesList, err := entity.ToUmkmEntities(umkmList, s.db) // Assuming s.db is the *gorm.DB instance
+	if err != nil {
+		return nil, err
+	}
+
+	// Prepare the result map
 	result := map[string]interface{}{
 		"total_records": totalCount,
-		"produk_list":   umkmEntitesList,
+		"umkm_list":   umkmEntitiesList,
 	}
 
 	return result, nil
 }
+
 
 
 //
