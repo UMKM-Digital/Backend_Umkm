@@ -6,6 +6,7 @@ import (
 
 	"umkm/app"
 	homepagecontroller "umkm/controller/homepage"
+	aboutuscontroller "umkm/controller/homepage/aboutus"
 	brandlogo "umkm/controller/homepage/logo"
 	kategoriprodukcontroller "umkm/controller/kategoriproduk"
 	kategoriumkmcontroller "umkm/controller/kategoriumkm"
@@ -23,6 +24,7 @@ import (
 
 	hakaksesrepo "umkm/repository/hakakses"
 	testimonialrepo "umkm/repository/homepage"
+	aboutusrepo "umkm/repository/homepage/aboutus"
 	brandrepo "umkm/repository/homepage/brandlogo"
 	kategoriprodukrepo "umkm/repository/kategori_produk"
 	repokategoriumkm "umkm/repository/kategori_umkm"
@@ -31,6 +33,7 @@ import (
 	umkmrepo "umkm/repository/umkm"
 	"umkm/repository/userrepo"
 	homepageservice "umkm/service/homepage"
+	aboutusservice "umkm/service/homepage/aboutus"
 	brandlogoservice "umkm/service/homepage/brandlogo"
 	kategoriprodukservice "umkm/service/kategori_produk"
 	kategoriumkmservice "umkm/service/kategori_umkm"
@@ -92,6 +95,11 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userLogo := brandrepo.NewBrandlogo(db)
 	userLogoBrandService := brandlogoservice.NewBrandLogoService(userLogo)
 	userLogoBrandController := brandlogo.NewBrandLogoController(userLogoBrandService)
+
+	//aboutus
+	userAboutUs := aboutusrepo.NewAboutUS(db)
+	userAboutUsService := aboutusservice.NewAboutUsService(userAboutUs)
+	userAboutUsController := aboutuscontroller.NewAboutUsController(*userAboutUsService)
 	
 	g := e.Group(prefix)
 
@@ -149,7 +157,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 
 	//testimonial
 	Testimonial := g.Group("/testimonial")
-	Testimonial.POST("/create", userTesimonialController.Create)//
+	Testimonial.POST("/create", userTesimonialController.Create)
 	Testimonial.GET("/list", userTesimonialController.GetTestimonial)
 	Testimonial.DELETE("/delete/:id", userTesimonialController.DeleteTestimonial)
 	Testimonial.GET("/:id", userTesimonialController.GetTestimonialId)
@@ -164,6 +172,13 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	Brandlogo.DELETE("/delet/:id", userLogoBrandController.DeleteProdukId)
 	Brandlogo.GET("/:id", userLogoBrandController.GetBrandLogoId)
 	Brandlogo.PUT("/edit/:id", userLogoBrandController.UpdateBrandLogo)
+
+	//aboutus
+	Aboutus := g.Group("/aboutus")
+	Aboutus.POST("/create", userAboutUsController.Create)
+	Aboutus.GET("/:id", userAboutUsController.GetAboutId)
+	Aboutus.GET("/list", userAboutUsController.GetAboutUs)
+	Aboutus.PUT("/edit/:id", userAboutUsController.UpdateAboutUs)
 }
 
 	func JWTProtection() echo.MiddlewareFunc {
