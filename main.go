@@ -58,5 +58,11 @@ func main() {
         log.Printf("Requested path: %s", path)
         return c.File("/Backend_Umkm/uploads/logo/" + path)
     })
+
+    r.GET("/uploads/about/*", func(c echo.Context) error {
+        path := c.Param("*")
+        log.Printf("Requested path: %s", path)
+        return c.File("/Backend_Umkm/uploads/about/" + path)
+    })
     
 }
