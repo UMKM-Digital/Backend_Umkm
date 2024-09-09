@@ -7,5 +7,5 @@ type ProdukController interface {
 	DeleteProdukId(c echo.Context) error
 	// GetProdukId(c echo.Context) error
 	GetprodukList(c echo.Context) error 
-	// UpdateProduk(c echo.Context) error
+	UpdateProduk(c echo.Context) error
 }

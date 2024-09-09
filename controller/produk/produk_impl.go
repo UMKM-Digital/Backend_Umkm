@@ -147,49 +147,54 @@ func (controller *ProdukControllerImpl) GetprodukList(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
-// func(controller *ProdukControllerImpl) UpdateProduk(c echo.Context) error{
-// 	IdProduk := c.Param("id")
-// 	id, _ := uuid.Parse(IdProduk)
+func (controller *ProdukControllerImpl) UpdateProduk(c echo.Context) error {
+    IdProduk := c.Param("id")
+    id, err := uuid.Parse(IdProduk)
+    if err != nil {
+        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid UUID format", nil))
+    }
 
-// 	name := c.FormValue("nama")
-// 	deskripsistr := c.FormValue("deskripsi")
+    name := c.FormValue("nama")
+    deskripsistr := c.FormValue("deskripsi")
 
-// 	hargastr := c.FormValue("harga")
-// 	harga, err := strconv.Atoi(hargastr)
-// 	if err != nil {
-// 		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest,false, "Invalid harga format", nil))
-// 	}
+    hargastr := c.FormValue("harga")
+    harga, err := strconv.Atoi(hargastr)
+    if err != nil {
+        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid harga format", nil))
+    }
 
-// 	satuanstr := c.FormValue("satuan")
-// 	satuan, err := strconv.Atoi(satuanstr)
-// 	if err != nil {
-// 		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest,false, "Invalid harga format", nil))
-// 	}
+    satuanstr := c.FormValue("satuan")
+    satuan, err := strconv.Atoi(satuanstr)
+    if err != nil {
+        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid satuan format", nil))
+    }
 
+    minpesananstr := c.FormValue("minpesanan")
+    minpesanan, err := strconv.Atoi(minpesananstr)
+    if err != nil {
+        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid minpesanan format", nil))
+    }
 
-// 	minpesananstr := c.FormValue("minpesanan")
-// 	minpesanan, err := strconv.Atoi(minpesananstr)
-// 	if err != nil {
-// 		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest,false, "Invalid harga format", nil))
-// 	}
+    file, err := c.FormFile("gambar")
+    if err != nil && err != http.ErrMissingFile {
+        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Failed to get uploaded file", nil))
+    }
 
-// 	file, err := c.FormFile("gambar")
-//     if err != nil && err != http.ErrMissingFile {
-//         return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "failed to get uploaded file", nil))
-//     }
+    kategoriProdukJSON := c.FormValue("kategori_produk")
 
-// 	request := web.UpdatedProduk{
-// 		Name: name,
-// 		Harga: harga,
-// 		Satuan: satuan,
-// 		MinPesanan: minpesanan,
-// 		Deskripsi: deskripsistr,
-// 	}
+    request := web.UpdatedProduk{
+        Name: name,
+        Harga: harga,
+        Satuan: satuan,
+        MinPesanan: minpesanan,
+        Deskripsi: deskripsistr,
+        KategoriProduk: json.RawMessage(kategoriProdukJSON),
+    }
 
-// 	testimonalUpdate, errTestimonalUpdate := controller.Produk.UpdateProduk(request, id, file)
-//     if errTestimonalUpdate != nil {
-//         return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, errTestimonalUpdate.Error(), nil))
-//     }
+    updatedProduk, errUpdate := controller.Produk.UpdateProduk(request, id, file)
+    if errUpdate != nil {
+        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, errUpdate.Error(), nil))
+    }
 
-//     return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "data berhasil diupdate", testimonalUpdate))
-// }
+    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "Data berhasil diupdate", updatedProduk))
+}

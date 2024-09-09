@@ -42,7 +42,7 @@ func (service *AboutUsServiceImpl) CreateAboutUs(aboutus web.CreateAboutUs, file
 	// Menghasilkan nama file acak untuk file yang diunggah
 	ext := filepath.Ext(file.Filename)
 	randomFileName := generateRandomFileName(ext)
-	logoPath := filepath.Join("uploads/logo", randomFileName)
+	logoPath := filepath.Join("uploads/about", randomFileName)
 
 	// Menyimpan file ke server
 	if err := helper.SaveFile(file, logoPath); err != nil {
@@ -124,7 +124,7 @@ func (service *AboutUsServiceImpl) UpdateAboutUs(request web.UpdateAboutUs, Id i
 		// Menghasilkan nama file acak untuk file yang diunggah
 		ext := filepath.Ext(file.Filename)
 		randomFileName := generateRandomFileName(ext)
-		Logo = filepath.Join("uploads/logo", randomFileName)
+		Logo = filepath.Join("uploads/about", randomFileName)
 
 		// Menyimpan file ke server
 		if err := helper.SaveFile(file, Logo); err != nil {

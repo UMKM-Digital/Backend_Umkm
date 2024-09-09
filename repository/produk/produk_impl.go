@@ -1,7 +1,7 @@
 package produkrepo
 
 import (
-	// "errors"
+	"errors"
 	"umkm/model/domain"
 	query_builder_produk "umkm/query_builder/produk"
 
@@ -74,9 +74,9 @@ func (repo *ProdukRepoImpl) GetProduk(ProdukId uuid.UUID, filters string, limit 
 	return produk, int(totalcount), nil
 }
 
-// func (repo *ProdukRepoImpl) UpdatedProduk(ProdukId uuid.UUID, produk domain.Produk) (domain.Produk, error) {
-// 	if err := repo.db.Model(&domain.Produk{}).Where("id = ?", ProdukId).Updates(produk).Error; err != nil {
-// 		return domain.Produk{}, errors.New("gagal memperbarui produk")
-// 	}
-// 	return produk, nil
-// }
+func (repo *ProdukRepoImpl) UpdatedProduk(ProdukId uuid.UUID, produk domain.Produk) (domain.Produk, error) {
+	if err := repo.db.Model(&domain.Produk{}).Where("id = ?", ProdukId).Updates(produk).Error; err != nil {
+		return domain.Produk{}, errors.New("gagal memperbarui produk")
+	}
+	return produk, nil
+}

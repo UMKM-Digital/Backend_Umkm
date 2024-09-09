@@ -154,6 +154,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	Produk.DELETE("/delete/:id", userProdukController.DeleteProdukId)
 	Produk.GET("/list/:umkm_id", userProdukController.GetprodukList)
 	Produk.GET("/:id", userProdukController.GetProdukId)
+	Produk.PUT("/update/:id", userProdukController.UpdateProduk)
 
 	//testimonial
 	Testimonial := g.Group("/testimonial")
