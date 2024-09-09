@@ -12,4 +12,5 @@ type CreateProduk interface {
 	FindById(id uuid.UUID) (domain.Produk, error)
 	// ProdukById(id uuid.UUID) (domain.Produk, error)
 	GetProduk(ProdukId uuid.UUID, filters string, limit int, page int, kategori_produk_id string) ([]domain.Produk, int, error)
+	// UpdatedProduk(ProdukId uuid.UUID, produk domain.Produk) (domain.Produk, error)
 }

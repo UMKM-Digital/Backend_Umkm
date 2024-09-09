@@ -245,3 +245,105 @@ func (service *ProdukServiceImpl) GetProdukList(Produkid uuid.UUID, filters stri
 }
 
 
+
+// func (service *ProdukServiceImpl) UpdateProduk(request web.UpdatedProduk, Id uuid.UUID, file *multipart.FileHeader) (map[string]interface{}, error) {
+//     // Ambil data produk berdasarkan ID
+//     getProdukById, err := service.produkrepository.FindById(Id)
+//     if err != nil {
+//         return nil, err
+//     }
+
+//     // Gunakan nilai yang ada jika tidak ada perubahan dalam request
+//     if request.Name == "" {
+//         request.Name = getProdukById.Nama
+//     }
+//     if request.Harga == 0 {
+//         request.Harga = getProdukById.Harga
+//     }
+//     if request.Satuan == 0 {
+//         request.Satuan = getProdukById.Satuan
+//     }
+//     if request.MinPesanan == 0 {
+//         request.MinPesanan = getProdukById.Min_pesanan
+//     }
+//     if request.Deskripsi == "" {
+//         request.Deskripsi = getProdukById.Deskripsi
+//     }
+
+//     // Ambil gambar lama
+//     oldGambar := getProdukById.Gamabr
+
+//     // Memperbarui salah satu gambar saja, misalnya hanya 'uploads/155181.jpg'
+//     var newGambar []string
+//     for _, img := range oldGambar {
+//         // Type assertion untuk memastikan bahwa `img` adalah string
+//         imgStr, ok := img.(string)
+//         if !ok {
+//             return nil, errors.New("invalid image format")
+//         }
+
+//         if imgStr == "uploads/155181.jpg" && file != nil {
+//             // Jika gambar adalah 'uploads/155181.jpg', ganti dengan gambar baru
+
+//             // Hapus gambar lama
+//             if err := os.Remove(imgStr); err != nil {
+//                 return nil, errors.New("failed to remove old image")
+//             }
+
+//             // Proses gambar baru
+//             src, err := file.Open()
+//             if err != nil {
+//                 return nil, errors.New("failed to open the uploaded file")
+//             }
+//             defer src.Close()
+
+//             // Menghasilkan nama file acak untuk file yang diunggah
+//             ext := filepath.Ext(file.Filename)
+//             randomFileName := generateRandomFileName(ext)
+//             newImagePath := filepath.Join("uploads", randomFileName)
+
+//             // Simpan file ke server
+//             if err := helper.SaveFile(file, newImagePath); err != nil {
+//                 return nil, errors.New("failed to save image")
+//             }
+
+//             // Tambahkan path baru ke daftar gambar
+//             newGambar = append(newGambar, filepath.ToSlash(newImagePath))
+//         } else {
+//             // Gambar lain tetap sama
+//             newGambar = append(newGambar, imgStr)
+//         }
+//     }
+
+//     // Buat objek Produk baru untuk pembaruan
+//     ProdukRequest := domain.Produk{
+//         IdUmkm:        Id,
+//         Nama:          request.Name,
+//         Gambar:        newGambar,
+//         Harga:         request.Harga,
+//         Satuan:        request.Satuan,
+//         Min_pesanan:   request.MinPesanan,
+//         KategoriProduk: request.KategoriProduk,
+//         Deskripsi:     request.Deskripsi,
+//     }
+
+//     // Update produk
+//     updatedProduk, errUpdate := service.produkrepository.UpdatedProduk(Id, ProdukRequest)
+//     if errUpdate != nil {
+//         return nil, errUpdate
+//     }
+
+//     // Bentuk respons yang akan dikembalikan
+//     response := map[string]interface{}{
+//         "id":            updatedProduk.IdUmkm,
+//         "name":          updatedProduk.Nama,
+//         "gambar":        updatedProduk.Gamabr,
+//         "harga":         updatedProduk.Harga,
+//         "satuan":        updatedProduk.Satuan,
+//         "min_pesanan":   updatedProduk.Min_pesanan,
+//         "kategoriproduk": updatedProduk.KategoriProduk,
+//         "deskripsi":     updatedProduk.Deskripsi,
+//     }
+
+//     return response, nil
+// }

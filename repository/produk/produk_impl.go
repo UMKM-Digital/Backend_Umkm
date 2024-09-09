@@ -7,22 +7,21 @@ import (
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	
 )
 
 type ProdukRepoImpl struct {
-	db *gorm.DB
+	db                 *gorm.DB
 	produkQueryBuilder query_builder_produk.ProdukQueryBuilder
 }
 
 func NewProdukRepositoryImpl(db *gorm.DB, produkQueryBuilder query_builder_produk.ProdukQueryBuilder) *ProdukRepoImpl {
 	return &ProdukRepoImpl{
-		db: db,
+		db:                 db,
 		produkQueryBuilder: produkQueryBuilder,
 	}
 }
 
-func (repo *ProdukRepoImpl) CreateRequest(produk domain.Produk)(domain.Produk, error) {
+func (repo *ProdukRepoImpl) CreateRequest(produk domain.Produk) (domain.Produk, error) {
 	err := repo.db.Create(&produk).Error
 	if err != nil {
 		return domain.Produk{}, err
@@ -31,14 +30,12 @@ func (repo *ProdukRepoImpl) CreateRequest(produk domain.Produk)(domain.Produk, e
 	return produk, nil
 }
 
-//
 func (repo *ProdukRepoImpl) DeleteProdukId(id uuid.UUID) error {
-    if err := repo.db.Delete(&domain.Produk{}, id).Error; err != nil {
-        return err
-    }
-    return nil
+	if err := repo.db.Delete(&domain.Produk{}, id).Error; err != nil {
+		return err
+	}
+	return nil
 }
-
 
 func (repo *ProdukRepoImpl) FindById(id uuid.UUID) (domain.Produk, error) {
 	var produk domain.Produk
@@ -47,21 +44,6 @@ func (repo *ProdukRepoImpl) FindById(id uuid.UUID) (domain.Produk, error) {
 	}
 	return produk, nil
 }
-
-
-
-// func (repo *ProdukRepoImpl) ProdukById(id uuid.UUID) (domain.Produk, error){
-// 	var produk domain.Produk
-	
-// 	err := repo.db.Find(&produk, "id = ?", id).Error
-
-
-// 	if err != nil {
-// 		return domain.Produk{},errors.New("produk tidak ditemukan")
-// 	}
-
-// 	return produk, nil
-// }
 
 func (repo *ProdukRepoImpl) GetProduk(ProdukId uuid.UUID, filters string, limit int, page int, kategori_produk_id string) ([]domain.Produk, int, error) {
 	var produk []domain.Produk
@@ -83,7 +65,7 @@ func (repo *ProdukRepoImpl) GetProduk(ProdukId uuid.UUID, filters string, limit 
 	if err != nil {
 		return nil, 0, err
 	}
-	
+
 	err = ProdukQueryBuilder.Model(&domain.Produk{}).Where("umkm_id = ?", ProdukId).Count(&totalcount).Error
 	if err != nil {
 		return nil, 0, err
@@ -91,3 +73,10 @@ func (repo *ProdukRepoImpl) GetProduk(ProdukId uuid.UUID, filters string, limit 
 
 	return produk, int(totalcount), nil
 }
+
+// func (repo *ProdukRepoImpl) UpdatedProduk(ProdukId uuid.UUID, produk domain.Produk) (domain.Produk, error) {
+// 	if err := repo.db.Model(&domain.Produk{}).Where("id = ?", ProdukId).Updates(produk).Error; err != nil {
+// 		return domain.Produk{}, errors.New("gagal memperbarui produk")
+// 	}
+// 	return produk, nil
+// }

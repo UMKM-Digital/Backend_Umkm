@@ -63,10 +63,10 @@ func (controller *AboutUsControllerImpl) UpdateAboutUs(c echo.Context) error {
 	id, _ := strconv.Atoi(c.Param("id"))
 
 	// Ambil nilai dari form-data
-	name := c.FormValue("name")
+	name := c.FormValue("description")
 
 	// Ambil file dari form-data jika ada
-	file, err := c.FormFile("gambar")
+	file, err := c.FormFile("image")
 	if err != nil && err != http.ErrMissingFile {
 		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "failed to get uploaded file", nil))
 	}

@@ -65,8 +65,8 @@ func (service *AboutUsServiceImpl) CreateAboutUs(aboutus web.CreateAboutUs, file
 	}
 
 	return map[string]interface{}{
-		"nama_barang": saveBrandLogo.Description,
-		"gambar":      saveBrandLogo.Image,
+		"description": saveBrandLogo.Description,
+		"image":      saveBrandLogo.Image,
 	}, nil
 }
 
