@@ -195,6 +195,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	Slider.GET("/:id", userSliderController.GetSlideId)
 	Slider.DELETE("/delete/:id", userSliderController.DelSlideId)
 	Slider.PUT("/edit/:id",userSliderController.Update)
+	Slider.PUT("/edit/active/:id",userSliderController.UpdateSldierActive)
 }
 
 	func JWTProtection() echo.MiddlewareFunc {

@@ -11,3 +11,8 @@ type UpdateSlider struct{
 	SlideTitle string `validate:"required" json:"slide_title"`
 	Gambar string `validate:"requuired" json:"gambar"`
 }
+
+
+type UpdateActiveSlider struct {
+    Active int `json:"active"`
+}

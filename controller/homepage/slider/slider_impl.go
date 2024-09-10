@@ -79,7 +79,7 @@ func(controller *SliderControllerImpl) Update(c echo.Context) error{
 	 slidetitle := c.FormValue("slide_title")
 	 
 	 // Ambil file dari form-data jika ada
-	 file, err := c.FormFile("gambar")
+	 file, err := c.FormFile("image")
 	 if err != nil && err != http.ErrMissingFile {
 		 return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "failed to get uploaded file", nil))
 	 }
@@ -97,4 +97,21 @@ func(controller *SliderControllerImpl) Update(c echo.Context) error{
 	 }
  
 	 return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "data berhasil diupdate", testimonalUpdate))
+}
+
+func (conntroller *SliderControllerImpl) UpdateSldierActive(c echo.Context) error {
+    slider := new(web.UpdateActiveSlider)
+    id, _ := strconv.Atoi(c.Param("id"))
+
+    if err := c.Bind(slider); err != nil {
+        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, err.Error(), nil))
+    }
+
+    sliderUpdate, errsliderUpdate := conntroller.slider.UpdateSliderActive(*slider, id)
+
+    if errsliderUpdate != nil {
+        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, errsliderUpdate.Error(), nil))
+    }
+
+    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "data berhasil diupdate", sliderUpdate))
 }

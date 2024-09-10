@@ -72,3 +72,12 @@ func(repo *SliderRepoImpl) UpdateSliderId(id int, slider domain.Slider) (domain.
 
     return slider, nil
 }
+
+// TestimonalRepoImpl adalah implementasi dari repository untuk testimonial
+func (repo *SliderRepoImpl) UpdateActiveId(idSlider int, active int) error {
+    if err := repo.db.Model(&domain.Slider{}).Where("id = ?", idSlider).Update("active", active).Error; err != nil {
+        return errors.New("failed to update slider active status")
+    }
+    return nil
+}
+

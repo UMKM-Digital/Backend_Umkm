@@ -8,4 +8,5 @@ type Slider interface {
 	GetSlideId(c echo.Context) error
 	DelSlideId(c echo.Context) error
 	Update(c echo.Context) error
+	UpdateSldierActive(c echo.Context) error 
 }

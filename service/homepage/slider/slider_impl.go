@@ -191,3 +191,32 @@ func(service *SliderServiceImpl) UpdateTestimonial(request web.UpdateSlider, Id 
     }
     return response, nil
 }
+
+func (service *SliderServiceImpl) UpdateSliderActive(request web.UpdateActiveSlider, Id int) (map[string]interface{}, error) {
+  
+    getTestimonialById, err := service.sliderrepository.GetSliderId(Id)
+    if err != nil {
+        return nil, err
+    }
+
+   
+    if request.Active == getTestimonialById.Active {
+       
+        response := map[string]interface{}{
+            "active": getTestimonialById.Active,
+        }
+        return response, nil
+    }
+
+   
+    errUpdate := service.sliderrepository.UpdateActiveId(Id, request.Active)
+    if errUpdate != nil {
+        return nil, errUpdate
+    }
+
+  
+    response := map[string]interface{}{
+        "active": request.Active,
+    }
+    return response, nil
+}
