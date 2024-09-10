@@ -13,5 +13,5 @@ type Produk interface {
 	DeleteProduk(id uuid.UUID) error
 	GetProdukId(id uuid.UUID)(entity.ProdukEntity, error)
 	GetProdukList(Produkid uuid.UUID, filters string, limit int, page int, kategori_produk_id string) (map[string]interface{}, error) 
-	UpdateProduk(request web.UpdatedProduk, Id uuid.UUID,file *multipart.FileHeader) (map[string]interface{}, error)
+	UpdateProduk(request web.UpdatedProduk, Id uuid.UUID, file *multipart.FileHeader, indexHapus []int) (map[string]interface{}, error)
 }

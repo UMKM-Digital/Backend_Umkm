@@ -244,37 +244,16 @@ func (service *ProdukServiceImpl) GetProdukList(Produkid uuid.UUID, filters stri
 	return result, nil
 }
 
-// Fungsi untuk mengupdate produk
-func (service *ProdukServiceImpl) UpdateProduk(request web.UpdatedProduk, Id uuid.UUID, file *multipart.FileHeader) (map[string]interface{}, error) {
+func (service *ProdukServiceImpl) UpdateProduk(request web.UpdatedProduk, Id uuid.UUID, file *multipart.FileHeader, indexHapus []int) (map[string]interface{}, error) {
     // Ambil data produk berdasarkan ID
     getProdukById, err := service.produkrepository.FindById(Id)
     if err != nil {
         return nil, err
     }
 
-    // Gunakan nilai yang ada jika tidak ada perubahan dalam request
-    if request.Name == "" {
-        request.Name = getProdukById.Nama
-    }
-    if request.Harga == 0 {
-        request.Harga = getProdukById.Harga
-    }
-    if request.Satuan == 0 {
-        request.Satuan = getProdukById.Satuan
-    }
-    if request.MinPesanan == 0 {
-        request.MinPesanan = getProdukById.Min_pesanan
-    }
-    if request.Deskripsi == "" {
-        request.Deskripsi = getProdukById.Deskripsi
-    }
-
-    // Ambil gambar lama
-    oldGambar := getProdukById.Gamabr
-
-    // Konversi oldGambar dari domain.JSONB ke []string
+    // Ambil gambar lama dan konversi dari domain.JSONB ke []string
     var oldGambarList []string
-    if urls, ok := oldGambar["urls"].([]interface{}); ok {
+    if urls, ok := getProdukById.Gamabr["urls"].([]interface{}); ok {
         for _, img := range urls {
             if imgStr, ok := img.(string); ok {
                 oldGambarList = append(oldGambarList, imgStr)
@@ -282,16 +261,24 @@ func (service *ProdukServiceImpl) UpdateProduk(request web.UpdatedProduk, Id uui
         }
     }
 
-    // Jika file gambar baru ada
+    // Hapus gambar pada indeks yang diberikan
+    toRemove := make(map[int]bool)
+    for _, idx := range indexHapus {
+        if idx >= 0 && idx < len(oldGambarList) {
+            toRemove[idx] = true
+        }
+    }
+
+    var newGambarList []string
+    for i, img := range oldGambarList {
+        if !toRemove[i] {
+            newGambarList = append(newGambarList, img)
+        }
+    }
+
+    // Jika ada file gambar baru
     var newGambar []string
     if file != nil {
-        // Hapus gambar lama jika ada
-        for _, img := range oldGambarList {
-            if err := os.Remove(img); err != nil {
-                return nil, errors.New("failed to remove old image")
-            }
-        }
-
         // Proses gambar baru
         src, err := file.Open()
         if err != nil {
@@ -311,12 +298,13 @@ func (service *ProdukServiceImpl) UpdateProduk(request web.UpdatedProduk, Id uui
 
         // Tambahkan path baru ke daftar gambar
         newGambar = append(newGambar, filepath.ToSlash(newImagePath))
-    } else {
-        newGambar = oldGambarList
     }
 
-    // Konversi newGambar ke JSONB
-    newGambarJSONB := domain.JSONB{"urls": newGambar}
+    // Gabungkan gambar lama yang telah diperbarui dan gambar baru
+    combinedGambar := append(newGambarList, newGambar...)
+
+    // Konversi combinedGambar ke JSONB
+    newGambarJSONB := domain.JSONB{"urls": combinedGambar}
 
     // Unmarshal KategoriProduk dari RawMessage ke JSONB
     var kategoriProdukJSONB domain.JSONB
@@ -352,28 +340,12 @@ func (service *ProdukServiceImpl) UpdateProduk(request web.UpdatedProduk, Id uui
         "id":            updatedProduk.IdUmkm,
         "name":          updatedProduk.Nama,
         "gambar": map[string]interface{}{
-            "urls": func() []string {
-                var urls []string
-                if urlsInterface, ok := updatedProduk.Gamabr["urls"].([]interface{}); ok {
-                    for _, img := range urlsInterface {
-                        if imgStr, ok := img.(string); ok {
-                            urls = append(urls, imgStr)
-                        }
-                    }
-                }
-                return urls
-            }(),
+            "urls": combinedGambar,
         },
         "harga":         updatedProduk.Harga,
         "satuan":        updatedProduk.Satuan,
         "min_pesanan":   updatedProduk.Min_pesanan,
-		"kategoriproduk": func() map[string]interface{} {
-            result := make(map[string]interface{})
-            for key, value := range updatedProduk.KategoriProduk {
-                result[key] = value
-            }
-            return result
-        }(),
+        "kategoriproduk": kategoriProdukJSONB,
         "deskripsi":     updatedProduk.Deskripsi,
     }
 

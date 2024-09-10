@@ -175,13 +175,23 @@ func (controller *ProdukControllerImpl) UpdateProduk(c echo.Context) error {
         return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid minpesanan format", nil))
     }
 
+    // Ambil file gambar jika ada
     file, err := c.FormFile("gambar")
     if err != nil && err != http.ErrMissingFile {
         return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Failed to get uploaded file", nil))
     }
 
+    // Ambil kategori produk dari form value
     kategoriProdukJSON := c.FormValue("kategori_produk")
 
+    // Ambil indeks gambar yang akan dihapus
+    indexHapusStr := c.FormValue("index_hapus")
+    var indexHapus []int
+    if err := json.Unmarshal([]byte(indexHapusStr), &indexHapus); err != nil {
+        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid index_hapus format", nil))
+    }
+
+    // Buat request untuk service
     request := web.UpdatedProduk{
         Name: name,
         Harga: harga,
@@ -191,7 +201,8 @@ func (controller *ProdukControllerImpl) UpdateProduk(c echo.Context) error {
         KategoriProduk: json.RawMessage(kategoriProdukJSON),
     }
 
-    updatedProduk, errUpdate := controller.Produk.UpdateProduk(request, id, file)
+    // Panggil service untuk memperbarui produk
+    updatedProduk, errUpdate := controller.Produk.UpdateProduk(request, id, file, indexHapus)
     if errUpdate != nil {
         return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, errUpdate.Error(), nil))
     }

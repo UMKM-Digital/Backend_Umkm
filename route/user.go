@@ -8,6 +8,7 @@ import (
 	homepagecontroller "umkm/controller/homepage"
 	aboutuscontroller "umkm/controller/homepage/aboutus"
 	brandlogo "umkm/controller/homepage/logo"
+	slidercontroller "umkm/controller/homepage/slider"
 	kategoriprodukcontroller "umkm/controller/kategoriproduk"
 	kategoriumkmcontroller "umkm/controller/kategoriumkm"
 	produkcontroller "umkm/controller/produk"
@@ -26,6 +27,7 @@ import (
 	testimonialrepo "umkm/repository/homepage"
 	aboutusrepo "umkm/repository/homepage/aboutus"
 	brandrepo "umkm/repository/homepage/brandlogo"
+	sliderrepo "umkm/repository/homepage/slider"
 	kategoriprodukrepo "umkm/repository/kategori_produk"
 	repokategoriumkm "umkm/repository/kategori_umkm"
 	produkrepo "umkm/repository/produk"
@@ -35,6 +37,7 @@ import (
 	homepageservice "umkm/service/homepage"
 	aboutusservice "umkm/service/homepage/aboutus"
 	brandlogoservice "umkm/service/homepage/brandlogo"
+	sliderservice "umkm/service/homepage/slider"
 	kategoriprodukservice "umkm/service/kategori_produk"
 	kategoriumkmservice "umkm/service/kategori_umkm"
 	produkservice "umkm/service/produk"
@@ -101,6 +104,11 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userAboutUsService := aboutusservice.NewAboutUsService(userAboutUs)
 	userAboutUsController := aboutuscontroller.NewAboutUsController(*userAboutUsService)
 	
+	//slider
+	userSlider := sliderrepo.NewSlider(db)
+	userSliderService := sliderservice.NewSliderService(userSlider)
+	userSliderController := slidercontroller.NewTestimonialController(*userSliderService)
+
 	g := e.Group(prefix)
 
 	authRoute := g.Group("/auth")
@@ -180,6 +188,11 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	Aboutus.GET("/:id", userAboutUsController.GetAboutId)
 	Aboutus.GET("/list", userAboutUsController.GetAboutUs)
 	Aboutus.PUT("/edit/:id", userAboutUsController.UpdateAboutUs)
+
+	Slider := g.Group("/slider")
+	Slider.POST("/create", userSliderController.Create)
+	Slider.GET("/list", userSliderController.List)
+	Slider.GET("/:id", userSliderController.GetSlideId)
 }
 
 	func JWTProtection() echo.MiddlewareFunc {
