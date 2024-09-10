@@ -7,4 +7,5 @@ type Slider interface {
 	GetSlider() ([]domain.Slider, error)
 	GetSliderId(id int) (domain.Slider, error)
 	DelSlider(id int) error
+	UpdateSliderId(id int, slider domain.Slider) (domain.Slider, error)
 }

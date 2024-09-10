@@ -55,3 +55,20 @@ func (repo *SliderRepoImpl) DelSlider(id int) error{
 	}
 	return nil
 }
+
+func(repo *SliderRepoImpl) UpdateSliderId(id int, slider domain.Slider) (domain.Slider, error){
+	var existingSlider domain.Slider
+    if err := repo.db.First(&existingSlider, id).Error; err != nil {
+        if errors.Is(err, gorm.ErrRecordNotFound) {
+            return domain.Slider{}, errors.New("testimonial not found")
+        }
+        return domain.Slider{}, err
+    }
+
+    // Lakukan pembaruan
+    if err := repo.db.Model(&existingSlider).Updates(slider).Error; err != nil {
+        return domain.Slider{}, errors.New("failed to update slider")
+    }
+
+    return slider, nil
+}

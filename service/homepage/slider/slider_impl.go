@@ -121,3 +121,73 @@ func(service *SliderServiceImpl) DeleteId(id int) error{
 
 	return service.sliderrepository.DelSlider(id)
 }
+
+func(service *SliderServiceImpl) UpdateTestimonial(request web.UpdateSlider, Id int, file *multipart.FileHeader) (map[string]interface{}, error){
+	getSliderById, err := service.sliderrepository.GetSliderId(Id)
+    if err != nil {
+        return nil, err
+    }
+
+    // Gunakan nilai yang ada jika tidak ada perubahan dalam request
+    if request.SlideDesc == "" {
+        request.SlideDesc = getSliderById.SlideDesc
+    }
+    if request.SlideTitle == "" {
+        request.SlideTitle = getSliderById.SlideTitle
+    }
+
+    var Logo string
+    if file != nil {
+        // Hapus gambar lama jika ada
+        if getSliderById.Gambar != "" {
+            err := os.Remove(getSliderById.Gambar)
+            if err != nil {
+                return nil, errors.New("failed to remove old image")
+            }
+        }
+
+        // Proses gambar baru
+        src, err := file.Open()
+        if err != nil {
+            return nil, errors.New("failed to open the uploaded file")
+        }
+        defer src.Close()
+
+        // Menghasilkan nama file acak untuk file yang diunggah
+        ext := filepath.Ext(file.Filename)
+        randomFileName := GenerateRandomFileName(ext)
+        Logo = filepath.Join("uploads/slide", randomFileName)
+
+        // Menyimpan file ke server
+        if err := helper.SaveFile(file, Logo); err != nil {
+            return nil, errors.New("failed to save image")
+        }
+
+        // Mengonversi path untuk menggunakan forward slashes
+        Logo = filepath.ToSlash(Logo)
+    } else {
+        // Gunakan gambar lama jika tidak ada gambar baru
+        Logo = getSliderById.Gambar
+    }
+
+    // Buat objek Testimonal baru untuk pembaruan
+    SliderRequest := domain.Slider{
+        Id:          Id,
+        SlideDesc: request.SlideDesc,
+		SlideTitle: request.SlideTitle,
+		Gambar: Logo,
+    }
+
+    // Update testimonial
+    UpdateTestimonial, errUpdate := service.sliderrepository.UpdateSliderId(Id, SliderRequest)
+    if errUpdate != nil {
+        return nil, errUpdate
+    }
+    // Bentuk respons yang akan dikembalikan
+    response := map[string]interface{}{
+        "slide_desc":   UpdateTestimonial.SlideDesc,
+        "slide_title": UpdateTestimonial.SlideTitle,
+        "gambar": UpdateTestimonial.Gambar,
+    }
+    return response, nil
+}

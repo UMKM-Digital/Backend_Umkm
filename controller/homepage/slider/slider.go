@@ -7,4 +7,5 @@ type Slider interface {
 	List(c echo.Context) error
 	GetSlideId(c echo.Context) error
 	DelSlideId(c echo.Context) error
+	Update(c echo.Context) error
 }
