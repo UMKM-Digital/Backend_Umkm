@@ -59,3 +59,13 @@ func (controller *SliderControllerImpl) GetSlideId(c echo.Context) error{
 
 	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success", getSlider))
 }
+
+func (controller *SliderControllerImpl) DelSlideId(c echo.Context) error{
+	id, _ := strconv.Atoi(c.Param("id"))
+
+	if errSlider := controller.slider.DeleteId(id); errSlider != nil{
+        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, errSlider.Error(), nil))
+    }
+
+    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "Delete Slider Success", nil))
+}

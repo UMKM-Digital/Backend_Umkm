@@ -99,3 +99,25 @@ func(service *SliderServiceImpl) GetSliderid(id int) (entity.SliderEntity, error
 
 	return entity.ToSliderEntity(GetSlider), nil
 }
+
+func(service *SliderServiceImpl) DeleteId(id int) error{
+	gambartesti, err :=  service.sliderrepository.GetSliderId(id)
+	if err != nil {
+		return err
+	}
+
+	// Hapus file gambar (jika ada)
+	filePath := filepath.Clean(gambartesti.Gambar)
+
+	// Cek jika file ada sebelum menghapus
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		log.Printf("File does not exist: %s", filePath)
+	} else {
+		if err := os.Remove(filePath); err != nil {
+			log.Printf("Error removing file %s: %v", filePath, err)
+			return err
+		}
+	}
+
+	return service.sliderrepository.DelSlider(id)
+}

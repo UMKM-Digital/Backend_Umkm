@@ -48,3 +48,10 @@ func (repo *SliderRepoImpl) GetSliderId(id int) (domain.Slider, error){
 
     return slide, nil
 }
+
+func (repo *SliderRepoImpl) DelSlider(id int) error{
+	if err := repo.db.Delete(&domain.Slider{}, id).Error; err != nil {
+		return err
+	}
+	return nil
+}
