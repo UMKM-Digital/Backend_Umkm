@@ -7,7 +7,7 @@ import (
 
 type MasteLegalQueryBuilder interface {
 	querybuilder.BaseQueryBuilderList
-	GetBuilderProduk(filters string, limit int, page int) (*gorm.DB, error)
+	GetBuilderMasterLegal(filters string, limit int, page int) (*gorm.DB, error)
 }
 
 type MasteLegalQueryBuilderImpl struct {
@@ -22,7 +22,7 @@ func NewMasteLegalQueryBuilder(db *gorm.DB) *MasteLegalQueryBuilderImpl {
 	}
 }
 
-func (MasteLegalQueryBuilder *MasteLegalQueryBuilderImpl) GetBuilderProduk(filters string, limit int, page int) (*gorm.DB, error) {
+func (MasteLegalQueryBuilder *MasteLegalQueryBuilderImpl) GetBuilderMasterLegal(filters string, limit int, page int) (*gorm.DB, error) {
 	query := MasteLegalQueryBuilder.db
 
 	// Implementasi filter di sini
@@ -35,8 +35,6 @@ func (MasteLegalQueryBuilder *MasteLegalQueryBuilderImpl) GetBuilderProduk(filte
 	if err != nil {
 		return nil, err
 	}
-
-	query = query.Preload("Umkm")
 
 	return query, nil
 }

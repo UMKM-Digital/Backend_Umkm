@@ -20,6 +20,7 @@ import (
 	"umkm/model"
 	query_builder_kategori_produk "umkm/query_builder/kategoriproduk"
 	query_builder_kategori_umkm "umkm/query_builder/kategoriumkm"
+	query_builder_masterlegal "umkm/query_builder/masterlegal"
 	query_builder_produk "umkm/query_builder/produk"
 	general_query_builder "umkm/query_builder/transaksi"
 	query_builder_umkm "umkm/query_builder/umkm"
@@ -112,7 +113,8 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userSliderService := sliderservice.NewSliderService(userSlider)
 	userSliderController := slidercontroller.NewTestimonialController(*userSliderService)
 
-	userMasterLegal := masterdokumenlegalrepo.NewDokumenLegalRepoImpl(db)
+	masterlegalQueryBuilder := query_builder_masterlegal.NewMasteLegalQueryBuilder(db)
+	userMasterLegal := masterdokumenlegalrepo.NewDokumenLegalRepoImpl(db, masterlegalQueryBuilder)
 	userMasterLegalService := masterdokumenlegalservice.NewMasterLegalService(userMasterLegal)
 	userMasterLegalController := masterlegalcontroller.NewKategeoriProdukController(userMasterLegalService)
 
@@ -207,6 +209,9 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 
 	slider := g.Group("/masterlegal")
 	slider.POST("/create", userMasterLegalController.Create)
+	slider.GET("/list",userMasterLegalController.GetMasterLegalList)
+	slider.DELETE("/delete/:id",userMasterLegalController.Delete)
+	slider.GET("/:id", userMasterLegalController.GetIdMasterLegalId)
 }
 
 	func JWTProtection() echo.MiddlewareFunc {
