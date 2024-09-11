@@ -81,3 +81,12 @@ func (repo *SliderRepoImpl) UpdateActiveId(idSlider int, active int) error {
     return nil
 }
 
+func (repo *SliderRepoImpl) GetSliderActive(active int)([]domain.Slider, error) {
+    var slider []domain.Slider
+    err := repo.db.Raw("SELECT * FROM homepage.sleder WHERE active = ?", active).Scan(&slider).Error
+    if err != nil {
+        return nil, err
+    }
+    return slider, nil
+}
+

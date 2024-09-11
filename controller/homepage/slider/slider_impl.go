@@ -115,3 +115,11 @@ func (conntroller *SliderControllerImpl) UpdateSldierActive(c echo.Context) erro
 
     return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "data berhasil diupdate", sliderUpdate))
 }
+
+func (controller *SliderControllerImpl) GetSlideralActive(c echo.Context) error {
+    getSlider, errGetSlider := controller.slider.GetSliderActive()
+    if errGetSlider != nil {
+        return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, errGetSlider.Error(), nil))
+    }
+    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success", getSlider))
+}

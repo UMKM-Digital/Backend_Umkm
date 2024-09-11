@@ -198,7 +198,6 @@ func (service *TestimonalServiceImpl) GetTestimonialActive() ([]entity.Testtimon
         log.Println("No testimonials found with active = 1")
         return nil, nil
     }
-    log.Printf("Found testimonials: %+v", GetTestimonialList)
     return entity.ToKategoriProdukEntities(GetTestimonialList), nil
 }
 

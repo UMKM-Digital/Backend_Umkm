@@ -147,3 +147,12 @@ CREATE TABLE struk(
     updated_at TIMESTAMPTZ(6)   
     FOREIGN KEY (umkm_id) REFERENCES umkm(id) ON DELETE CASCADE
 );
+
+CREATE TABLE master_dokumen_legal(
+    id SERIAL PRIMARY KEY,
+    nama VARCHAR(255) NOT NULL,
+    is_wajib INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+

@@ -1,7 +1,6 @@
 package homepagecontroller
 
 import (
-	"log"
 	"net/http"
 	"strconv"
 	"umkm/model"
@@ -106,9 +105,6 @@ func (controller *TestimonalControllerImpl) GetTestimonialActive(c echo.Context)
     if errGetTestimoni != nil {
         return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, errGetTestimoni.Error(), nil))
     }
-
-    log.Println("Controller received testimonials:", getTestimoni)
-
     return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success", getTestimoni))
 }
 

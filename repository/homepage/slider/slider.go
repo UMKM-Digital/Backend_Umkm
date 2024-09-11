@@ -9,4 +9,5 @@ type Slider interface {
 	DelSlider(id int) error
 	UpdateSliderId(id int, slider domain.Slider) (domain.Slider, error)
 	UpdateActiveId(idSlider int, active int) error
+	GetSliderActive(active int)([]domain.Slider, error)
 }

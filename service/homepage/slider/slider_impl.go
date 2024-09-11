@@ -220,3 +220,16 @@ func (service *SliderServiceImpl) UpdateSliderActive(request web.UpdateActiveSli
     }
     return response, nil
 }
+
+
+func (service *SliderServiceImpl) GetSliderActive() ([]entity.SliderEntity, error) {
+    GetSliderList, err := service.sliderrepository.GetSliderActive(1)
+    if err != nil {
+        return nil, err
+    }
+    if len(GetSliderList) == 0 {
+        log.Println("No testimonials found with active = 1")
+        return nil, nil
+    }
+    return entity.ToSliderEntities(GetSliderList), nil
+}

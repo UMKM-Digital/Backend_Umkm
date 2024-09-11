@@ -11,6 +11,7 @@ import (
 	slidercontroller "umkm/controller/homepage/slider"
 	kategoriprodukcontroller "umkm/controller/kategoriproduk"
 	kategoriumkmcontroller "umkm/controller/kategoriumkm"
+	masterlegalcontroller "umkm/controller/masterlegal"
 	produkcontroller "umkm/controller/produk"
 	transaksicontroller "umkm/controller/transaksi"
 	umkmcontroller "umkm/controller/umkm"
@@ -30,6 +31,7 @@ import (
 	sliderrepo "umkm/repository/homepage/slider"
 	kategoriprodukrepo "umkm/repository/kategori_produk"
 	repokategoriumkm "umkm/repository/kategori_umkm"
+	masterdokumenlegalrepo "umkm/repository/masterdokumenlegal"
 	produkrepo "umkm/repository/produk"
 	transaksirepo "umkm/repository/transaksi"
 	umkmrepo "umkm/repository/umkm"
@@ -40,6 +42,7 @@ import (
 	sliderservice "umkm/service/homepage/slider"
 	kategoriprodukservice "umkm/service/kategori_produk"
 	kategoriumkmservice "umkm/service/kategori_umkm"
+	masterdokumenlegalservice "umkm/service/masterdokumenlegal"
 	produkservice "umkm/service/produk"
 	transaksiservice "umkm/service/transaksi"
 	umkmservice "umkm/service/umkm"
@@ -108,6 +111,10 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userSlider := sliderrepo.NewSlider(db)
 	userSliderService := sliderservice.NewSliderService(userSlider)
 	userSliderController := slidercontroller.NewTestimonialController(*userSliderService)
+
+	userMasterLegal := masterdokumenlegalrepo.NewDokumenLegalRepoImpl(db)
+	userMasterLegalService := masterdokumenlegalservice.NewMasterLegalService(userMasterLegal)
+	userMasterLegalController := masterlegalcontroller.NewKategeoriProdukController(userMasterLegalService)
 
 	g := e.Group(prefix)
 
@@ -196,6 +203,10 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	Slider.DELETE("/delete/:id", userSliderController.DelSlideId)
 	Slider.PUT("/edit/:id",userSliderController.Update)
 	Slider.PUT("/edit/active/:id",userSliderController.UpdateSldierActive)
+	Slider.GET("/list/active", userSliderController.GetSlideralActive)
+
+	slider := g.Group("/masterlegal")
+	slider.POST("/create", userMasterLegalController.Create)
 }
 
 	func JWTProtection() echo.MiddlewareFunc {
