@@ -212,6 +212,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	slider.GET("/list",userMasterLegalController.GetMasterLegalList)
 	slider.DELETE("/delete/:id",userMasterLegalController.Delete)
 	slider.GET("/:id", userMasterLegalController.GetIdMasterLegalId)
+	slider.PUT("/edit/:id", userMasterLegalController.UpdateMasterLegalId)
 }
 
 	func JWTProtection() echo.MiddlewareFunc {

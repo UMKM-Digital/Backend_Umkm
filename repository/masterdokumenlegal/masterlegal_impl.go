@@ -1,6 +1,7 @@
 package masterdokumenlegalrepo
 
 import (
+	"errors"
 	"umkm/model/domain"
 	query_builder_masterlegal "umkm/query_builder/masterlegal"
 
@@ -68,4 +69,11 @@ func (repo *MasterDokumenLegalRepoImpl) GetMasterLegalId(id int)(domain.MasterDo
 		return masterdokumenlegal, err
 	}
 	return masterdokumenlegal, nil
+}
+
+func (repo *MasterDokumenLegalRepoImpl) UpdateMasterLegalId(id int, dokumen domain.MasterDokumenLegal)(domain.MasterDokumenLegal, error){
+	if err := repo.db.Model(&domain.MasterDokumenLegal{}).Where("id = ?", id).Updates(dokumen).Error; err != nil{
+		return domain.MasterDokumenLegal{}, errors.New("failed to update master legal")
+	}
+	return dokumen, nil
 }

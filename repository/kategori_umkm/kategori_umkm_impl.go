@@ -73,7 +73,7 @@ func(repo *KategoriRepoUmkmImpl) GetKategoriUmkmId(idKategori int) (domain.Kateg
 //update kategori
 func (repo *KategoriRepoUmkmImpl) UpdateKategoriId(idKategori int, kategori domain.Kategori_Umkm) (domain.Kategori_Umkm, error) {
     if err := repo.db.Model(&domain.Kategori_Umkm{}).Where("id = ?", idKategori).Updates(kategori).Error; err != nil {
-        return domain.Kategori_Umkm{}, errors.New("failed to update profile")
+        return domain.Kategori_Umkm{}, errors.New("failed to update kategori umkm")
     }
     return kategori, nil
 }
