@@ -156,3 +156,13 @@ CREATE TABLE master_dokumen_legal(
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )
 
+CREATE TABLE umkm_dokumen_legal (
+    id SERIAL PRIMARY KEY,
+    umkm_id UUID NOT NULL,
+    dokumen_id INT NOT NULL,
+    dok_upload JSONB NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    FOREIGN KEY (umkm_id) REFERENCES umkm(id) ON DELETE CASCADE
+    FOREIGN KEY (dokumen_id) REFERENCES master_dokumen_legal(id) ON DELETE CASCADE
+);

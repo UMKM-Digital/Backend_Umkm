@@ -25,7 +25,7 @@ func Newauthservice(authrepository userrepo.AuthUserRepo, token helper.TokenUseC
 	return &AuthServiceImpl{
 		authrepository: authrepository,
 		tokenUseCase:   token,
-		db: db,
+		db:             db,
 	}
 }
 
@@ -55,7 +55,7 @@ func (service *AuthServiceImpl) RegisterRequest(user web.RegisterRequest) (map[s
 
 	// Membuat claims untuk token JWT
 	claims := helper.JwtCustomClaims{
-		ID:      strconv.Itoa(saveUser.IdUser),  // Menggunakan ID dari saveUser setelah disimpan ke DB
+		ID:      strconv.Itoa(saveUser.IdUser), // Menggunakan ID dari saveUser setelah disimpan ke DB
 		Name:    saveUser.Username,
 		Email:   saveUser.Email,
 		Phone:   saveUser.No_Phone,
@@ -79,7 +79,6 @@ func (service *AuthServiceImpl) RegisterRequest(user web.RegisterRequest) (map[s
 	}, nil
 }
 
-
 func (service *AuthServiceImpl) LoginRequest(username string, password string) (map[string]interface{}, error) {
 	user, getUserErr := service.authrepository.FindUserByUsername(username)
 	if getUserErr != nil {
@@ -90,11 +89,11 @@ func (service *AuthServiceImpl) LoginRequest(username string, password string) (
 	}
 
 	claims := helper.JwtCustomClaims{
-		ID:    strconv.Itoa(user.IdUser),
-		Name:  user.Username,
-		Email: user.Email,
-		Phone: user.No_Phone,
-		Role: user.Role,
+		ID:      strconv.Itoa(user.IdUser),
+		Name:    user.Username,
+		Email:   user.Email,
+		Phone:   user.No_Phone,
+		Role:    user.Role,
 		Picture: user.Picture,
 	}
 
@@ -128,14 +127,11 @@ func (service *AuthServiceImpl) SendOtp(phone string) (map[string]interface{}, e
 		return nil, err
 	}
 
-
-
 	return map[string]interface{}{
 		"message":    "OTP sent successfully",
 		"expires_at": expirationTime.Format(time.RFC3339),
 	}, nil
 }
-
 
 // get profile
 func (service *AuthServiceImpl) ViewMe(userId int) (entity.UserEntity, error) {
@@ -192,7 +188,7 @@ func (service *AuthServiceImpl) ViewMe(userId int) (entity.UserEntity, error) {
 
 //
 
-//verify
+// verify
 func (service *AuthServiceImpl) VerifyOTP(phone_number string, otpCode string) (map[string]interface{}, error) {
 	// Verifikasi OTP
 	isValid, err := helper.VerifyOTP(service.db, phone_number, otpCode)
@@ -208,10 +204,12 @@ func (service *AuthServiceImpl) VerifyOTP(phone_number string, otpCode string) (
 
 	// Token
 	claims := helper.JwtCustomClaims{
-		ID:    strconv.Itoa(user.IdUser),
-		Name:  user.Username,
-		Email: user.Email,
-		Phone: user.No_Phone,
+		ID:      strconv.Itoa(user.IdUser),
+		Name:    user.Username,
+		Email:   user.Email,
+		Phone:   user.No_Phone,
+		Picture: user.Picture,
+		Role:    user.Role,
 	}
 
 	token, tokenErr := service.tokenUseCase.GenerateAccessToken(claims)
@@ -226,47 +224,47 @@ func (service *AuthServiceImpl) VerifyOTP(phone_number string, otpCode string) (
 	return map[string]interface{}{
 		"message": "OTP verified",
 		// "user":    user,
-		"token": token,
+		"token":        token,
 		"expired time": expirationTime,
 	}, nil
 }
 
 func (service *AuthServiceImpl) SendOtpRegister(phone string) (map[string]interface{}, error) {
-    user, err := service.authrepository.FindUserByPhoneRegister(phone)
+	user, err := service.authrepository.FindUserByPhoneRegister(phone)
 	if phone == "" {
 		return nil, errors.New("no telepon kosong")
 	}
-    if err != nil {
-        return nil, err
-    }
-    
-    if user != nil {
-        return map[string]interface{}{
-            "message": "Phone number already registered",
-        }, nil
-    }
+	if err != nil {
+		return nil, err
+	}
 
-    expirationTime := time.Now().Add(1 * time.Minute)
-    
-    if err := helper.SendWhatsAppOTP(service.db, phone, expirationTime); err != nil {
-        return nil, err
-    }
+	if user != nil {
+		return map[string]interface{}{
+			"message": "Phone number already registered",
+		}, nil
+	}
 
-    return map[string]interface{}{
-        "message":    "otp terkirim",
-        "expires_at": expirationTime.Format(time.RFC3339),
-    }, nil
+	expirationTime := time.Now().Add(1 * time.Minute)
+
+	if err := helper.SendWhatsAppOTP(service.db, phone, expirationTime); err != nil {
+		return nil, err
+	}
+
+	return map[string]interface{}{
+		"message":    "otp terkirim",
+		"expires_at": expirationTime.Format(time.RFC3339),
+	}, nil
 }
 
-//verify otp register
-func (service *AuthServiceImpl) VerifyOTPRegister(otp_code string, phone_code string)(map[string]interface{}, error) {
-    // Verifikasi OTP
-    isValid, err := helper.VerifyOTP(service.db, otp_code, phone_code)
-    if err != nil || !isValid {
-        return nil, errors.New("invalid OTP")
-    }
+// verify otp register
+func (service *AuthServiceImpl) VerifyOTPRegister(otp_code string, phone_code string) (map[string]interface{}, error) {
+	// Verifikasi OTP
+	isValid, err := helper.VerifyOTP(service.db, otp_code, phone_code)
+	if err != nil || !isValid {
+		return nil, errors.New("invalid OTP")
+	}
 
-    return map[string]interface{}{
-        "message": "OTP verified successfully",
-    }, nil
+	return map[string]interface{}{
+		"message": "OTP verified successfully",
+	}, nil
 }

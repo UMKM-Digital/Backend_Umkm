@@ -1,6 +1,9 @@
 package entity
 
-import "umkm/model/domain"
+import (
+	"umkm/model/domain"
+)
+
 
 type MasterlegalEntity struct {
 	Id   int    `json:"id"`

@@ -1,19 +1,22 @@
 package masterdokumenlegalservice
 
 import (
+
 	"errors"
 	"umkm/helper"
 	"umkm/model/domain"
 	"umkm/model/entity"
 	"umkm/model/web"
 	masterdokumenlegalrepo "umkm/repository/masterdokumenlegal"
+
+	"github.com/google/uuid"
 )
 
 type MasterLegalServiceImpl struct {
 	masterlegal masterdokumenlegalrepo.MasterDokumenLegal
 }
 
-func NewMasterLegalService(masterlegal masterdokumenlegalrepo.MasterDokumenLegal) *MasterLegalServiceImpl {
+func NewMasterLegalService(masterlegal masterdokumenlegalrepo.MasterDokumenLegal ) *MasterLegalServiceImpl {
 	return &MasterLegalServiceImpl{
 		masterlegal: masterlegal,
 	}
@@ -92,4 +95,11 @@ func (service *MasterLegalServiceImpl) UpdateMasterLegal(request web.UpdateMaste
 
 	response := map[string]interface{}{"nama": updateMasterLeglal.Name, "is_wajib": updateMasterLeglal.Iswajib}
 	return response, nil
+}
+
+
+
+
+func (service *MasterLegalServiceImpl) GetDokumenUmkmStatus(umkmId uuid.UUID) ([]domain.DokumenStatusResponse, error) {
+    return service.masterlegal.GetDokumenUmkmStatus(umkmId)
 }

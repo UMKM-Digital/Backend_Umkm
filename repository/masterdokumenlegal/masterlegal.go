@@ -1,6 +1,10 @@
 package masterdokumenlegalrepo
 
-import "umkm/model/domain"
+import (
+	"umkm/model/domain"
+
+	"github.com/google/uuid"
+)
 
 type MasterDokumenLegal interface {
 	Created(dokumen domain.MasterDokumenLegal) (domain.MasterDokumenLegal, error)
@@ -8,4 +12,5 @@ type MasterDokumenLegal interface {
 	DeleteMasterLegalId(id int) error
 	GetMasterLegalId(id int)(domain.MasterDokumenLegal, error)
 	UpdateMasterLegalId(id int, dokumen domain.MasterDokumenLegal)(domain.MasterDokumenLegal, error)
+	GetDokumenUmkmStatus(umkmId uuid.UUID) ([]domain.DokumenStatusResponse, error)
 }

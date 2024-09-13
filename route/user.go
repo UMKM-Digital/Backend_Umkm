@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"umkm/app"
+	dokumenumkmcontroller "umkm/controller/dokumenumkm"
 	homepagecontroller "umkm/controller/homepage"
 	aboutuscontroller "umkm/controller/homepage/aboutus"
 	brandlogo "umkm/controller/homepage/logo"
@@ -25,6 +26,7 @@ import (
 	general_query_builder "umkm/query_builder/transaksi"
 	query_builder_umkm "umkm/query_builder/umkm"
 
+	dokumenumkmrepo "umkm/repository/dokumenumkm"
 	hakaksesrepo "umkm/repository/hakakses"
 	testimonialrepo "umkm/repository/homepage"
 	aboutusrepo "umkm/repository/homepage/aboutus"
@@ -37,6 +39,7 @@ import (
 	transaksirepo "umkm/repository/transaksi"
 	umkmrepo "umkm/repository/umkm"
 	"umkm/repository/userrepo"
+	dokumenumkmservice "umkm/service/dokumenumkm"
 	homepageservice "umkm/service/homepage"
 	aboutusservice "umkm/service/homepage/aboutus"
 	brandlogoservice "umkm/service/homepage/brandlogo"
@@ -117,6 +120,10 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userMasterLegal := masterdokumenlegalrepo.NewDokumenLegalRepoImpl(db, masterlegalQueryBuilder)
 	userMasterLegalService := masterdokumenlegalservice.NewMasterLegalService(userMasterLegal)
 	userMasterLegalController := masterlegalcontroller.NewKategeoriProdukController(userMasterLegalService)
+
+	userDokumenuMKM := dokumenumkmrepo.NewDokumenRepositoryImpl(db)
+	userDokumenUmkmService := dokumenumkmservice.NewDokumenUmkmService(userDokumenuMKM)
+	userDokumenUmkmController := dokumenumkmcontroller.NewDokumenUmkmController(userDokumenUmkmService)
 
 	g := e.Group(prefix)
 
@@ -207,12 +214,16 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	Slider.PUT("/edit/active/:id",userSliderController.UpdateSldierActive)
 	Slider.GET("/list/active", userSliderController.GetSlideralActive)
 
-	slider := g.Group("/masterlegal")
-	slider.POST("/create", userMasterLegalController.Create)
-	slider.GET("/list",userMasterLegalController.GetMasterLegalList)
-	slider.DELETE("/delete/:id",userMasterLegalController.Delete)
-	slider.GET("/:id", userMasterLegalController.GetIdMasterLegalId)
-	slider.PUT("/edit/:id", userMasterLegalController.UpdateMasterLegalId)
+	masterlegal := g.Group("/masterlegal")
+	masterlegal.POST("/create", userMasterLegalController.Create)
+	masterlegal.GET("/list",userMasterLegalController.GetMasterLegalList)
+	masterlegal.DELETE("/delete/:id",userMasterLegalController.Delete)
+	masterlegal.GET("/:id", userMasterLegalController.GetIdMasterLegalId)
+	masterlegal.PUT("/edit/:id", userMasterLegalController.UpdateMasterLegalId)
+	masterlegal.GET("/list/dokumenumkm/:umkm_id", userMasterLegalController.List)
+
+	dokumenumkm := g.Group("/dokumenumkm")
+	dokumenumkm.POST("/create", userDokumenUmkmController.Create)
 }
 
 	func JWTProtection() echo.MiddlewareFunc {

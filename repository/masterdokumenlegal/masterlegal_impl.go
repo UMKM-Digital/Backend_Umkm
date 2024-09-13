@@ -2,9 +2,11 @@ package masterdokumenlegalrepo
 
 import (
 	"errors"
+	"log"
 	"umkm/model/domain"
 	query_builder_masterlegal "umkm/query_builder/masterlegal"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -76,4 +78,32 @@ func (repo *MasterDokumenLegalRepoImpl) UpdateMasterLegalId(id int, dokumen doma
 		return domain.MasterDokumenLegal{}, errors.New("failed to update master legal")
 	}
 	return dokumen, nil
+}
+
+type DokumenStatusResponse struct {
+    Nama   string `json:"nama"`
+    Status int    `json:"status"` // 0 = Not Uploaded, 1 = Uploaded
+}
+
+
+func (repo *MasterDokumenLegalRepoImpl) GetDokumenUmkmStatus(umkmId uuid.UUID) ([]domain.DokumenStatusResponse, error) {
+    log.Printf("UMKM ID: %s", umkmId.String()) // Tambahkan log ini
+    
+    var results []domain.DokumenStatusResponse
+    
+    // Pastikan umkmId tidak kosong
+    if umkmId == uuid.Nil {
+        return nil, errors.New("invalid UMKM ID")
+    }
+    
+    err := repo.db.Table("master_dokumen_legal").
+        Select("master_dokumen_legal.nama, CASE WHEN umkm_dokumen_legal.id IS NOT NULL THEN 1 ELSE 0 END AS status").
+        Joins("LEFT JOIN umkm_dokumen_legal ON master_dokumen_legal.id = umkm_dokumen_legal.dokumen_id AND umkm_dokumen_legal.umkm_id = ?", umkmId).
+        Scan(&results).Error
+    
+    if err != nil {
+        return nil, err
+    }
+    
+    return results, nil
 }

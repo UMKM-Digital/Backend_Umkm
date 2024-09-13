@@ -25,6 +25,7 @@ type UMKM struct {
     KategoriProduk        []KategoriProduk `gorm:"foreignkey:umkm_id"`
     Produk               []Produk  `gorm:"foreignkey:UmkmId"`
     Transaksi            []Transaksi `gorm:"foreignkey:UmkmId"`
+    Dokumen            []UmkmDokumen `gorm:"foreignkey:UmkmId"`
 }
 
 func (UMKM) TableName() string {
@@ -49,3 +50,5 @@ func (j *JSONB) Scan(value interface{}) error {
     }
     return json.Unmarshal(bytes, j)
 }
+
+type JSON []byte

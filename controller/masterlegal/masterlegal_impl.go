@@ -8,6 +8,7 @@ import (
 	"umkm/model/web"
 	masterdokumenlegalservice "umkm/service/masterdokumenlegal"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -94,4 +95,19 @@ func(controller *MasterLegalControllerImpl) UpdateMasterLegalId(c echo.Context) 
     }
 
     return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "data masterlegal berhasil diperbaharui", userMasterLegal))
+}
+
+func (controller *MasterLegalControllerImpl) List(c echo.Context) error {
+    umkmIDStr := c.Param("umkm_id")
+    umkmID, err := uuid.Parse(umkmIDStr)
+    if err != nil {
+        return echo.NewHTTPError(http.StatusBadRequest, "Invalid UMKM ID")
+    }
+
+    dokumenStatusList, err := controller.masterLegalService.GetDokumenUmkmStatus(umkmID)
+    if err != nil {
+        return echo.NewHTTPError(http.StatusInternalServerError, "Failed to retrieve documents")
+    }
+
+    return c.JSON(http.StatusOK, dokumenStatusList)
 }
