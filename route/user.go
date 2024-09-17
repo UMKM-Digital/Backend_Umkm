@@ -12,9 +12,9 @@ import (
 	brandlogo "umkm/controller/homepage/logo"
 	slidercontroller "umkm/controller/homepage/slider"
 
-	// kategoriprodukcontroller "umkm/controller/kategoriproduk"
+	kategoriprodukcontroller "umkm/controller/kategoriproduk"
 	kategoriumkmcontroller "umkm/controller/kategoriumkm"
-	// masterlegalcontroller "umkm/controller/masterlegal"
+	masterlegalcontroller "umkm/controller/masterlegal"
 	// produkcontroller "umkm/controller/produk"
 	// transaksicontroller "umkm/controller/transaksi"
 	umkmcontroller "umkm/controller/umkm"
@@ -22,9 +22,9 @@ import (
 	"umkm/helper"
 	"umkm/model"
 
-	// query_builder_kategori_produk "umkm/query_builder/kategoriproduk"
+	query_builder_kategori_produk "umkm/query_builder/kategoriproduk"
 	query_builder_kategori_umkm "umkm/query_builder/kategoriumkm"
-	// query_builder_masterlegal "umkm/query_builder/masterlegal"
+	query_builder_masterlegal "umkm/query_builder/masterlegal"
 	// query_builder_produk "umkm/query_builder/produk"
 	// general_query_builder "umkm/query_builder/transaksi"
 	query_builder_berita "umkm/query_builder/berita"
@@ -38,9 +38,9 @@ import (
 	brandrepo "umkm/repository/homepage/brandlogo"
 	sliderrepo "umkm/repository/homepage/slider"
 
-	// kategoriprodukrepo "umkm/repository/kategori_produk"
+	kategoriprodukrepo "umkm/repository/kategori_produk"
 	repokategoriumkm "umkm/repository/kategori_umkm"
-	// masterdokumenlegalrepo "umkm/repository/masterdokumenlegal"
+	masterdokumenlegalrepo "umkm/repository/masterdokumenlegal"
 	// produkrepo "umkm/repository/produk"
 	// transaksirepo "umkm/repository/transaksi"
 	umkmrepo "umkm/repository/umkm"
@@ -52,9 +52,9 @@ import (
 	brandlogoservice "umkm/service/homepage/brandlogo"
 	sliderservice "umkm/service/homepage/slider"
 
-	// kategoriprodukservice "umkm/service/kategori_produk"
+	kategoriprodukservice "umkm/service/kategori_produk"
 	kategoriumkmservice "umkm/service/kategori_umkm"
-	// masterdokumenlegalservice "umkm/service/masterdokumenlegal"
+	masterdokumenlegalservice "umkm/service/masterdokumenlegal"
 	// produkservice "umkm/service/produk"
 	// transaksiservice "umkm/service/transaksi"
 	umkmservice "umkm/service/umkm"
@@ -93,10 +93,10 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	// userTransaksiController := transaksicontroller.NewTransaksiController(userTransaksiService, db)
 
 	//userkategori produk
-	// KategoriProdukQueryBuilder := query_builder_kategori_produk.NewKategoriProdukQueryBuilder(db)
-	// userKategoriProdukRepo := kategoriprodukrepo.NewKategoriProdukRepo(db,KategoriProdukQueryBuilder)
-	// userKategoriProdukService := kategoriprodukservice.NewKategoriProdukService(userKategoriProdukRepo)
-	// userKategoriProdukController := kategoriprodukcontroller.NewKategeoriProdukController(*userKategoriProdukService)
+	KategoriProdukQueryBuilder := query_builder_kategori_produk.NewKategoriProdukQueryBuilder(db)
+	userKategoriProdukRepo := kategoriprodukrepo.NewKategoriProdukRepo(db,KategoriProdukQueryBuilder)
+	userKategoriProdukService := kategoriprodukservice.NewKategoriProdukService(userKategoriProdukRepo)
+	userKategoriProdukController := kategoriprodukcontroller.NewKategeoriProdukController(*userKategoriProdukService)
 
 	//userproduk
 	// produkQueryBuilder := query_builder_produk.NewProdukQueryBuilder(db)
@@ -124,15 +124,17 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userSliderService := sliderservice.NewSliderService(userSlider)
 	userSliderController := slidercontroller.NewTestimonialController(*userSliderService)
 
-	// masterlegalQueryBuilder := query_builder_masterlegal.NewMasteLegalQueryBuilder(db)
-	// userMasterLegal := masterdokumenlegalrepo.NewDokumenLegalRepoImpl(db, masterlegalQueryBuilder)
-	// userMasterLegalService := masterdokumenlegalservice.NewMasterLegalService(userMasterLegal)
-	// userMasterLegalController := masterlegalcontroller.NewKategeoriProdukController(userMasterLegalService)
+	masterlegalQueryBuilder := query_builder_masterlegal.NewMasteLegalQueryBuilder(db)
+	userMasterLegal := masterdokumenlegalrepo.NewDokumenLegalRepoImpl(db, masterlegalQueryBuilder)
+	userMasterLegalService := masterdokumenlegalservice.NewMasterLegalService(userMasterLegal)
+	userMasterLegalController := masterlegalcontroller.NewKategeoriProdukController(userMasterLegalService)
 
+	//dokumen
 	userDokumenuMKM := dokumenumkmrepo.NewDokumenRepositoryImpl(db)
 	userDokumenUmkmService := dokumenumkmservice.NewDokumenUmkmService(userDokumenuMKM)
 	userDokumenUmkmController := dokumenumkmcontroller.NewDokumenUmkmController(userDokumenUmkmService)
 
+	//berita
 	beritaQueryBuilder := query_builder_berita.NewBeritaQueryBuilder(db)
 	userBerita := beritarepo.NewBerita(db, beritaQueryBuilder)
 	userBeritaService := beritaservice.NewBeritaService(userBerita)
@@ -178,12 +180,12 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	// Transaksi.GET("/web/date/:umkm_id", userTransaksiController.GetTransaksiByDate)
 
 	//kategoriproduk
-	// KatProdukRoute := g.Group("/kategoriproduk")
-	// KatProdukRoute.POST("/create", userKategoriProdukController.Create)
-	// KatProdukRoute.GET("/list/:umkm_id", userKategoriProdukController.GetKategoriList)
-	// KatProdukRoute.GET("/:id", userKategoriProdukController.GetKategoriId)
-	// KatProdukRoute.PUT("/update/:id", userKategoriProdukController.UpdateKategoriProduk)
-	// KatProdukRoute.DELETE("/delete/:id", userKategoriProdukController.Delete)
+	KatProdukRoute := g.Group("/kategoriproduk")
+	KatProdukRoute.POST("/create", userKategoriProdukController.Create)
+	KatProdukRoute.GET("/list/:umkm_id", userKategoriProdukController.GetKategoriList)
+	KatProdukRoute.GET("/:id", userKategoriProdukController.GetKategoriId)
+	KatProdukRoute.PUT("/update/:id", userKategoriProdukController.UpdateKategoriProduk)
+	KatProdukRoute.DELETE("/delete/:id", userKategoriProdukController.Delete)
 
 	//produk
 	// Produk := g.Group("/produk")
@@ -227,13 +229,13 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	Slider.PUT("/edit/active/:id",userSliderController.UpdateSldierActive)
 	Slider.GET("/list/active", userSliderController.GetSlideralActive)
 
-	// masterlegal := g.Group("/masterlegal")
-	// masterlegal.POST("/create", userMasterLegalController.Create)
-	// masterlegal.GET("/list",userMasterLegalController.GetMasterLegalList)
-	// masterlegal.DELETE("/delete/:id",userMasterLegalController.Delete)
-	// masterlegal.GET("/:id", userMasterLegalController.GetIdMasterLegalId)
-	// masterlegal.PUT("/edit/:id", userMasterLegalController.UpdateMasterLegalId)
-	// masterlegal.GET("/list/dokumenumkm/:umkm_id", userMasterLegalController.List)
+	masterlegal := g.Group("/masterlegal")
+	masterlegal.POST("/create", userMasterLegalController.Create)
+	masterlegal.GET("/list",userMasterLegalController.GetMasterLegalList)
+	masterlegal.DELETE("/delete/:id",userMasterLegalController.Delete)
+	masterlegal.GET("/:id", userMasterLegalController.GetIdMasterLegalId)
+	masterlegal.PUT("/edit/:id", userMasterLegalController.UpdateMasterLegalId)
+	masterlegal.GET("/list/dokumenumkm/:umkm_id", userMasterLegalController.List)
 
 	dokumenumkm := g.Group("/dokumenumkm")
 	dokumenumkm.POST("/create", userDokumenUmkmController.Create)

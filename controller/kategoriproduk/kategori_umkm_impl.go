@@ -53,23 +53,23 @@ func (controller *KategoriProdukControllerImpl) GetKategoriList(c echo.Context) 
         return echo.NewHTTPError(http.StatusBadRequest, "Invalid UMKM ID")
     }
 
-    kategoriProduk, err := controller.kategoriprodukService.GetKategoriProdukList(umkmID, filters, limit, page)
-    if err != nil {
-        return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"status":  false,
-			"message": "gagal melihat kategori list",
-			"code":    http.StatusBadRequest,
-		})
+	fmt.Println("Page from request:", page) // Debug log for page
+
+    kategoriProduk, totalCount, currentPage, totalPages, nextPage, prevPage, err := controller.kategoriprodukService.GetKategoriProdukList(umkmID, filters, limit, page)
+   
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
+	}
+
+	pagination := model.Pagination{
+        CurrentPage:  currentPage,
+        NextPage:     nextPage,
+        PrevPage:     prevPage,
+        TotalPages:   totalPages,
+        TotalRecords: totalCount,
     }
 
-    response := map[string]interface{}{
-        "code":   http.StatusOK,
-        "status": true,
-		"message": "list kategori produk",
-        "data":   kategoriProduk, 
-    }
-
-    return c.JSON(http.StatusOK, response)
+	return c.JSON(http.StatusOK, model.ResponseToClientpagi(http.StatusOK, "true", "berhasil melihat seluruh list kategori umkm", pagination, kategoriProduk))
 }
 
 func (controller *KategoriProdukControllerImpl) GetKategoriId(c echo.Context) error{

@@ -1,81 +1,111 @@
 package kategoriprodukrepo
 
-// import (
-// 	"errors"
-// 	"umkm/model/domain"
-// 	query_builder_kategori_produk "umkm/query_builder/kategoriproduk"
+import (
+	"errors"
+	"umkm/model/domain"
+	query_builder_kategori_produk "umkm/query_builder/kategoriproduk"
 
-// 	"github.com/google/uuid"
-// 	"gorm.io/gorm"
-// )
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+)
 
-// type KategoriProdukRepoImpl struct {
-// 	db *gorm.DB
-// 	KategoriProdukQueryBuilder query_builder_kategori_produk.KategoriProdukQueryBuilder
-// }
+type KategoriProdukRepoImpl struct {
+	db                         *gorm.DB
+	KategoriProdukQueryBuilder query_builder_kategori_produk.KategoriProdukQueryBuilder
+}
 
-// func NewKategoriProdukRepo(db *gorm.DB, KategoriProdukQueryBuilder query_builder_kategori_produk.KategoriProdukQueryBuilder) *KategoriProdukRepoImpl {
-// 	return &KategoriProdukRepoImpl{
-// 		db: db,
-// 		KategoriProdukQueryBuilder: KategoriProdukQueryBuilder,
-// 	}
-// }
+func NewKategoriProdukRepo(db *gorm.DB, KategoriProdukQueryBuilder query_builder_kategori_produk.KategoriProdukQueryBuilder) *KategoriProdukRepoImpl {
+	return &KategoriProdukRepoImpl{
+		db:                         db,
+		KategoriProdukQueryBuilder: KategoriProdukQueryBuilder,
+	}
+}
 
-// func (repo *KategoriProdukRepoImpl) CreateKategoriProduk(kategoriproduk domain.KategoriProduk) (domain.KategoriProduk, error) {
-// 	err := repo.db.Create(&kategoriproduk).Error
-// 	if err != nil {
-// 		return domain.KategoriProduk{}, err
-// 	}
-// 	return kategoriproduk, nil
-// }
+func (repo *KategoriProdukRepoImpl) CreateKategoriProduk(kategoriproduk domain.KategoriProduk) (domain.KategoriProduk, error) {
+	err := repo.db.Create(&kategoriproduk).Error
+	if err != nil {
+		return domain.KategoriProduk{}, err
+	}
+	return kategoriproduk, nil
+}
 
-// func (repo *KategoriProdukRepoImpl) GetKategoriProduk(umkmID uuid.UUID, filters string, limit int, page int) ([]domain.KategoriProduk, int, error) {
-//     var kategori []domain.KategoriProduk
-//     var totalcount int64
+func (repo *KategoriProdukRepoImpl) GetKategoriProduk(umkmID uuid.UUID, filters string, limit int, page int) ([]domain.KategoriProduk, int,int, int, *int, *int, error) {
+	var kategori []domain.KategoriProduk
+	var totalcount int64
 
-//     // Gunakan satu query builder untuk semua operasi
-//     query, err := repo.KategoriProdukQueryBuilder.GetBuilder(filters, limit, page)
-//     if err != nil {
-//         return nil, 0, err
-//     }
+	if limit <= 0 {
+		limit = 15
+	}
 
-//     // Terapkan filter untuk mendapatkan data
-//     err = query.Where("umkm_id = ?", umkmID).Find(&kategori).Error
-//     if err != nil {
-//         return nil, 0, err
-//     }
+	// Gunakan satu query builder untuk semua operasi
+	query, err := repo.KategoriProdukQueryBuilder.GetBuilder(filters, limit, page)
+	if err != nil {
+		 return nil, 0, 0, 0, nil, nil, err
+	}
 
-//     // Terapkan filter yang sama untuk menghitung total count
-//     err = query.Model(&domain.KategoriProduk{}).Where("umkm_id = ?", umkmID).Count(&totalcount).Error
-//     if err != nil {
-//         return nil, 0, err
-//     }
+	// Terapkan filter untuk mendapatkan data
+	err = query.Where("umkm_id = ?", umkmID).Find(&kategori).Error
+	if err != nil {
+		 return nil, 0, 0, 0, nil, nil, err
+	}
 
-//     return kategori, int(totalcount), nil
-// }
+	// Terapkan filter yang sama untuk menghitung total count
+	err = query.Model(&domain.KategoriProduk{}).Where("umkm_id = ?", umkmID).Count(&totalcount).Error
+	if err != nil {
+		 return nil, 0, 0, 0, nil, nil, err
+	}
 
-// func (repo *KategoriProdukRepoImpl) GetKategoriProdukId(idproduk int) (domain.KategoriProduk, error){
-//     var KategoriUmkmData domain.KategoriProduk
+	  // Hitung total pages
+	  totalPages := 1
+	  if limit > 0 {
+		  totalPages = int((totalcount + int64(limit) - 1) / int64(limit))
+	  }
+  
+	  // Jika page > totalPages, return kosong
+	  if page > totalPages {
+		  return nil, int(totalcount), page, totalPages, nil, nil, nil
+	  }
+  
+	  currentPage := page
+  
+	  // Tentukan nextPage dan prevPage
+	  var nextPage *int
+	  if currentPage < totalPages {
+		  np := currentPage + 1
+		  nextPage = &np
+	  }
+  
+	  var prevPage *int
+	  if currentPage > 1 {
+		  pp := currentPage - 1
+		  prevPage = &pp
+	  }
 
-//     err := repo.db.Find(&KategoriUmkmData, "id = ?", idproduk).Error
+	return kategori, int(totalcount), currentPage, totalPages, nextPage, prevPage, nil
+}
 
-// 	if err != nil {
-// 		return domain.KategoriProduk{},errors.New("kategori tidak ditemukan")
-// 	}
+func (repo *KategoriProdukRepoImpl) GetKategoriProdukId(idproduk int) (domain.KategoriProduk, error) {
+	var KategoriUmkmData domain.KategoriProduk
 
-// 	return KategoriUmkmData, nil
-// }
+	err := repo.db.Find(&KategoriUmkmData, "id = ?", idproduk).Error
 
-// func (repo *KategoriProdukRepoImpl) UpdateKategoriId(idProduk int, kategori domain.KategoriProduk) (domain.KategoriProduk, error) {
-// 	if err := repo.db.Model(&domain.KategoriProduk {}).Where("id = ?", idProduk).Updates(kategori).Error; err != nil {
-//         return domain.KategoriProduk{}, errors.New("failed to update kategori produk")
-//     }
-//     return kategori, nil
-// }
+	if err != nil {
+		return domain.KategoriProduk{}, errors.New("kategori tidak ditemukan")
+	}
 
-// func (repo *KategoriProdukRepoImpl) DeleteKategoriProdukId(idproduk int) error {
-//     if err := repo.db.Delete(&domain.KategoriProduk{}, idproduk).Error; err != nil{
-//         return err
-//     }
-//     return nil
-// }
+	return KategoriUmkmData, nil
+}
+
+func (repo *KategoriProdukRepoImpl) UpdateKategoriId(idProduk int, kategori domain.KategoriProduk) (domain.KategoriProduk, error) {
+	if err := repo.db.Model(&domain.KategoriProduk{}).Where("id = ?", idProduk).Updates(kategori).Error; err != nil {
+		return domain.KategoriProduk{}, errors.New("failed to update kategori produk")
+	}
+	return kategori, nil
+}
+
+func (repo *KategoriProdukRepoImpl) DeleteKategoriProdukId(idproduk int) error {
+	if err := repo.db.Delete(&domain.KategoriProduk{}, idproduk).Error; err != nil {
+		return err
+	}
+	return nil
+}

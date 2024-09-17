@@ -39,20 +39,15 @@ func (service *MasterLegalServiceImpl) CreatedRequest(masterlegal web.CreateMast
 	return helper.ResponseToJson{"id": saveMasterLegal.IdMasterDokumenLegal, "Name": saveMasterLegal.Name, "is_wajib": saveMasterLegal.Iswajib}, nil
 }
 
-func (service *MasterLegalServiceImpl) GetMasterLegalList(filters string, limit int, page int) (map[string]interface{}, error) {
-	getMasterLegalList, totalcount, errGetMasterLegalList := service.masterlegal.GetmasterlegalUmkm(filters, limit, page)
+func (service *MasterLegalServiceImpl) GetMasterLegalList(filters string, limit int, page int) ([]entity.MasterlegalEntity, int, int, int, *int, *int, error) {
+	getMasterLegalList, totalcount, currentPage, totalPages, nextPage, prevPage, errGetMasterLegalList := service.masterlegal.GetmasterlegalUmkm(filters, limit, page)
 
 	if errGetMasterLegalList != nil {
-		return nil, errGetMasterLegalList
+		return nil, 0, 0, 0, nil, nil, errGetMasterLegalList
 	}
 
 	masterLegalEntitis := entity.TomasterlegalEntities(getMasterLegalList)
-	result := map[string]interface{}{
-		"total_records": totalcount,
-		"kategori_umkm": masterLegalEntitis,
-	}
-
-	return result, nil
+	return masterLegalEntitis, totalcount, currentPage, totalPages,nextPage, prevPage, nil
 }
 
 func (service *MasterLegalServiceImpl) DeleteMasterLegalId(id int) error {

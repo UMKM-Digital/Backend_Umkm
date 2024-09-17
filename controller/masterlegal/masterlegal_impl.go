@@ -39,23 +39,21 @@ func (controller *MasterLegalControllerImpl) Create(c echo.Context) error {
 func (controller *MasterLegalControllerImpl) GetMasterLegalList(c echo.Context) error {
 	filters, limit, page := helper.ExtractFilter(c.QueryParams())
 
-    masterlegal, err := controller.masterLegalService.GetMasterLegalList(filters, limit, page)
-    if err != nil {
-        return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"status":  false,
-			"message": "gagal melihat dokumen master legal list",
-			"code":    http.StatusBadRequest,
-		})
+    masterlegal, totalCount, currentPage, totalPages, nextPage, prevPage, err := controller.masterLegalService.GetMasterLegalList(filters, limit, page)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
+	}
+
+    pagination := model.Pagination{
+        CurrentPage:  currentPage,
+        NextPage:     nextPage,
+        PrevPage:     prevPage,
+        TotalPages:   totalPages,
+        TotalRecords: totalCount,
     }
 
-    response := map[string]interface{}{
-        "code":   http.StatusOK,
-        "status": true,
-		"message": "list  dokumen master lagal",
-        "data":   masterlegal, 
-    }
-
-    return c.JSON(http.StatusOK, response)
+    return c.JSON(http.StatusOK, model.ResponseToClientpagi(http.StatusOK,  "true", "berhasil melihat seluruh list kategori umkm",pagination,masterlegal))
 }
 
 func (controller *MasterLegalControllerImpl) Delete( c echo.Context) error{

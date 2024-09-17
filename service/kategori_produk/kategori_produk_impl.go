@@ -36,20 +36,15 @@ func (service *KategoriProdukServiceImpl) CreateKategori(kategoriproduk web.Crea
     }, nil
 }
 
-func (service *KategoriProdukServiceImpl) GetKategoriProdukList(umkmID uuid.UUID, filters string, limit int, page int) (map[string]interface{}, error) {
-    getKategoriProdukList, totalcount, err := service.kategoriprodukrepository.GetKategoriProduk(umkmID, filters, limit, page)
+func (service *KategoriProdukServiceImpl) GetKategoriProdukList(umkmID uuid.UUID, filters string, limit int, page int) ([]entity.KategoriProdukEntity, int, int, int, *int, *int, error) {
+    getKategoriProdukList, totalcount, currentPage, totalPages, nextPage, prevPage, err := service.kategoriprodukrepository.GetKategoriProduk(umkmID, filters, limit, page)
     if err != nil {
-        return nil, err
+		return nil, 0, 0, 0, nil, nil, err
     }
     
     KatgeoriEntitie := entity.ToKategoriProdukEntities(getKategoriProdukList)
 
-    result := map[string]interface{}{
-		"total_records": totalcount,
-		"kategori_produk":   KatgeoriEntitie,
-	}
-
-	return result, nil
+	return KatgeoriEntitie, totalcount, currentPage, totalPages, nextPage, prevPage, nil
 }
 
 
