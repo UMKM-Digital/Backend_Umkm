@@ -105,18 +105,6 @@ func (service *TranssaksiServiceImpl) GetKategoriUmkmId(id int) (entity.Transaks
 	return entity.ToTransaksiEntity(GetTransaksiUmkm), nil
 }
 
-//filter
-// func (service *TranssaksiServiceImpl) GetTransaksiFilter(umkmID uuid.UUID) ([]entity.TransasksiFilterEntity, error) {
-//     // Misalkan Anda memiliki metode repository untuk mendapatkan transaksi berdasarkan umkmID
-//     domainTransaksiList, err := service.transaksirepository.GetFilterTransaksi(umkmID)
-//     if err != nil {
-//         return nil, err
-//     }
-
-//     // Konversi dari domain.Transaksi ke entity.TransasksiFilterEntity
-//     return entity.ToTransaksiFilterEntities(domainTransaksiList), nil
-// }
-
 func (service *TranssaksiServiceImpl) GetTransaksiFilter(umkmID uuid.UUID, filtersTanggal map[string]string, allowedfiltersTanggal []string, filters string, limit int, page int, status string) ([]entity.TransasksiFilterEntity, int, int, int, *int, *int, error) {
 	var filterTanggal string
 	if tanggal, ok := filtersTanggal["tanggal"]; ok {
@@ -162,65 +150,55 @@ func (service *TranssaksiServiceImpl) GetTransaksiByYear(umkmID string, page int
 	return results, nil
 }
 
-func (service *TranssaksiServiceImpl) GetTransaksiByMonth(umkmID string, year int, page int, limit int, filter string) ([]map[string]interface{}, error) {
-	var results []map[string]interface{}
+func (service *TranssaksiServiceImpl) GetTransaksiByMonth(umkmID string, year int, page int, limit int, filter string) ([]map[string]interface{}, int, int, int, *int, *int, error) {
+    // Panggil repository untuk mengambil data transaksi dengan pagination
+    transactions, totalRecords, currentPage, totalPages, nextPage, prevPage, err := service.transaksirepository.GetTransaksiByMonth(umkmID, year, page, limit, filter)
+    if err != nil {
+        return nil, 0, 0, 0, nil, nil, fmt.Errorf("failed to retrieve transactions: %w", err)
+    }
 
-	transactions, err := service.transaksirepository.GetTransaksiByMonth(umkmID, year, page, limit, filter)
-	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve transactions: %w", err)
-	}
+    // Proses hasil query
+    var results []map[string]interface{}
+    for _, transaction := range transactions {
+        // Buat struktur hasil
+        result := map[string]interface{}{
+            "month":                 transaction["month"],
+            "jumlah_transaksi":      transaction["jumlah_transaksi"],
+            "jml_transaksi_berlaku": transaction["jml_transaksi_berlaku"],
+            "jml_transaksi_batal":   transaction["jml_transaksi_batal"],
+            "total_berlaku":         transaction["total_berlaku"],
+            "total_batal":           transaction["total_batal"],
+        }
+        results = append(results, result)
+    }
 
-	// Parse hasil query
-	// Process the results
-	for _, transaction := range transactions {
-		result := map[string]interface{}{
-			"month":                 transaction["month"], // Access value using the key
-			"jumlah_transaksi":      transaction["jumlah_transaksi"],
-			"jml_transaksi_berlaku": transaction["jml_transaksi_berlaku"],
-			"jml_transaksi_batal":   transaction["jml_transaksi_batal"],
-			"total_berlaku":         transaction["total_berlaku"], // Assuming these are strings already
-			"total_batal":           transaction["total_batal"],
-		}
-		results = append(results, result)
-	}
-
-	return results, nil
+    // Kembalikan hasil dengan detail pagination
+    return results, totalRecords, currentPage, totalPages, nextPage, prevPage, nil
 }
 
 
 
-func (service *TranssaksiServiceImpl) GetTransaksiByDate(umkmID string, year int, month int, page int, limit int, filter string) (map[string]interface{}, error) {
-    response, err := service.transaksirepository.GetTransaksiByDate(umkmID, year, month, page, limit, filter)
+
+func (service *TranssaksiServiceImpl) GetTransaksiByDate(umkmID uuid.UUID, year int, month int, page int, limit int, filter string) ([]map[string]interface{}, int, int, int, *int, *int, error) {
+    // Call the repository to get the data along with pagination details
+    transactions, totalRecords, currentPage, totalPages, nextPage, prevPage, err := service.transaksirepository.GetTransaksiByDate(umkmID, year, month, page, limit, filter)
     if err != nil {
-        return nil, fmt.Errorf("failed to retrieve transactions: %w", err)
+        return nil, 0, 0, 0, nil, nil, fmt.Errorf("failed to retrieve transactions: %w", err)
     }
 
-    transactions, ok := response["transactions"].([]map[string]interface{})
-    if !ok {
-        return nil, fmt.Errorf("unexpected data format for transactions")
-    }
-
-    totalRecords, ok := response["total_records"].(int64)
-    if !ok {
-        return nil, fmt.Errorf("unexpected data format for total_records")
-    }
-
+    // Check if transactions data is in the expected format
     var results []map[string]interface{}
     for _, transaction := range transactions {
+        // Check and convert the date field from `time.Time`
+        parsedDate, ok := transaction["date"].(time.Time)
         if !ok {
-            return nil, fmt.Errorf("failed to convert date to string")
+            return nil, 0, 0, 0, nil, nil, fmt.Errorf("failed to convert date to time.Time")
         }
 
-        // Konversi string ke time.Time jika perlu
-		parsedDate, ok := transaction["date"].(time.Time)
-		if !ok {
-			return nil, fmt.Errorf("failed to convert date to time.Time")
-		}
+        // Format the date as "DD-MM-YYYY"
+        formattedDate := parsedDate.Format("02-01-2006")
 
-		// Format tanggal menjadi Tanggal Bulan Tahun
-		formattedDate := parsedDate.Format("02-01-2006")
-
-
+        // Create the result structure
         result := map[string]interface{}{
             "date":                 formattedDate,
             "jumlah_transaksi":     transaction["jumlah_transaksi"],
@@ -229,13 +207,10 @@ func (service *TranssaksiServiceImpl) GetTransaksiByDate(umkmID string, year int
             "total_berlaku":        transaction["total_berlaku"],
             "total_batal":          transaction["total_batal"],
         }
+
         results = append(results, result)
     }
 
-    finalResponse := map[string]interface{}{
-        "total_records": totalRecords,
-        "transactions":  results,
-    }
-
-    return finalResponse, nil
+    // Return data and pagination details in a similar format as `GetProdukList`
+    return results, totalRecords, currentPage, totalPages, nextPage, prevPage, nil
 }

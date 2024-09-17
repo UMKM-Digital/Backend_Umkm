@@ -177,7 +177,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	Transaksi.GET("/:id", userTransaksiController.GetKategoriId)
 	Transaksi.GET("/:umkm_id/:date", userTransaksiController.GetTransaksiFilterList)
 	Transaksi.GET("/web/:umkm_id", userTransaksiController.GetTransaksiByYear)
-	Transaksi.GET("/web/mounth/:umkm_id", userTransaksiController.GetTransaksiByMounth)
+	Transaksi.GET("/web/mounth/:umkm_id", userTransaksiController.GetTransaksiByMonth)
 	Transaksi.GET("/web/date/:umkm_id", userTransaksiController.GetTransaksiByDate)
 
 	//kategoriproduk
