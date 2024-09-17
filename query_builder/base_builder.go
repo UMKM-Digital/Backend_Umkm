@@ -5,7 +5,7 @@ import (
 )
 
 type BaseQueryBuilderList interface {
-	GetQueryBuilderList(query *gorm.DB, filter string, limit int, page int) (*gorm.DB, error)
+	GetQueryBuilderList(query *gorm.DB, limit int, page int) (*gorm.DB, error)
 }
 
 type BaseQueryBuilderListImpl struct {
@@ -18,7 +18,7 @@ func NewBaseQueryBuilderList(db *gorm.DB) *BaseQueryBuilderListImpl {
 	}
 }
 
-func (baseQueryBuilder *BaseQueryBuilderListImpl) GetQueryBuilderList(query *gorm.DB, filter string, limit int, page int) (*gorm.DB, error) {
+func (baseQueryBuilder *BaseQueryBuilderListImpl) GetQueryBuilderList(query *gorm.DB, limit int, page int) (*gorm.DB, error) {
 	// Set limit dan pagination
 	if limit == 0 {
 		limit = 15

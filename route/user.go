@@ -5,50 +5,58 @@ import (
 	"os"
 
 	"umkm/app"
+	beritacontroller "umkm/controller/berita"
 	dokumenumkmcontroller "umkm/controller/dokumenumkm"
 	homepagecontroller "umkm/controller/homepage"
 	aboutuscontroller "umkm/controller/homepage/aboutus"
 	brandlogo "umkm/controller/homepage/logo"
 	slidercontroller "umkm/controller/homepage/slider"
-	kategoriprodukcontroller "umkm/controller/kategoriproduk"
+
+	// kategoriprodukcontroller "umkm/controller/kategoriproduk"
 	kategoriumkmcontroller "umkm/controller/kategoriumkm"
-	masterlegalcontroller "umkm/controller/masterlegal"
-	produkcontroller "umkm/controller/produk"
-	transaksicontroller "umkm/controller/transaksi"
+	// masterlegalcontroller "umkm/controller/masterlegal"
+	// produkcontroller "umkm/controller/produk"
+	// transaksicontroller "umkm/controller/transaksi"
 	umkmcontroller "umkm/controller/umkm"
 	"umkm/controller/usercontroller"
 	"umkm/helper"
 	"umkm/model"
-	query_builder_kategori_produk "umkm/query_builder/kategoriproduk"
+
+	// query_builder_kategori_produk "umkm/query_builder/kategoriproduk"
 	query_builder_kategori_umkm "umkm/query_builder/kategoriumkm"
-	query_builder_masterlegal "umkm/query_builder/masterlegal"
-	query_builder_produk "umkm/query_builder/produk"
-	general_query_builder "umkm/query_builder/transaksi"
+	// query_builder_masterlegal "umkm/query_builder/masterlegal"
+	// query_builder_produk "umkm/query_builder/produk"
+	// general_query_builder "umkm/query_builder/transaksi"
+	query_builder_berita "umkm/query_builder/berita"
 	query_builder_umkm "umkm/query_builder/umkm"
 
 	dokumenumkmrepo "umkm/repository/dokumenumkm"
 	hakaksesrepo "umkm/repository/hakakses"
 	testimonialrepo "umkm/repository/homepage"
 	aboutusrepo "umkm/repository/homepage/aboutus"
+	beritarepo "umkm/repository/homepage/berita"
 	brandrepo "umkm/repository/homepage/brandlogo"
 	sliderrepo "umkm/repository/homepage/slider"
-	kategoriprodukrepo "umkm/repository/kategori_produk"
+
+	// kategoriprodukrepo "umkm/repository/kategori_produk"
 	repokategoriumkm "umkm/repository/kategori_umkm"
-	masterdokumenlegalrepo "umkm/repository/masterdokumenlegal"
-	produkrepo "umkm/repository/produk"
-	transaksirepo "umkm/repository/transaksi"
+	// masterdokumenlegalrepo "umkm/repository/masterdokumenlegal"
+	// produkrepo "umkm/repository/produk"
+	// transaksirepo "umkm/repository/transaksi"
 	umkmrepo "umkm/repository/umkm"
 	"umkm/repository/userrepo"
 	dokumenumkmservice "umkm/service/dokumenumkm"
 	homepageservice "umkm/service/homepage"
 	aboutusservice "umkm/service/homepage/aboutus"
+	beritaservice "umkm/service/homepage/berita"
 	brandlogoservice "umkm/service/homepage/brandlogo"
 	sliderservice "umkm/service/homepage/slider"
-	kategoriprodukservice "umkm/service/kategori_produk"
+
+	// kategoriprodukservice "umkm/service/kategori_produk"
 	kategoriumkmservice "umkm/service/kategori_umkm"
-	masterdokumenlegalservice "umkm/service/masterdokumenlegal"
-	produkservice "umkm/service/produk"
-	transaksiservice "umkm/service/transaksi"
+	// masterdokumenlegalservice "umkm/service/masterdokumenlegal"
+	// produkservice "umkm/service/produk"
+	// transaksiservice "umkm/service/transaksi"
 	umkmservice "umkm/service/umkm"
 	userservice "umkm/service/user"
 
@@ -79,22 +87,22 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userUmkmController := umkmcontroller.NewUmkmController(userUmkmService)
  
 	// userQuerBuilder := querybuilder.NewBaseQueryBuilder(db)
-	transaksiQueryBuilder := general_query_builder.NewTransaksiQueryBuilder(db)
-	userTransaksiRepo := transaksirepo.NewTransaksiRepositoryImpl(db, transaksiQueryBuilder)
-	userTransaksiService := transaksiservice.NewTransaksiservice(userTransaksiRepo, db)
-	userTransaksiController := transaksicontroller.NewTransaksiController(userTransaksiService, db)
+	// transaksiQueryBuilder := general_query_builder.NewTransaksiQueryBuilder(db)
+	// userTransaksiRepo := transaksirepo.NewTransaksiRepositoryImpl(db, transaksiQueryBuilder)
+	// userTransaksiService := transaksiservice.NewTransaksiservice(userTransaksiRepo, db)
+	// userTransaksiController := transaksicontroller.NewTransaksiController(userTransaksiService, db)
 
 	//userkategori produk
-	KategoriProdukQueryBuilder := query_builder_kategori_produk.NewKategoriProdukQueryBuilder(db)
-	userKategoriProdukRepo := kategoriprodukrepo.NewKategoriProdukRepo(db,KategoriProdukQueryBuilder)
-	userKategoriProdukService := kategoriprodukservice.NewKategoriProdukService(userKategoriProdukRepo)
-	userKategoriProdukController := kategoriprodukcontroller.NewKategeoriProdukController(*userKategoriProdukService)
+	// KategoriProdukQueryBuilder := query_builder_kategori_produk.NewKategoriProdukQueryBuilder(db)
+	// userKategoriProdukRepo := kategoriprodukrepo.NewKategoriProdukRepo(db,KategoriProdukQueryBuilder)
+	// userKategoriProdukService := kategoriprodukservice.NewKategoriProdukService(userKategoriProdukRepo)
+	// userKategoriProdukController := kategoriprodukcontroller.NewKategeoriProdukController(*userKategoriProdukService)
 
 	//userproduk
-	produkQueryBuilder := query_builder_produk.NewProdukQueryBuilder(db)
-	userProdukrepo := produkrepo.NewProdukRepositoryImpl(db, produkQueryBuilder)
-	userProdukService := produkservice.NewProdukService(userProdukrepo)
-	userProdukController := produkcontroller.NewProdukController(userProdukService)
+	// produkQueryBuilder := query_builder_produk.NewProdukQueryBuilder(db)
+	// userProdukrepo := produkrepo.NewProdukRepositoryImpl(db, produkQueryBuilder)
+	// userProdukService := produkservice.NewProdukService(userProdukrepo)
+	// userProdukController := produkcontroller.NewProdukController(userProdukService)
 
 	//testimonial
 	userTestimonial := testimonialrepo.NewTestimonal(db)
@@ -116,14 +124,19 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userSliderService := sliderservice.NewSliderService(userSlider)
 	userSliderController := slidercontroller.NewTestimonialController(*userSliderService)
 
-	masterlegalQueryBuilder := query_builder_masterlegal.NewMasteLegalQueryBuilder(db)
-	userMasterLegal := masterdokumenlegalrepo.NewDokumenLegalRepoImpl(db, masterlegalQueryBuilder)
-	userMasterLegalService := masterdokumenlegalservice.NewMasterLegalService(userMasterLegal)
-	userMasterLegalController := masterlegalcontroller.NewKategeoriProdukController(userMasterLegalService)
+	// masterlegalQueryBuilder := query_builder_masterlegal.NewMasteLegalQueryBuilder(db)
+	// userMasterLegal := masterdokumenlegalrepo.NewDokumenLegalRepoImpl(db, masterlegalQueryBuilder)
+	// userMasterLegalService := masterdokumenlegalservice.NewMasterLegalService(userMasterLegal)
+	// userMasterLegalController := masterlegalcontroller.NewKategeoriProdukController(userMasterLegalService)
 
 	userDokumenuMKM := dokumenumkmrepo.NewDokumenRepositoryImpl(db)
 	userDokumenUmkmService := dokumenumkmservice.NewDokumenUmkmService(userDokumenuMKM)
 	userDokumenUmkmController := dokumenumkmcontroller.NewDokumenUmkmController(userDokumenUmkmService)
+
+	beritaQueryBuilder := query_builder_berita.NewBeritaQueryBuilder(db)
+	userBerita := beritarepo.NewBerita(db, beritaQueryBuilder)
+	userBeritaService := beritaservice.NewBeritaService(userBerita)
+	userBeritaController := beritacontroller.NewBeritaController(*userBeritaService)
 
 	g := e.Group(prefix)
 
@@ -156,29 +169,29 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	Umkm.GET("/web/list", userUmkmController.GetUmkmListWeb, JWTProtection())
 
 	//transaksi
-	Transaksi := g.Group("/transaksi")
-	Transaksi.POST("/umkm", userTransaksiController.Create)
-	Transaksi.GET("/:id", userTransaksiController.GetKategoriId)
-	Transaksi.GET("/:umkm_id/:date", userTransaksiController.GetTransaksiFilterList)
-	Transaksi.GET("/web/:umkm_id", userTransaksiController.GetTransaksiByYear)
-	Transaksi.GET("/web/mounth/:umkm_id", userTransaksiController.GetTransaksiByMounth)
-	Transaksi.GET("/web/date/:umkm_id", userTransaksiController.GetTransaksiByDate)
+	// Transaksi := g.Group("/transaksi")
+	// Transaksi.POST("/umkm", userTransaksiController.Create)
+	// Transaksi.GET("/:id", userTransaksiController.GetKategoriId)
+	// Transaksi.GET("/:umkm_id/:date", userTransaksiController.GetTransaksiFilterList)
+	// Transaksi.GET("/web/:umkm_id", userTransaksiController.GetTransaksiByYear)
+	// Transaksi.GET("/web/mounth/:umkm_id", userTransaksiController.GetTransaksiByMounth)
+	// Transaksi.GET("/web/date/:umkm_id", userTransaksiController.GetTransaksiByDate)
 
 	//kategoriproduk
-	KatProdukRoute := g.Group("/kategoriproduk")
-	KatProdukRoute.POST("/create", userKategoriProdukController.Create)
-	KatProdukRoute.GET("/list/:umkm_id", userKategoriProdukController.GetKategoriList)
-	KatProdukRoute.GET("/:id", userKategoriProdukController.GetKategoriId)
-	KatProdukRoute.PUT("/update/:id", userKategoriProdukController.UpdateKategoriProduk)
-	KatProdukRoute.DELETE("/delete/:id", userKategoriProdukController.Delete)
+	// KatProdukRoute := g.Group("/kategoriproduk")
+	// KatProdukRoute.POST("/create", userKategoriProdukController.Create)
+	// KatProdukRoute.GET("/list/:umkm_id", userKategoriProdukController.GetKategoriList)
+	// KatProdukRoute.GET("/:id", userKategoriProdukController.GetKategoriId)
+	// KatProdukRoute.PUT("/update/:id", userKategoriProdukController.UpdateKategoriProduk)
+	// KatProdukRoute.DELETE("/delete/:id", userKategoriProdukController.Delete)
 
 	//produk
-	Produk := g.Group("/produk")
-	Produk.POST("/create", userProdukController.CreateProduk)
-	Produk.DELETE("/delete/:id", userProdukController.DeleteProdukId)
-	Produk.GET("/list/:umkm_id", userProdukController.GetprodukList)
-	Produk.GET("/:id", userProdukController.GetProdukId)
-	Produk.PUT("/update/:id", userProdukController.UpdateProduk)
+	// Produk := g.Group("/produk")
+	// Produk.POST("/create", userProdukController.CreateProduk)
+	// Produk.DELETE("/delete/:id", userProdukController.DeleteProdukId)
+	// Produk.GET("/list/:umkm_id", userProdukController.GetprodukList)
+	// Produk.GET("/:id", userProdukController.GetProdukId)
+	// Produk.PUT("/update/:id", userProdukController.UpdateProduk)
 
 	//testimonial
 	Testimonial := g.Group("/testimonial")
@@ -214,16 +227,23 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	Slider.PUT("/edit/active/:id",userSliderController.UpdateSldierActive)
 	Slider.GET("/list/active", userSliderController.GetSlideralActive)
 
-	masterlegal := g.Group("/masterlegal")
-	masterlegal.POST("/create", userMasterLegalController.Create)
-	masterlegal.GET("/list",userMasterLegalController.GetMasterLegalList)
-	masterlegal.DELETE("/delete/:id",userMasterLegalController.Delete)
-	masterlegal.GET("/:id", userMasterLegalController.GetIdMasterLegalId)
-	masterlegal.PUT("/edit/:id", userMasterLegalController.UpdateMasterLegalId)
-	masterlegal.GET("/list/dokumenumkm/:umkm_id", userMasterLegalController.List)
+	// masterlegal := g.Group("/masterlegal")
+	// masterlegal.POST("/create", userMasterLegalController.Create)
+	// masterlegal.GET("/list",userMasterLegalController.GetMasterLegalList)
+	// masterlegal.DELETE("/delete/:id",userMasterLegalController.Delete)
+	// masterlegal.GET("/:id", userMasterLegalController.GetIdMasterLegalId)
+	// masterlegal.PUT("/edit/:id", userMasterLegalController.UpdateMasterLegalId)
+	// masterlegal.GET("/list/dokumenumkm/:umkm_id", userMasterLegalController.List)
 
 	dokumenumkm := g.Group("/dokumenumkm")
 	dokumenumkm.POST("/create", userDokumenUmkmController.Create)
+
+	berita := g.Group("/berita")
+	berita.POST("/create", userBeritaController.Create, JWTProtection())
+	berita.GET("/list", userBeritaController.LIst)
+	berita.DELETE("/delete/:id", userBeritaController.Delete)
+	berita.GET("/:id", userBeritaController.GetId)
+	berita.PUT("/edit/:id",userBeritaController.Update)
 }
 
 	func JWTProtection() echo.MiddlewareFunc {

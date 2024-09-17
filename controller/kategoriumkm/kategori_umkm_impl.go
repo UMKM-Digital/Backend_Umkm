@@ -39,13 +39,21 @@ func (controller *KategoriUmkmControllerImpl) Create(c echo.Context) error {
 func (controller *KategoriUmkmControllerImpl) GetKategoriList(c echo.Context) error {
 	filters, limit, page := helper.ExtractFilter(c.QueryParams())
 	
-	getKategoriUmkm, errGetKategoriUmkm := controller.kategoriService.GetKategoriUmkmList(filters, limit, page)
+	getKategoriUmkm,totalCount, currentPage, totalPages, nextPage, prevPage, errGetKategoriUmkm := controller.kategoriService.GetKategoriUmkmList(filters, limit, page)
 
 	if errGetKategoriUmkm != nil {
 		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, errGetKategoriUmkm.Error(), nil))
 	}
 
-	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "berhasil melihat seluruh list kategori umkm", getKategoriUmkm))
+	pagination := model.Pagination{
+        CurrentPage:  currentPage,
+        NextPage:     nextPage,
+        PrevPage:     prevPage,
+        TotalPages:   totalPages,
+        TotalRecords: totalCount,
+    }
+
+	return c.JSON(http.StatusOK, model.ResponseToClientpagi(http.StatusOK, "true", "berhasil melihat seluruh list kategori umkm", pagination, getKategoriUmkm))
 }
 
 

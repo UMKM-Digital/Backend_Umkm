@@ -13,6 +13,7 @@ type Users struct {
     Created_at time.Time `gorm:"column:created_at"`
     Updated_at time.Time `gorm:"column:updated_at"`
     HakAkses   []HakAkses `gorm:"foreignKey:user_id"`
+    Berita   []Berita `gorm:"foreignKey:author"`
 }
 
 func (Users) TableName() string {

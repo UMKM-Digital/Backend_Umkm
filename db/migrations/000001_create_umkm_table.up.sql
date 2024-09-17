@@ -162,7 +162,29 @@ CREATE TABLE umkm_dokumen_legal (
     dokumen_id INT NOT NULL,
     dok_upload JSONB NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (umkm_id) REFERENCES umkm(id) ON DELETE CASCADE
     FOREIGN KEY (dokumen_id) REFERENCES master_dokumen_legal(id) ON DELETE CASCADE
+);
+
+CREATE TABLE homepage.berita (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    image VARCHAR(255) NOT NULL,
+    content VARCHAR(255) NOT NULL,
+    author TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (author) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE homepage.berita (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    image VARCHAR(255) NOT NULL,
+    content TEXT NOT NULL,
+    author INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (author) REFERENCES users(id) ON DELETE CASCADE
 );

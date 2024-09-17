@@ -27,11 +27,19 @@ func (transaksiQueryBuilder *KategoriUmkmQueryBuilderImpl) GetBuilder(filters st
 
 	// Implementasi filter di sini
 	if filters != "" {
-		searchPattern := "%" + filters 
+		searchPattern := "%" + filters + "%"
 		query = query.Where("name ILIKE ?", searchPattern)
 	}
 
-	query, err := transaksiQueryBuilder.GetQueryBuilderList(query, filters, limit, page)
+	if limit <= 0 {
+        limit = 15
+    }
+
+    // Hitung offset
+    offset := (page - 1) * limit
+    query = query.Offset(offset).Limit(limit)
+
+	query, err := transaksiQueryBuilder.GetQueryBuilderList(query, limit, page)
 	if err != nil {
 		return nil, err
 	}

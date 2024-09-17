@@ -7,7 +7,7 @@ import (
 
 type UmkmQueryBuilder interface {
 	querybuilder.BaseQueryBuilderList
-	GetBuilder(filters string,limit int, page int) (*gorm.DB, error)
+	GetBuilder(filters string, limit int, page int) (*gorm.DB, error)
 }
 
 type UmkmQueryBuilderImpl struct {
@@ -22,20 +22,26 @@ func NewUmkmQueryBuilder(db *gorm.DB) *UmkmQueryBuilderImpl {
 	}
 }
 
-func (umkmQueryBuilder *UmkmQueryBuilderImpl) GetBuilder( filters string,  limit int, page int,) (*gorm.DB, error) {
-	query := umkmQueryBuilder.db
+func (umkmQueryBuilder *UmkmQueryBuilderImpl) GetBuilder(filters string, limit int, page int) (*gorm.DB, error) {
+    query := umkmQueryBuilder.db
 
-	if filters != "" {
-		searchPattern := "%" + filters 
-		query = query.Where("name ILIKE ?", searchPattern)
-	}
+    // Tambahkan filter sebelum pagination
+    if filters != "" {
+        searchPattern := "%" + filters + "%"
+        query = query.Where("name ILIKE ?", searchPattern)
+    }
 
-	query, err := umkmQueryBuilder.GetQueryBuilderList(query, filters, limit, page,)
-	if err != nil {
-		return nil, err
-	}
+    // Set default limit jika limit == 0
+    if limit <= 0 {
+        limit = 15
+    }
 
-	query = query.Preload("HakAkses")
+    // Hitung offset
+    offset := (page - 1) * limit
+    query = query.Offset(offset).Limit(limit)
 
-	return query, nil
+    // Apply pagination
+    query = query.Preload("HakAkses")
+
+    return query, nil
 }

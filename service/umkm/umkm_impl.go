@@ -2,7 +2,7 @@ package umkmservice
 
 import (
 	"context"
-	
+
 	// "database/sql"
 	// "encoding/json"
 	"errors"
@@ -30,16 +30,16 @@ import (
 )
 
 type UmkmServiceImpl struct {
-	umkmrepository    umkmrepo.CreateUmkm
+	umkmrepository     umkmrepo.CreateUmkm
 	hakaksesrepository hakaksesrepo.CreateHakakses // Tambahkan field untuk HakAkses repository
-	db *gorm.DB
+	db                 *gorm.DB
 }
 
 func NewUmkmService(umkmrepository umkmrepo.CreateUmkm, hakaksesrepository hakaksesrepo.CreateHakakses, db *gorm.DB) *UmkmServiceImpl {
 	return &UmkmServiceImpl{
-		umkmrepository:    umkmrepository,
+		umkmrepository:     umkmrepository,
 		hakaksesrepository: hakaksesrepository,
-		db: db,
+		db:                 db,
 	}
 }
 func generateRandomFileName(ext string) string {
@@ -49,33 +49,33 @@ func generateRandomFileName(ext string) string {
 }
 
 func (service *UmkmServiceImpl) CreateUmkm(umkm web.UmkmRequest, userID int, files map[string]*multipart.FileHeader) (map[string]interface{}, error) {
-    kategoriUmkmId, err := helper.RawMessageToJSONB(umkm.Kategori_Umkm_Id)
-    if err != nil {
-        return nil, errors.New("invalid type for Kategori_Umkm_Id")
-    }
+	kategoriUmkmId, err := helper.RawMessageToJSONB(umkm.Kategori_Umkm_Id)
+	if err != nil {
+		return nil, errors.New("invalid type for Kategori_Umkm_Id")
+	}
 
-    informasiJamBuka, err := helper.RawMessageToJSONB(umkm.Informasi_JamBuka)
-    if err != nil {
-        return nil, errors.New("invalid type for Informasi_JamBuka")
-    }
+	informasiJamBuka, err := helper.RawMessageToJSONB(umkm.Informasi_JamBuka)
+	if err != nil {
+		return nil, errors.New("invalid type for Informasi_JamBuka")
+	}
 
-    Maps, err := helper.RawMessageToJSONB(umkm.Maps)
-    if err != nil {
-        return nil, errors.New("invalid type for Maps")
-    }
+	Maps, err := helper.RawMessageToJSONB(umkm.Maps)
+	if err != nil {
+		return nil, errors.New("invalid type for Maps")
+	}
 
-    // var Images domain.JSONB
-    // if len(umkm.Gambar) > 0 {
-    //     var imgURLs []string
-    //     if err := json.Unmarshal(umkm.Gambar, &imgURLs); err != nil {
-    //         return nil, errors.New("invalid type for Images")
-    //     }
-    //     Images = domain.JSONB{"urls": imgURLs}
-    // } else {
-    //     Images = domain.JSONB{"urls": []string{}}
-    // }
-    // Handle gambar files
-    var Images domain.JSONB
+	// var Images domain.JSONB
+	// if len(umkm.Gambar) > 0 {
+	//     var imgURLs []string
+	//     if err := json.Unmarshal(umkm.Gambar, &imgURLs); err != nil {
+	//         return nil, errors.New("invalid type for Images")
+	//     }
+	//     Images = domain.JSONB{"urls": imgURLs}
+	// } else {
+	//     Images = domain.JSONB{"urls": []string{}}
+	// }
+	// Handle gambar files
+	var Images domain.JSONB
 	var savedImageURLs []string
 	if len(files) > 0 {
 		for _, file := range files {
@@ -96,111 +96,142 @@ func (service *UmkmServiceImpl) CreateUmkm(umkm web.UmkmRequest, userID int, fil
 		Images = domain.JSONB{"urls": []string{}}
 	}
 
-    newUmkm := domain.UMKM{
-        Name:                umkm.Name,
-        NoNpwp:              umkm.NoNpwp,
-        Images:              Images,
-        KategoriUmkmId:      kategoriUmkmId,
-        NamaPenanggungJawab: umkm.Nama_Penanggung_Jawab,
-        InformasiJambuka:    informasiJamBuka,
-        NoKontak:            umkm.No_Kontak,
-        Lokasi:              umkm.Lokasi,
-        Maps:                Maps,
-    }
+	newUmkm := domain.UMKM{
+		Name:                umkm.Name,
+		NoNpwp:              umkm.NoNpwp,
+		Images:              Images,
+		KategoriUmkmId:      kategoriUmkmId,
+		NamaPenanggungJawab: umkm.Nama_Penanggung_Jawab,
+		InformasiJambuka:    informasiJamBuka,
+		NoKontak:            umkm.No_Kontak,
+		Lokasi:              umkm.Lokasi,
+		Maps:                Maps,
+	}
 
-    saveUmkm, errSaveUmkm := service.umkmrepository.CreateRequest(newUmkm)
-    if errSaveUmkm != nil {
-        return nil, errSaveUmkm
-    }
+	saveUmkm, errSaveUmkm := service.umkmrepository.CreateRequest(newUmkm)
+	if errSaveUmkm != nil {
+		return nil, errSaveUmkm
+	}
 
-    hakAkses := domain.HakAkses{
-        UserId: userID,
-        UmkmId: saveUmkm.IdUmkm,
-        Status: 0,
-    }
-    if err := service.hakaksesrepository.CreateHakAkses(&hakAkses); err != nil {
-        return nil, err
-    }
+	hakAkses := domain.HakAkses{
+		UserId: userID,
+		UmkmId: saveUmkm.IdUmkm,
+		Status: 0,
+	}
+	if err := service.hakaksesrepository.CreateHakAkses(&hakAkses); err != nil {
+		return nil, err
+	}
 
-    return map[string]interface{}{
-        "name":                  saveUmkm.Name,
-        "kategori_umkm_id":        saveUmkm.KategoriUmkmId,
-        "nama_penanggung_jawab": saveUmkm.NamaPenanggungJawab,
-        "informasi_jam":         saveUmkm.InformasiJambuka,
-        "no_kontak":             saveUmkm.NoKontak,
-        "lokasi":                saveUmkm.Lokasi,
-        "images":                saveUmkm.Images,
-		"user_id":                 userID,
-		"status":            hakAkses.Status,
-    }, nil
+	return map[string]interface{}{
+		"name":                  saveUmkm.Name,
+		"kategori_umkm_id":      saveUmkm.KategoriUmkmId,
+		"nama_penanggung_jawab": saveUmkm.NamaPenanggungJawab,
+		"informasi_jam":         saveUmkm.InformasiJambuka,
+		"no_kontak":             saveUmkm.NoKontak,
+		"lokasi":                saveUmkm.Lokasi,
+		"images":                saveUmkm.Images,
+		"user_id":               userID,
+		"status":                hakAkses.Status,
+	}, nil
 }
 
-func (s *UmkmServiceImpl) GetUmkmListByUserId(ctx context.Context, userId int, filters string, limit int, page int) (map[string]interface{}, error) {
-	// Fetch HakAkses for the given user ID
-	hakAksesList, err := s.hakaksesrepository.GetHakAksesByUserId(ctx, userId)
-	if err != nil {
-		return nil, err
-	}
+// func (s *UmkmServiceImpl) GetUmkmListByUserId(ctx context.Context, userId int, filters string, limit int, page int) (map[string]interface{}, error) {
+//     // Mendapatkan Hak Akses berdasarkan user ID
+//     hakAksesList, err := s.hakaksesrepository.GetHakAksesByUserId(ctx, userId)
+//     if err != nil {
+//         return nil, err
+//     }
 
-	// Collect UMKM IDs from HakAkses
-	var umkmIDs []uuid.UUID
-	for _, hakAkses := range hakAksesList {
-		umkmIDs = append(umkmIDs, hakAkses.UmkmId)
-	}
+//     // Membuat slice untuk menampung UMKM IDs dari Hak Akses
+//     var umkmIDs []uuid.UUID
+//     for _, hakAkses := range hakAksesList {
+//         umkmIDs = append(umkmIDs, hakAkses.UmkmId)
+//     }
 
-	// Fetch UMKM entities based on the collected IDs
-	umkmList, totalCount, err := s.umkmrepository.GetUmkmListByIds(ctx, umkmIDs, filters, limit, page)
-	if err != nil {
-		return nil, err
-	}
+//     // Mengambil daftar UMKM berdasarkan UMKM IDs dengan pagination
+//     umkmList, totalCount, currentPage, totalPages, nextPage, prevPage, err := s.umkmrepository.GetUmkmListByIds(ctx, umkmIDs, filters, limit, page)
+//     if err != nil {
+//         return nil, err
+//     }
 
-	// Convert UMKM entities to UmkmEntity format
-	umkmEntitiesList, err := entity.ToUmkmEntities(umkmList, s.db) // Assuming s.db is the *gorm.DB instance
-	if err != nil {
-		return nil, err
-	}
+//     // Mengonversi UMKM list ke entitas yang sesuai untuk response
+//     umkmEntitiesList, err := entity.ToUmkmEntities(umkmList, s.db)
+//     if err != nil {
+//         return nil, err
+//     }
 
-	// Prepare the result map
-	result := map[string]interface{}{
-		"total_records": totalCount,
-		"umkm_list":   umkmEntitiesList,
-	}
+//     // Mengembalikan hasil dalam format map, termasuk pagination detail
+//     result := map[string]interface{}{
+//         "total_records": totalCount,
+//         "current_page":  currentPage,
+//         "total_pages":   totalPages,
+//         "next_page":     nextPage,
+//         "prev_page":     prevPage,
+//         "umkm_list":     umkmEntitiesList,
+//     }
 
-	return result, nil
+//     return result, nil
+// }
+
+func (s *UmkmServiceImpl) GetUmkmListByUserId(ctx context.Context, userId int, filters string, limit int, page int) ([]entity.UmkmFilterEntity, int, int, int, *int, *int, error) {
+    // Fetch HakAkses and UMKM IDs
+    hakAksesList, err := s.hakaksesrepository.GetHakAksesByUserId(ctx, userId)
+    if err != nil {
+        return nil, 0, 0, 0, nil, nil, err
+    }
+
+    var umkmIDs []uuid.UUID
+    for _, hakAkses := range hakAksesList {
+        umkmIDs = append(umkmIDs, hakAkses.UmkmId)
+    }
+
+    // Fetch UMKM entities based on IDs
+    umkmList, totalCount, currentPage, totalPages, nextPage, prevPage, err := s.umkmrepository.GetUmkmListByIds(ctx, umkmIDs, filters, limit, page)
+    if err != nil {
+        return nil, 0, 0, 0, nil, nil, err
+    }
+
+    umkmResponses := entity.ToUmkmfilterEntities(umkmList) // Convert UMKM entities to responses
+
+    return umkmResponses, totalCount, currentPage, totalPages, nextPage, prevPage, nil
 }
 
 
 
-//
+
+
+
+
+
+
 func (service *UmkmServiceImpl) GetUmkmFilter(ctx context.Context, userID int, filters map[string]string, allowedFilters []string) ([]entity.UmkmFilterEntity, error) {
-    queryBuilder := querybuilder.NewBaseQueryBuilderName(service.db)
+	queryBuilder := querybuilder.NewBaseQueryBuilderName(service.db)
 
-    query, err := queryBuilder.GetQueryBuilderName(filters, allowedFilters)
-    if err != nil {
-        return nil, err
-    }
+	query, err := queryBuilder.GetQueryBuilderName(filters, allowedFilters)
+	if err != nil {
+		return nil, err
+	}
 
-    hakakseslist, err := service.hakaksesrepository.GetHakAksesByUserId(ctx, userID)
-    if err != nil {
-        return nil, err
-    }
+	hakakseslist, err := service.hakaksesrepository.GetHakAksesByUserId(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
 
-    var umkmIds []uuid.UUID
-    for _, hakakses := range hakakseslist {
-        umkmIds = append(umkmIds, hakakses.UmkmId)
-    }
+	var umkmIds []uuid.UUID
+	for _, hakakses := range hakakseslist {
+		umkmIds = append(umkmIds, hakakses.UmkmId)
+	}
 
-    
-    var umkmList []entity.UmkmFilterEntity
-    result := query.Find(&umkmList)
-    if result.Error != nil {
-        return nil, result.Error
-    }
+	var umkmList []entity.UmkmFilterEntity
+	result := query.Find(&umkmList)
+	if result.Error != nil {
+		return nil, result.Error
+	}
 
-    return umkmList, nil
+	return umkmList, nil
 }
 
-func(service *UmkmServiceImpl) GetUmkmListWeb(ctx context.Context, userId int)([]entity.UmkmEntityList, error){
+func (service *UmkmServiceImpl) GetUmkmListWeb(ctx context.Context, userId int) ([]entity.UmkmEntityList, error) {
 	hakAksesList, err := service.hakaksesrepository.GetHakAksesByUserId(ctx, userId)
 	if err != nil {
 		return nil, err

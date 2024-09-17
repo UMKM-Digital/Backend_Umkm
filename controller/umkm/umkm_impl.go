@@ -51,23 +51,6 @@ func (controller *UmkmControllerImpl) Create(c echo.Context) error {
         umkm.Maps = json.RawMessage(maps)
     }
 
-    // Handle image URLs
-    // var gambarURLs []string
-    // if err := c.Request().ParseMultipartForm(32 << 20); err != nil {
-    //     return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, "Failed to parse form", nil))
-    // }
-
-    // files := c.Request().MultipartForm.File["images"]
-    // for _, file := range files {
-    //     url, err := helper.HandleFileUpload(file, "uploads")
-    //     if err != nil {
-    //         return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, "Failed to upload file", nil))
-    //     }
-    //     gambarURLs = append(gambarURLs, url)
-    // }
-
-    // gambarURLsJSON, err := json.Marshal(gambarURLs)
-    	// Handle image upload
 	if err := c.Request().ParseMultipartForm(32 << 20); err != nil {
 		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, "Failed to parse form", nil))
 	}
@@ -80,12 +63,7 @@ func (controller *UmkmControllerImpl) Create(c echo.Context) error {
 
 	umkm.Gambar = json.RawMessage([]byte("[]")) 
 
-    // if err != nil {
-    //     return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, "Failed to marshal image URLs", nil))
-    // }
-    // umkm.Gambar = json.RawMessage(gambarURLsJSON)
-
-    // Log data for debugging
+    
     fmt.Printf("Form Data: %+v\n", umkm)
 
     // Get authenticated user ID
@@ -105,19 +83,29 @@ func (controller *UmkmControllerImpl) Create(c echo.Context) error {
 
 // //umkm list
 func (controller *UmkmControllerImpl) GetUmkmList(c echo.Context) error {
-        userId, err := helper.GetAuthId(c)
-        filters, limit, page := helper.ExtractFilter(c.QueryParams())
-        if err != nil {
-            return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
-        }
-    
-        umkmList, err := controller.umkmservice.GetUmkmListByUserId(c.Request().Context(), userId, filters, limit, page)
-        if err != nil {
-            return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
-        }
-    
-        return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success melihat seluruh umkm yang login", umkmList))
+	userId, err := helper.GetAuthId(c)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, model.ResponseToClientpagi(http.StatusInternalServerError, "false", err.Error(), model.Pagination{}, nil))
+	}
+
+	filters, limit, page := helper.ExtractFilter(c.QueryParams())
+	umkmList, totalCount, currentPage, totalPages, nextPage, prevPage, err := controller.umkmservice.GetUmkmListByUserId(c.Request().Context(), userId, filters, limit, page)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, model.ResponseToClientpagi(http.StatusInternalServerError, "false", err.Error(), model.Pagination{}, nil))
+	}
+
+	pagination := model.Pagination{
+		CurrentPage:  currentPage,
+		NextPage:     nextPage,
+		PrevPage:     prevPage,
+		TotalPages:   totalPages,
+		TotalRecords: totalCount,
+	}
+	
+	return c.JSON(http.StatusOK, model.ResponseToClientpagi(http.StatusOK, "true", "berhasil", pagination, umkmList))
 }
+
+
 
 //filter umkm name
 func (controller *UmkmControllerImpl) GetUmkmFilter(c echo.Context) error {

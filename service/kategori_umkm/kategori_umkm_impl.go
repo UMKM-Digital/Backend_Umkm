@@ -38,20 +38,21 @@ func (service *KategoriUmkmServiceImpl) CreateKategori(kategori web.CreateCatego
 }
 
 // baca seluruh kategori
-func (service *KategoriUmkmServiceImpl) GetKategoriUmkmList(filters string, limit int, page int) (map[string]interface{}, error) {
-	getKategoriUmkmList, totalcount, errGetKategoriUmkmList := service.kategorirepository.GetKategoriUmkm(filters, limit, page)
+func (service *KategoriUmkmServiceImpl) GetKategoriUmkmList(filters string, limit int, page int) ([]entity.KategoriEntity, int, int, int, *int, *int, error) {
+	getKategoriUmkmList, totalcount, currentPage, totalPages, nextPage, prevPage, errGetKategoriUmkmList := service.kategorirepository.GetKategoriUmkm(filters, limit, page)
 
 	if errGetKategoriUmkmList != nil {
-		return nil, errGetKategoriUmkmList
+		return nil, 0, 0, 0, nil, nil, errGetKategoriUmkmList
 	}
 
-	kategoriUmkmEntitis := entity.ToKategoriEntities(getKategoriUmkmList)
-	result := map[string]interface{}{
-		"total_records": totalcount,
-		"kategori_umkm":   kategoriUmkmEntitis,
-	}
+	// kategoriUmkmEntitis := entity.ToKategoriEntities(getKategoriUmkmList)
+	// result := map[string]interface{}{
+	// 	"total_records": totalcount,
+	// 	"kategori_umkm":   kategoriUmkmEntitis,
+	// }
 
-	return result, nil
+	result := entity.ToKategoriEntities(getKategoriUmkmList)
+	return result,totalcount, currentPage, totalPages, nextPage,prevPage, nil
 }
 
 // get by id

@@ -24,14 +24,6 @@ func ToUmkmFilterEntity(umkm domain.UMKM) UmkmFilterEntity {
 	}
 }
 
-// func ToUmkmEntities(UmkmList []domain.Transaksi) []UmkmEntity {
-//     var UmkmEntities []UmkmEntity
-//     for _, UmkmList := range UmkmList {
-//         UmkmEntities = append(UmkmEntities, ToUmkmEntity(UmkmList))
-//     }
-//     return UmkmEntities
-// }
-
 func ToUmkmfilterEntities(umkm []domain.UMKM) []UmkmFilterEntity {
     var umkmEntities []UmkmFilterEntity
     for _, umkm := range umkm {
