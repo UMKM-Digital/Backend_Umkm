@@ -2,7 +2,6 @@ package masterdokumenlegalrepo
 
 import (
 	"errors"
-	"log"
 	"umkm/model/domain"
 	query_builder_masterlegal "umkm/query_builder/masterlegal"
 
@@ -116,24 +115,67 @@ type DokumenStatusResponse struct {
 }
 
 
-func (repo *MasterDokumenLegalRepoImpl) GetDokumenUmkmStatus(umkmId uuid.UUID) ([]domain.DokumenStatusResponse, error) {
-    log.Printf("UMKM ID: %s", umkmId.String()) // Tambahkan log ini
-    
+func (repo *MasterDokumenLegalRepoImpl) GetDokumenUmkmStatus(umkmId uuid.UUID, filters string, limit int, page int) ([]domain.DokumenStatusResponse, int, int, int, *int, *int, error) {
     var results []domain.DokumenStatusResponse
+    var totalcount int64
+
+    if limit <= 0 {
+        limit = 15
+    }
     
     // Pastikan umkmId tidak kosong
     if umkmId == uuid.Nil {
-        return nil, errors.New("invalid UMKM ID")
+        return nil, 0, 0, 0, nil, nil, errors.New("invalid UMKM ID")
     }
-    
-    err := repo.db.Table("master_dokumen_legal").
-        Select("master_dokumen_legal.nama, CASE WHEN umkm_dokumen_legal.id IS NOT NULL THEN 1 ELSE 0 END AS status").
-        Joins("LEFT JOIN umkm_dokumen_legal ON master_dokumen_legal.id = umkm_dokumen_legal.dokumen_id AND umkm_dokumen_legal.umkm_id = ?", umkmId).
-        Scan(&results).Error
-    
+
+    // Gunakan query builder dengan pagination
+    query, err := repo.masterlegalQuerybuilder.GetBuilderDokumenUmkmStatus(umkmId, filters, limit, page)
     if err != nil {
-        return nil, err
+        return nil, 0, 0, 0, nil, nil, err
     }
-    
-    return results, nil
+
+    // Eksekusi query dan scan hasilnya
+    err = query.Find(&results).Error
+    if err != nil {
+        return nil, 0, 0, 0, nil, nil, err
+    }
+
+    // Hitung total count
+    countQuery, err := repo.masterlegalQuerybuilder.GetBuilderDokumenUmkmStatus(umkmId, filters, 0, 0)
+    if err != nil {
+        return nil, 0, 0, 0, nil, nil, err
+    }
+
+    err = countQuery.Model(&domain.DokumenStatusResponse{}).Count(&totalcount).Error
+    if err != nil {
+        return nil, 0, 0, 0, nil, nil, err
+    }
+
+    // Hitung total pages
+    totalPages := 1
+    if limit > 0 {
+        totalPages = int((totalcount + int64(limit) - 1) / int64(limit))
+    }
+
+    // Jika page > totalPages, return kosong
+    if page > totalPages {
+        return nil, int(totalcount), page, totalPages, nil, nil, nil
+    }
+
+    currentPage := page
+
+    // Tentukan nextPage dan prevPage
+    var nextPage *int
+    if currentPage < totalPages {
+        np := currentPage + 1
+        nextPage = &np
+    }
+
+    var prevPage *int
+    if currentPage > 1 {
+        pp := currentPage - 1
+        prevPage = &pp
+    }
+
+    return results, int(totalcount), currentPage, totalPages, nextPage, prevPage, nil
 }

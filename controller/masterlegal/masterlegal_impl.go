@@ -102,10 +102,20 @@ func (controller *MasterLegalControllerImpl) List(c echo.Context) error {
         return echo.NewHTTPError(http.StatusBadRequest, "Invalid UMKM ID")
     }
 
-    dokumenStatusList, err := controller.masterLegalService.GetDokumenUmkmStatus(umkmID)
+    filters, limit, page := helper.ExtractFilter(c.QueryParams())
+
+    dokumenStatusList, totalCount, currentPage, totalPages, nextPage, prevPage, err := controller.masterLegalService.GetDokumenUmkmStatus(umkmID, filters, limit, page)
     if err != nil {
         return echo.NewHTTPError(http.StatusInternalServerError, "Failed to retrieve documents")
     }
 
-    return c.JSON(http.StatusOK, dokumenStatusList)
+    pagination := model.Pagination{
+        CurrentPage:  currentPage,
+        NextPage:     nextPage,
+        PrevPage:     prevPage,
+        TotalPages:   totalPages,
+        TotalRecords: totalCount,
+    }
+
+    return c.JSON(http.StatusOK, model.ResponseToClientpagi(http.StatusOK, "true", "Successfully retrieved documents", pagination, dokumenStatusList))
 }

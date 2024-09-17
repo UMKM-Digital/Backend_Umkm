@@ -95,6 +95,14 @@ func (service *MasterLegalServiceImpl) UpdateMasterLegal(request web.UpdateMaste
 
 
 
-func (service *MasterLegalServiceImpl) GetDokumenUmkmStatus(umkmId uuid.UUID) ([]domain.DokumenStatusResponse, error) {
-    return service.masterlegal.GetDokumenUmkmStatus(umkmId)
+func (service *MasterLegalServiceImpl) GetDokumenUmkmStatus(umkmId uuid.UUID, filters string, limit int, page int) ([]domain.DokumenStatusResponse, int, int, int, *int, *int, error) {
+    // Panggil repository untuk mendapatkan data dokumen UMKM dengan pagination
+    dokumenStatusList, totalcount, currentPage, totalPages, nextPage, prevPage, err := service.masterlegal.GetDokumenUmkmStatus(umkmId, filters, limit, page)
+
+    if err != nil {
+        return nil, 0, 0, 0, nil, nil, err
+    }
+
+    // Mengembalikan hasil dengan informasi pagination
+    return dokumenStatusList, totalcount, currentPage, totalPages, nextPage, prevPage, nil
 }

@@ -15,7 +15,7 @@ import (
 	kategoriprodukcontroller "umkm/controller/kategoriproduk"
 	kategoriumkmcontroller "umkm/controller/kategoriumkm"
 	masterlegalcontroller "umkm/controller/masterlegal"
-	// produkcontroller "umkm/controller/produk"
+	produkcontroller "umkm/controller/produk"
 	// transaksicontroller "umkm/controller/transaksi"
 	umkmcontroller "umkm/controller/umkm"
 	"umkm/controller/usercontroller"
@@ -25,7 +25,7 @@ import (
 	query_builder_kategori_produk "umkm/query_builder/kategoriproduk"
 	query_builder_kategori_umkm "umkm/query_builder/kategoriumkm"
 	query_builder_masterlegal "umkm/query_builder/masterlegal"
-	// query_builder_produk "umkm/query_builder/produk"
+	query_builder_produk "umkm/query_builder/produk"
 	// general_query_builder "umkm/query_builder/transaksi"
 	query_builder_berita "umkm/query_builder/berita"
 	query_builder_umkm "umkm/query_builder/umkm"
@@ -41,7 +41,7 @@ import (
 	kategoriprodukrepo "umkm/repository/kategori_produk"
 	repokategoriumkm "umkm/repository/kategori_umkm"
 	masterdokumenlegalrepo "umkm/repository/masterdokumenlegal"
-	// produkrepo "umkm/repository/produk"
+	produkrepo "umkm/repository/produk"
 	// transaksirepo "umkm/repository/transaksi"
 	umkmrepo "umkm/repository/umkm"
 	"umkm/repository/userrepo"
@@ -55,7 +55,7 @@ import (
 	kategoriprodukservice "umkm/service/kategori_produk"
 	kategoriumkmservice "umkm/service/kategori_umkm"
 	masterdokumenlegalservice "umkm/service/masterdokumenlegal"
-	// produkservice "umkm/service/produk"
+	produkservice "umkm/service/produk"
 	// transaksiservice "umkm/service/transaksi"
 	umkmservice "umkm/service/umkm"
 	userservice "umkm/service/user"
@@ -99,10 +99,10 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userKategoriProdukController := kategoriprodukcontroller.NewKategeoriProdukController(*userKategoriProdukService)
 
 	//userproduk
-	// produkQueryBuilder := query_builder_produk.NewProdukQueryBuilder(db)
-	// userProdukrepo := produkrepo.NewProdukRepositoryImpl(db, produkQueryBuilder)
-	// userProdukService := produkservice.NewProdukService(userProdukrepo)
-	// userProdukController := produkcontroller.NewProdukController(userProdukService)
+	produkQueryBuilder := query_builder_produk.NewProdukQueryBuilder(db)
+	userProdukrepo := produkrepo.NewProdukRepositoryImpl(db, produkQueryBuilder)
+	userProdukService := produkservice.NewProdukService(userProdukrepo)
+	userProdukController := produkcontroller.NewProdukController(userProdukService)
 
 	//testimonial
 	userTestimonial := testimonialrepo.NewTestimonal(db)

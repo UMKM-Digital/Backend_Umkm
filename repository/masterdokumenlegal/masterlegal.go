@@ -12,5 +12,5 @@ type MasterDokumenLegal interface {
 	DeleteMasterLegalId(id int) error
 	GetMasterLegalId(id int)(domain.MasterDokumenLegal, error)
 	UpdateMasterLegalId(id int, dokumen domain.MasterDokumenLegal)(domain.MasterDokumenLegal, error)
-	GetDokumenUmkmStatus(umkmId uuid.UUID) ([]domain.DokumenStatusResponse, error)
+	GetDokumenUmkmStatus(umkmId uuid.UUID, filters string, limit int, page int) ([]domain.DokumenStatusResponse, int, int, int, *int, *int, error)
 }
