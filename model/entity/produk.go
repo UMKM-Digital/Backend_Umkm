@@ -47,6 +47,7 @@ func ToProdukList(produk domain.Produk) ProdukList{
 	return ProdukList{
 		IdProduk: produk.IdUmkm,
 		Name: produk.Nama,
+		Images: produk.Gamabr,
 		KategdoriProduk: produk.KategoriProduk,
 	}
 }

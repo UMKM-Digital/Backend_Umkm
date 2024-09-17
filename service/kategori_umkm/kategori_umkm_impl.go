@@ -45,12 +45,6 @@ func (service *KategoriUmkmServiceImpl) GetKategoriUmkmList(filters string, limi
 		return nil, 0, 0, 0, nil, nil, errGetKategoriUmkmList
 	}
 
-	// kategoriUmkmEntitis := entity.ToKategoriEntities(getKategoriUmkmList)
-	// result := map[string]interface{}{
-	// 	"total_records": totalcount,
-	// 	"kategori_umkm":   kategoriUmkmEntitis,
-	// }
-
 	result := entity.ToKategoriEntities(getKategoriUmkmList)
 	return result,totalcount, currentPage, totalPages, nextPage,prevPage, nil
 }

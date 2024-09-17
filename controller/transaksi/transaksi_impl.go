@@ -92,7 +92,7 @@ func (controller *TransaksiControllerImpl) GetKategoriId(c echo.Context) error{
 
 func (controller *TransaksiControllerImpl) GetTransaksiFilterList(c echo.Context) error {
     umkmIDStr := c.Param("umkm_id")
-    dateStr := c.Param("date")
+    dateStr := c.QueryParam("date") // Mengambil tanggal dari query parameter
     filters, status, limit, page := helper.ExtractFilterSort(c.QueryParams())
 
     umkmID, err := uuid.Parse(umkmIDStr)
@@ -104,26 +104,23 @@ func (controller *TransaksiControllerImpl) GetTransaksiFilterList(c echo.Context
     filtersTanggal := map[string]string{"tanggal": dateStr}
     allowedFilters := []string{"tanggal"}
 
-    // Fetching transaksi list from service
-    transaksiResult, err := controller.transaksiservice.GetTransaksiFilter(umkmID, filtersTanggal, allowedFilters, filters, limit, page, status)
+    // Call service to get transaksi list and pagination data
+    transaksiResult, totalCount, currentPage, totalPages, nextPage, prevPage, err := controller.transaksiservice.GetTransaksiFilter(umkmID, filtersTanggal, allowedFilters, filters, limit, page, status)
     if err != nil {
-        return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-            "status":  false,
-            "message": "Invalid request",
-            "code":    http.StatusInternalServerError,
-        })
+        return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
     }
 
-    // Preparing response
-    response := map[string]interface{}{
-        "code":    http.StatusOK,
-        "status":  true,
-        "message": "Menampilkan transaksi berdasarkan tanggal",
-        "data": map[string]interface{}{
-            "total_records": transaksiResult.TotalRecords,
-            "transactions":  transaksiResult.Data,
-        },
+    // Prepare pagination data
+    pagination := model.Pagination{
+        CurrentPage:  currentPage,
+        NextPage:     nextPage,
+        PrevPage:     prevPage,
+        TotalPages:   totalPages,
+        TotalRecords: totalCount,
     }
+
+    // Create response
+    response := model.ResponseToClientpagi(http.StatusOK, "true", "Berhasil melihat seluruh transaksi berdasarkan umkm_id", pagination, transaksiResult)
 
     return c.JSON(http.StatusOK, response)
 }

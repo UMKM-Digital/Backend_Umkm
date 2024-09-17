@@ -116,42 +116,25 @@ func (service *TranssaksiServiceImpl) GetKategoriUmkmId(id int) (entity.Transaks
 //     // Konversi dari domain.Transaksi ke entity.TransasksiFilterEntity
 //     return entity.ToTransaksiFilterEntities(domainTransaksiList), nil
 // }
-type TransaksiFilterResult struct {
-	Data         []map[string]interface{} `json:"transactions"`
-	TotalRecords int                      `json:"total_records"`
-}
 
-func (service *TranssaksiServiceImpl) GetTransaksiFilter(umkmID uuid.UUID, filtersTanggal map[string]string, allowedfiltersTanggal []string, filters string, limit int, page int, status string) (*TransaksiFilterResult, error) {
+func (service *TranssaksiServiceImpl) GetTransaksiFilter(umkmID uuid.UUID, filtersTanggal map[string]string, allowedfiltersTanggal []string, filters string, limit int, page int, status string) ([]entity.TransasksiFilterEntity, int, int, int, *int, *int, error) {
 	var filterTanggal string
 	if tanggal, ok := filtersTanggal["tanggal"]; ok {
 		filterTanggal = tanggal
 	}
 
-	transaksiDomainList, totalCount, err := service.transaksirepository.GetFilterTransaksi(umkmID, filters, filterTanggal, limit, page, status)
+	transaksiDomainList, totalCount, currentPage, totalPages, nextPage, prevPage, err := service.transaksirepository.GetFilterTransaksi(umkmID, filters, filterTanggal, limit, page, status)
 	if err != nil {
-		return nil, err
+		return nil, 0, 0, 0, nil, nil, err
 	}
 
-	// Konversi transaksiDomainList ke bentuk yang diinginkan
-	data := []map[string]interface{}{}
-	for _, trans := range transaksiDomainList {
-		data = append(data, map[string]interface{}{
-			"id":          trans.IdTransaksi,
-			"name_client": trans.Nameclient,
-			"no_invoice":  trans.NoInvoice,
-			"tanggal":     trans.Tanggal.Format(time.RFC3339), // Format tanggal dengan format ISO 8601
-			"total_jml":   trans.TotalJml.String(),            // Konversi decimal ke string
-			"status":      trans.Status,
-		})
-	}
+	// Konversi hasil transaksi ke entitas
+	transaksiEntities := entity.ToTransaksiFilterEntities(transaksiDomainList)
 
-	result := &TransaksiFilterResult{
-		Data:         data,
-		TotalRecords: totalCount,
-	}
-
-	return result, nil
+	return transaksiEntities, totalCount, currentPage, totalPages, nextPage, prevPage, nil
 }
+
+
 
 
 // transaksi web

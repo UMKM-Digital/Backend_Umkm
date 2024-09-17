@@ -131,21 +131,27 @@ func (controller *ProdukControllerImpl) GetprodukList(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid Produk ID")
 	}
 
-	// Panggil service untuk mendapatkan daftar produk dan total count
-	result, err := controller.Produk.GetProdukList(produkId, filters, limit, page, kategoriProdukID)
+	// Call service to get produk list and pagination data
+	result, totalCount, currentPage, totalPages, nextPage, prevPage, err := controller.Produk.GetProdukList(produkId, filters, limit, page, kategoriProdukID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get produk list")
+		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
 	}
 
-	response := map[string]interface{}{
-		"code":    http.StatusOK,
-		"status":  true,
-		"message": "Berhasil melihat seluruh produk berdasarkan umkm_id",
-		"data":    result,
+	// Prepare pagination data
+	pagination := model.Pagination{
+		CurrentPage:  currentPage,
+		NextPage:     nextPage,
+		PrevPage:     prevPage,
+		TotalPages:   totalPages,
+		TotalRecords: totalCount,
 	}
+
+	// Create response
+	response := model.ResponseToClientpagi(http.StatusOK, "true", "Berhasil melihat seluruh produk berdasarkan umkm_id", pagination, result)
 
 	return c.JSON(http.StatusOK, response)
 }
+
 
 func (controller *ProdukControllerImpl) UpdateProduk(c echo.Context) error {
     IdProduk := c.Param("id")

@@ -16,18 +16,18 @@ import (
 	kategoriumkmcontroller "umkm/controller/kategoriumkm"
 	masterlegalcontroller "umkm/controller/masterlegal"
 	produkcontroller "umkm/controller/produk"
-	// transaksicontroller "umkm/controller/transaksi"
+	transaksicontroller "umkm/controller/transaksi"
 	umkmcontroller "umkm/controller/umkm"
 	"umkm/controller/usercontroller"
 	"umkm/helper"
 	"umkm/model"
 
+	query_builder_berita "umkm/query_builder/berita"
 	query_builder_kategori_produk "umkm/query_builder/kategoriproduk"
 	query_builder_kategori_umkm "umkm/query_builder/kategoriumkm"
 	query_builder_masterlegal "umkm/query_builder/masterlegal"
 	query_builder_produk "umkm/query_builder/produk"
-	// general_query_builder "umkm/query_builder/transaksi"
-	query_builder_berita "umkm/query_builder/berita"
+	general_query_builder "umkm/query_builder/transaksi"
 	query_builder_umkm "umkm/query_builder/umkm"
 
 	dokumenumkmrepo "umkm/repository/dokumenumkm"
@@ -42,7 +42,7 @@ import (
 	repokategoriumkm "umkm/repository/kategori_umkm"
 	masterdokumenlegalrepo "umkm/repository/masterdokumenlegal"
 	produkrepo "umkm/repository/produk"
-	// transaksirepo "umkm/repository/transaksi"
+	transaksirepo "umkm/repository/transaksi"
 	umkmrepo "umkm/repository/umkm"
 	"umkm/repository/userrepo"
 	dokumenumkmservice "umkm/service/dokumenumkm"
@@ -56,7 +56,7 @@ import (
 	kategoriumkmservice "umkm/service/kategori_umkm"
 	masterdokumenlegalservice "umkm/service/masterdokumenlegal"
 	produkservice "umkm/service/produk"
-	// transaksiservice "umkm/service/transaksi"
+	transaksiservice "umkm/service/transaksi"
 	umkmservice "umkm/service/umkm"
 	userservice "umkm/service/user"
 
@@ -86,11 +86,12 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userUmkmService := umkmservice.NewUmkmService(userUmkmRepo, userHakAksesRepo, db)
 	userUmkmController := umkmcontroller.NewUmkmController(userUmkmService)
  
+
 	// userQuerBuilder := querybuilder.NewBaseQueryBuilder(db)
-	// transaksiQueryBuilder := general_query_builder.NewTransaksiQueryBuilder(db)
-	// userTransaksiRepo := transaksirepo.NewTransaksiRepositoryImpl(db, transaksiQueryBuilder)
-	// userTransaksiService := transaksiservice.NewTransaksiservice(userTransaksiRepo, db)
-	// userTransaksiController := transaksicontroller.NewTransaksiController(userTransaksiService, db)
+	transaksiQueryBuilder := general_query_builder.NewTransaksiQueryBuilder(db)
+	userTransaksiRepo := transaksirepo.NewTransaksiRepositoryImpl(db, transaksiQueryBuilder)
+	userTransaksiService := transaksiservice.NewTransaksiservice(userTransaksiRepo, db)
+	userTransaksiController := transaksicontroller.NewTransaksiController(userTransaksiService, db)
 
 	//userkategori produk
 	KategoriProdukQueryBuilder := query_builder_kategori_produk.NewKategoriProdukQueryBuilder(db)
@@ -171,13 +172,13 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	Umkm.GET("/web/list", userUmkmController.GetUmkmListWeb, JWTProtection())
 
 	//transaksi
-	// Transaksi := g.Group("/transaksi")
-	// Transaksi.POST("/umkm", userTransaksiController.Create)
-	// Transaksi.GET("/:id", userTransaksiController.GetKategoriId)
-	// Transaksi.GET("/:umkm_id/:date", userTransaksiController.GetTransaksiFilterList)
-	// Transaksi.GET("/web/:umkm_id", userTransaksiController.GetTransaksiByYear)
-	// Transaksi.GET("/web/mounth/:umkm_id", userTransaksiController.GetTransaksiByMounth)
-	// Transaksi.GET("/web/date/:umkm_id", userTransaksiController.GetTransaksiByDate)
+	Transaksi := g.Group("/transaksi")
+	Transaksi.POST("/umkm", userTransaksiController.Create)
+	Transaksi.GET("/:id", userTransaksiController.GetKategoriId)
+	Transaksi.GET("/:umkm_id/:date", userTransaksiController.GetTransaksiFilterList)
+	Transaksi.GET("/web/:umkm_id", userTransaksiController.GetTransaksiByYear)
+	Transaksi.GET("/web/mounth/:umkm_id", userTransaksiController.GetTransaksiByMounth)
+	Transaksi.GET("/web/date/:umkm_id", userTransaksiController.GetTransaksiByDate)
 
 	//kategoriproduk
 	KatProdukRoute := g.Group("/kategoriproduk")
@@ -188,12 +189,12 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	KatProdukRoute.DELETE("/delete/:id", userKategoriProdukController.Delete)
 
 	//produk
-	// Produk := g.Group("/produk")
-	// Produk.POST("/create", userProdukController.CreateProduk)
-	// Produk.DELETE("/delete/:id", userProdukController.DeleteProdukId)
-	// Produk.GET("/list/:umkm_id", userProdukController.GetprodukList)
-	// Produk.GET("/:id", userProdukController.GetProdukId)
-	// Produk.PUT("/update/:id", userProdukController.UpdateProduk)
+	Produk := g.Group("/produk")
+	Produk.POST("/create", userProdukController.CreateProduk)
+	Produk.DELETE("/delete/:id", userProdukController.DeleteProdukId)
+	Produk.GET("/list/:umkm_id", userProdukController.GetprodukList)
+	Produk.GET("/:id", userProdukController.GetProdukId)
+	Produk.PUT("/update/:id", userProdukController.UpdateProduk)
 
 	//testimonial
 	Testimonial := g.Group("/testimonial")

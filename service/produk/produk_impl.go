@@ -226,22 +226,16 @@ func(service *ProdukServiceImpl) GetProdukId(id uuid.UUID)(entity.ProdukEntity, 
 }
 
 
-func (service *ProdukServiceImpl) GetProdukList(Produkid uuid.UUID, filters string, limit int, page int, kategori_produk_id string) (map[string]interface{}, error) {
-	getProdukList, totalCount, errGetProdukList := service.produkrepository.GetProduk(Produkid, filters, limit, page, kategori_produk_id)
+func (service *ProdukServiceImpl) GetProdukList(Produkid uuid.UUID, filters string, limit int, page int, kategori_produk_id string) ([]entity.ProdukList, int, int, int, *int, *int, error) {
+	getProdukList, totalCount, currentPage, totalPages, nextPage, prevPage, errGetProdukList := service.produkrepository.GetProduk(Produkid, filters, limit, page, kategori_produk_id)
 	if errGetProdukList != nil {
-		return nil, errGetProdukList
+		return nil, 0, 0, 0, nil, nil, errGetProdukList
 	}
 
 	// Konversi hasil produk ke entitas
 	produkEntities := entity.ToProdukEntities(getProdukList)
 
-	// Membuat map untuk hasil akhir
-	result := map[string]interface{}{
-		"total_records": totalCount,
-		"produk_list":   produkEntities,
-	}
-
-	return result, nil
+	return produkEntities,totalCount, currentPage, totalPages, nextPage,prevPage, nil
 }
 
 func (service *ProdukServiceImpl) UpdateProduk(request web.UpdatedProduk, Id uuid.UUID, file *multipart.FileHeader, indexHapus []int) (map[string]interface{}, error) {
