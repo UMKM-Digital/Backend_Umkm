@@ -126,29 +126,32 @@ func (service *TranssaksiServiceImpl) GetTransaksiFilter(umkmID uuid.UUID, filte
 
 
 // transaksi web
-func (service *TranssaksiServiceImpl) GetTransaksiByYear(umkmID string, page int, limit int, filter string) ([]map[string]interface{}, error) {
-	var results []map[string]interface{}
+func (service *TranssaksiServiceImpl) GetTransaksiByYear(umkmID string, page int, limit int, filter string) ([]map[string]interface{}, int, int, int, *int, *int, error) {
+    // Panggil repository untuk mengambil data transaksi dengan pagination
+    transactions, totalRecords, currentPage, totalPages, nextPage, prevPage, err := service.transaksirepository.GetFilterTransaksiWebTahun(umkmID, page, limit, filter)
+    if err != nil {
+        return nil, 0, 0, 0, nil, nil, fmt.Errorf("failed to retrieve transactions: %w", err)
+    }
 
-	transactions, err := service.transaksirepository.GetFilterTransaksiWebTahun(umkmID, page, limit, filter)
-	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve transactions: %w", err)
-	}
+    // Proses hasil query
+    var results []map[string]interface{}
+    for _, transaction := range transactions {
+        // Buat struktur hasil
+        result := map[string]interface{}{
+            "year":                  transaction["year"],
+            "jumlah_transaksi":      transaction["jumlah_transaksi"],
+            "jml_transaksi_berlaku": transaction["jml_transaksi_berlaku"],
+            "jml_transaksi_batal":   transaction["jml_transaksi_batal"],
+            "total_berlaku":         transaction["total_berlaku"],
+            "total_batal":           transaction["total_batal"],
+        }
+        results = append(results, result)
+    }
 
-	// Process the results
-	for _, transaction := range transactions {
-		result := map[string]interface{}{
-			"year":                  transaction["year"], // Access value using the key
-			"jumlah_transaksi":      transaction["jumlah_transaksi"],
-			"jml_transaksi_berlaku": transaction["jml_transaksi_berlaku"],
-			"jml_transaksi_batal":   transaction["jml_transaksi_batal"],
-			"total_berlaku":         transaction["total_berlaku"], // Assuming these are strings already
-			"total_batal":           transaction["total_batal"],
-		}
-		results = append(results, result)
-	}
-
-	return results, nil
+    // Kembalikan hasil dengan detail pagination
+    return results, totalRecords, currentPage, totalPages, nextPage, prevPage, nil
 }
+
 
 func (service *TranssaksiServiceImpl) GetTransaksiByMonth(umkmID string, year int, page int, limit int, filter string) ([]map[string]interface{}, int, int, int, *int, *int, error) {
     // Panggil repository untuk mengambil data transaksi dengan pagination

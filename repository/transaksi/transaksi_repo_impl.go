@@ -128,10 +128,23 @@ func (repo *TransaksirepositoryImpl) GetFilterTransaksi(umkmID uuid.UUID, filter
 	return transaksi, int(totalCount), currentPage, totalPages, nextPage, prevPage, nil
 }
 
-func (repo *TransaksirepositoryImpl) GetFilterTransaksiWebTahun(umkmID string, page int, limit int, filter string) ([]map[string]interface{}, error) {
+func (repo *TransaksirepositoryImpl) GetFilterTransaksiWebTahun(umkmID string, page int, limit int, filter string) ([]map[string]interface{}, int, int, int, *int, *int, error) {
 	var results []map[string]interface{}
+	var totalRecords int64
+
+	// Hitung offset berdasarkan halaman
 	offset := (page - 1) * limit
 
+	// Query untuk menghitung total records
+	totalQuery := repo.db.Model(&domain.Transaksi{}).
+		Where("umkm_id = ?", umkmID)
+
+	// Terapkan filter jika ada
+	if filter != "" {
+		totalQuery = totalQuery.Where("EXTRACT(YEAR FROM tanggal) = ?", filter)
+	}
+
+	// Query utama dengan pagination
 	query := repo.db.Model(&domain.Transaksi{}).
 		Select(`
             EXTRACT(YEAR FROM tanggal) AS year,
@@ -154,11 +167,30 @@ func (repo *TransaksirepositoryImpl) GetFilterTransaksiWebTahun(umkmID string, p
 
 	// Eksekusi query
 	if err := query.Scan(&results).Error; err != nil {
-		return nil, err
+		return nil, 0, 0, 0, nil, nil, err
 	}
 
-	return results, nil
+	// Hitung total records
+	totalRecords = int64(len(results))
+
+	// Hitung total halaman
+	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
+
+	// Hitung nilai nextPage dan prevPage
+	var nextPage, prevPage *int
+	if page < totalPages {
+		next := page + 1
+		nextPage = &next
+	}
+	if page > 1 {
+		prev := page - 1
+		prevPage = &prev
+	}
+
+	// Kembalikan hasil dengan pagination
+	return results, int(totalRecords), page, totalPages, nextPage, prevPage, nil
 }
+
 
 func (repo *TransaksirepositoryImpl) GetTransaksiByMonth(umkmID string, year int, page int, limit int, filter string) ([]map[string]interface{}, int, int, int, *int, *int, error) {
 	var results []map[string]interface{}
