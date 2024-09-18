@@ -9,6 +9,7 @@ import (
 	// "umkm/helper"
 	"umkm/helper"
 	"umkm/model"
+	"umkm/model/entity"
 	"umkm/model/web"
 	umkmservice "umkm/service/umkm"
 
@@ -94,6 +95,11 @@ func (controller *UmkmControllerImpl) GetUmkmList(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, model.ResponseToClientpagi(http.StatusInternalServerError, "false", err.Error(), model.Pagination{}, nil))
 	}
 
+	// Jika umkmList kosong, set sebagai array kosong agar tidak null
+	if umkmList == nil {
+		umkmList = []entity.UmkmFilterEntity{}
+	}
+
 	pagination := model.Pagination{
 		CurrentPage:  currentPage,
 		NextPage:     nextPage,
@@ -104,6 +110,7 @@ func (controller *UmkmControllerImpl) GetUmkmList(c echo.Context) error {
 	
 	return c.JSON(http.StatusOK, model.ResponseToClientpagi(http.StatusOK, "true", "berhasil", pagination, umkmList))
 }
+
 
 
 

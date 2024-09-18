@@ -238,64 +238,67 @@ func (service *ProdukServiceImpl) GetProdukList(Produkid uuid.UUID, filters stri
 	return produkEntities,totalCount, currentPage, totalPages, nextPage,prevPage, nil
 }
 
-func (service *ProdukServiceImpl) UpdateProduk(request web.UpdatedProduk, Id uuid.UUID, file *multipart.FileHeader, indexHapus []int) (map[string]interface{}, error) {
+
+func (service *ProdukServiceImpl) UpdateProduk(request web.UpdatedProduk, Id uuid.UUID, file *multipart.FileHeader, indexHapus []string) (map[string]interface{}, error) {
     // Ambil data produk berdasarkan ID
     getProdukById, err := service.produkrepository.FindById(Id)
     if err != nil {
         return nil, err
     }
 
-    // Ambil gambar lama dan konversi dari domain.JSONB ke []string
-    var oldGambarList []string
+    // Ambil gambar lama dan konversi dari domain.JSONB ke []map[string]interface{}
+    var oldGambarList []map[string]interface{}
     if urls, ok := getProdukById.Gamabr["urls"].([]interface{}); ok {
         for _, img := range urls {
-            if imgStr, ok := img.(string); ok {
-                oldGambarList = append(oldGambarList, imgStr)
+            if imgMap, ok := img.(map[string]interface{}); ok {
+                imgID, _ := imgMap["id"].(string)
+                imgPath, _ := imgMap["gambar"].(string)
+                oldGambarList = append(oldGambarList, map[string]interface{}{"id": imgID, "gambar": imgPath})
+				
             }
         }
     }
 
-    // Hapus gambar pada indeks yang diberikan
-    toRemove := make(map[int]bool)
-    for _, idx := range indexHapus {
-        if idx >= 0 && idx < len(oldGambarList) {
-            toRemove[idx] = true
-        }
-    }
-
-    var newGambarList []string
-    for i, img := range oldGambarList {
-        if !toRemove[i] {
+    // Hapus gambar berdasarkan ID yang diberikan
+    var newGambarList []map[string]interface{}
+    for _, img := range oldGambarList {
+        if !containsID(indexHapus, img["id"].(string)) {
             newGambarList = append(newGambarList, img)
         }
     }
 
     // Jika ada file gambar baru
-    var newGambar []string
-    if file != nil {
-        // Proses gambar baru
-        src, err := file.Open()
-        if err != nil {
-            return nil, errors.New("failed to open the uploaded file")
-        }
-        defer src.Close()
+   // Jika ada file gambar baru
+if file != nil {
+    // Proses gambar baru
+    src, err := file.Open()
+    if err != nil {
+        return nil, errors.New("failed to open the uploaded file")
+    }
+    defer src.Close()
 
-        // Menghasilkan nama file acak untuk file yang diunggah
-        ext := filepath.Ext(file.Filename)
-        randomFileName := generateRandomFileName(ext)
-        newImagePath := filepath.Join("uploads", randomFileName)
+    // Menghasilkan nama file acak untuk file yang diunggah
+    ext := filepath.Ext(file.Filename)
+    randomFileName := generateRandomFileName(ext)
+    newImagePath := filepath.Join("uploads", randomFileName)
 
-        // Simpan file ke server
-        if err := helper.SaveFile(file, newImagePath); err != nil {
-            return nil, errors.New("failed to save image")
-        }
-
-        // Tambahkan path baru ke daftar gambar
-        newGambar = append(newGambar, filepath.ToSlash(newImagePath))
+    // Simpan gambar di folder uploads
+    if err := helper.SaveFile(file, newImagePath); err != nil {
+        return nil, errors.New("failed to save image")
     }
 
+    // Tambahkan gambar baru dengan ID custom atau gunakan ID lama jika tidak dihapus
+    newImageID := generateUniqueImageID() // Ganti dengan metode ID custom jika perlu
+
+    // Tambahkan gambar baru dengan ID yang sesuai
+    newGambarList = append(newGambarList, map[string]interface{}{
+        "id":     newImageID, // gunakan ID custom yang tidak menggunakan UUID
+        "gambar": filepath.ToSlash(newImagePath),
+    })
+}
+
     // Gabungkan gambar lama yang telah diperbarui dan gambar baru
-    combinedGambar := append(newGambarList, newGambar...)
+    combinedGambar := newGambarList
 
     // Konversi combinedGambar ke JSONB
     newGambarJSONB := domain.JSONB{"urls": combinedGambar}
@@ -323,6 +326,12 @@ func (service *ProdukServiceImpl) UpdateProduk(request web.UpdatedProduk, Id uui
         Deskripsi:      request.Deskripsi,
     }
 
+    // Log untuk debug
+    log.Println("Old Gambar List:", oldGambarList)
+    log.Println("Index Hapus:", indexHapus)
+    log.Println("New Gambar List:", newGambarList)
+    log.Println("Combined Gambar:", combinedGambar)
+
     // Update produk
     updatedProduk, errUpdate := service.produkrepository.UpdatedProduk(Id, ProdukRequest)
     if errUpdate != nil {
@@ -344,4 +353,24 @@ func (service *ProdukServiceImpl) UpdateProduk(request web.UpdatedProduk, Id uui
     }
 
     return response, nil
+}
+
+
+
+// Helper function to check if an ID is in a list
+func containsID(slice []string, item string) bool {
+    for _, v := range slice {
+        if v == item {
+            return true
+        }
+    }
+    return false
+}
+// GenerateUniqueImageID generates a new UUID
+func generateUniqueImageID() string {
+    id, err := uuid.NewV6()
+    if err != nil {
+        return "" // Handle error appropriately
+    }
+    return id.String()
 }

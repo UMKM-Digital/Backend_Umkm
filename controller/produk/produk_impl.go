@@ -152,7 +152,6 @@ func (controller *ProdukControllerImpl) GetprodukList(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
-
 func (controller *ProdukControllerImpl) UpdateProduk(c echo.Context) error {
     IdProduk := c.Param("id")
     id, err := uuid.Parse(IdProduk)
@@ -190,20 +189,20 @@ func (controller *ProdukControllerImpl) UpdateProduk(c echo.Context) error {
     // Ambil kategori produk dari form value
     kategoriProdukJSON := c.FormValue("kategori_produk")
 
-    // Ambil indeks gambar yang akan dihapus
+    // Ambil ID gambar yang akan dihapus
     indexHapusStr := c.FormValue("index_hapus")
-    var indexHapus []int
+    var indexHapus []string
     if err := json.Unmarshal([]byte(indexHapusStr), &indexHapus); err != nil {
         return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid index_hapus format", nil))
     }
 
     // Buat request untuk service
     request := web.UpdatedProduk{
-        Name: name,
-        Harga: harga,
-        Satuan: satuan,
-        MinPesanan: minpesanan,
-        Deskripsi: deskripsistr,
+        Name:           name,
+        Harga:          harga,
+        Satuan:         satuan,
+        MinPesanan:     minpesanan,
+        Deskripsi:      deskripsistr,
         KategoriProduk: json.RawMessage(kategoriProdukJSON),
     }
 

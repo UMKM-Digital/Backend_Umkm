@@ -204,6 +204,8 @@ func (s *UmkmServiceImpl) GetUmkmListByUserId(ctx context.Context, userId int, f
 
 
 
+
+
 func (service *UmkmServiceImpl) GetUmkmFilter(ctx context.Context, userID int, filters map[string]string, allowedFilters []string) ([]entity.UmkmFilterEntity, error) {
 	queryBuilder := querybuilder.NewBaseQueryBuilderName(service.db)
 

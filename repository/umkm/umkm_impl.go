@@ -60,6 +60,11 @@ func (repo *RepoUmkmImpl) GetUmkmListByIds(ctx context.Context, umkmIDs []uuid.U
         return nil, 0, 0, 0, nil, nil, err
     }
 
+    if len(umkm) == 0 {
+        umkm = []domain.UMKM{}
+    }
+
+    
     // Hitung total records dari hasil pencarian, tanpa pagination
     totalQuery, err := repo.umkmQueryBuilder.GetBuilder(filters, 0, 0) // Tanpa pagination
     if err != nil {
