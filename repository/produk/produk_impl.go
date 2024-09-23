@@ -101,9 +101,9 @@ func (repo *ProdukRepoImpl) GetProduk(ProdukId uuid.UUID, filters string, limit 
 	return produk, int(totalcount), currentPage, totalPages, nextPage, prevPage, nil
 }
 
-func (repo *ProdukRepoImpl) UpdatedProduk(ProdukId uuid.UUID, produk domain.Produk) (domain.Produk, error) {
-	if err := repo.db.Model(&domain.Produk{}).Where("id = ?", ProdukId).Updates(produk).Error; err != nil {
-		return domain.Produk{}, errors.New("gagal memperbarui produk")
+	func (repo *ProdukRepoImpl) UpdatedProduk(ProdukId uuid.UUID, produk domain.Produk) (domain.Produk, error) {
+		if err := repo.db.Model(&domain.Produk{}).Where("id = ?", ProdukId).Updates(produk).Error; err != nil {
+			return domain.Produk{}, errors.New("gagal memperbarui produk")
+		}
+		return produk, nil
 	}
-	return produk, nil
-}

@@ -30,7 +30,7 @@ func (produkQueryBuilder *ProdukQueryBuilderImpl) GetBuilderProduk(filters strin
 
 	// Implementasi filter di sini
 	if filters != "" {
-		searchPattern := "%" + filters 
+		searchPattern := "%" + filters + "%" 
 		query = query.Where("nama ILIKE ?", searchPattern)
 	}
 

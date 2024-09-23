@@ -11,6 +11,7 @@ import (
 	aboutuscontroller "umkm/controller/homepage/aboutus"
 	brandlogo "umkm/controller/homepage/logo"
 	slidercontroller "umkm/controller/homepage/slider"
+	sektorusahacontroller "umkm/controller/sektorusaha"
 
 	kategoriprodukcontroller "umkm/controller/kategoriproduk"
 	kategoriumkmcontroller "umkm/controller/kategoriumkm"
@@ -37,6 +38,7 @@ import (
 	beritarepo "umkm/repository/homepage/berita"
 	brandrepo "umkm/repository/homepage/brandlogo"
 	sliderrepo "umkm/repository/homepage/slider"
+	sektorusaharepo "umkm/repository/sektorusaha"
 
 	kategoriprodukrepo "umkm/repository/kategori_produk"
 	repokategoriumkm "umkm/repository/kategori_umkm"
@@ -51,6 +53,7 @@ import (
 	beritaservice "umkm/service/homepage/berita"
 	brandlogoservice "umkm/service/homepage/brandlogo"
 	sliderservice "umkm/service/homepage/slider"
+	sektorusahaservice "umkm/service/sektorusaha"
 
 	kategoriprodukservice "umkm/service/kategori_produk"
 	kategoriumkmservice "umkm/service/kategori_umkm"
@@ -140,6 +143,11 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userBerita := beritarepo.NewBerita(db, beritaQueryBuilder)
 	userBeritaService := beritaservice.NewBeritaService(userBerita)
 	userBeritaController := beritacontroller.NewBeritaController(*userBeritaService)
+
+	//sektorusaha
+	userSektorUsaha := sektorusaharepo.NewSektorUsaha(db)
+	userSektorUsahaService := sektorusahaservice.NewSektorUsahaService(userSektorUsaha)
+	userSektorUsahaController := sektorusahacontroller.NewSektorUsahaController(userSektorUsahaService)
 
 	g := e.Group(prefix)
 
@@ -247,6 +255,10 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	berita.DELETE("/delete/:id", userBeritaController.Delete)
 	berita.GET("/:id", userBeritaController.GetId)
 	berita.PUT("/edit/:id",userBeritaController.Update)
+
+	sektorusaha := g.Group("/sektorusaha")
+	sektorusaha.POST("/create", userSektorUsahaController.Create)
+	sektorusaha.GET("/list", userSektorUsahaController.GetSektorUsaha)
 }
 
 	func JWTProtection() echo.MiddlewareFunc {

@@ -2,6 +2,8 @@ package produkcontroller
 
 import (
 	"encoding/json"
+	"fmt"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"strconv"
@@ -9,6 +11,7 @@ import (
 	// "umkm/helper"
 	"umkm/helper"
 	"umkm/model"
+	"umkm/model/entity"
 	"umkm/model/web"
 	produkservice "umkm/service/produk"
 
@@ -137,6 +140,11 @@ func (controller *ProdukControllerImpl) GetprodukList(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
 	}
 
+	if result == nil {
+		result = []entity.ProdukList{}
+	}
+
+
 	// Prepare pagination data
 	pagination := model.Pagination{
 		CurrentPage:  currentPage,
@@ -153,64 +161,104 @@ func (controller *ProdukControllerImpl) GetprodukList(c echo.Context) error {
 }
 
 func (controller *ProdukControllerImpl) UpdateProduk(c echo.Context) error {
+    // Ambil ID produk dari URL dan parsing
     IdProduk := c.Param("id")
     id, err := uuid.Parse(IdProduk)
     if err != nil {
+        log.Printf("Error parsing UUID: %v", err)
         return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid UUID format", nil))
     }
+    log.Printf("Received request to update product with ID: %s", id)
 
+    // Proses data produk lainnya
     name := c.FormValue("nama")
     deskripsistr := c.FormValue("deskripsi")
-
     hargastr := c.FormValue("harga")
     harga, err := strconv.Atoi(hargastr)
     if err != nil {
+        log.Printf("Error converting harga: %v", err)
         return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid harga format", nil))
     }
+    log.Printf("Parsed harga: %d", harga)
 
     satuanstr := c.FormValue("satuan")
     satuan, err := strconv.Atoi(satuanstr)
     if err != nil {
+        log.Printf("Error converting satuan: %v", err)
         return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid satuan format", nil))
     }
+    log.Printf("Parsed satuan: %d", satuan)
 
     minpesananstr := c.FormValue("minpesanan")
     minpesanan, err := strconv.Atoi(minpesananstr)
     if err != nil {
+        log.Printf("Error converting minpesanan: %v", err)
         return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid minpesanan format", nil))
     }
+    log.Printf("Parsed minpesanan: %d", minpesanan)
 
-    // Ambil file gambar jika ada
-    file, err := c.FormFile("gambar")
-    if err != nil && err != http.ErrMissingFile {
-        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Failed to get uploaded file", nil))
+    // Parse multipart form to handle file uploads
+    err = c.Request().ParseMultipartForm(32 << 20) // Limit size 32MB
+    if err != nil {
+        log.Printf("Error parsing multipart form: %v", err)
+        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Failed to parse form", nil))
     }
 
-    // Ambil kategori produk dari form value
-    kategoriProdukJSON := c.FormValue("kategori_produk")
+    // Handle gambar files
+    gambarFiles := make(map[int]*multipart.FileHeader) // Use int for ID
+    i := 1
+    for {
+        key := fmt.Sprintf("gambar[%d]", i)
+        fileHeaders, ok := c.Request().MultipartForm.File[key]
+        if !ok {
+            break
+        }
+        for _, fileHeader := range fileHeaders {
+            gambarIDStr := c.Request().FormValue(fmt.Sprintf("gambarID[%d]", i)) // Use c.Request().FormValue for gambarID
+            log.Printf("Form value for gambarID[%d]: %s", i, gambarIDStr) // Debug log for gambarID
+            gambarID, err := strconv.Atoi(gambarIDStr)
+            if err != nil {
+                log.Printf("Error converting gambarID: %v", err)
+                return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid gambarID format", nil))
+            }
+            log.Printf("Received file: %s with size %d bytes and ID: %d", fileHeader.Filename, fileHeader.Size, gambarID)
+            gambarFiles[gambarID] = fileHeader // Simpan file berdasarkan ID gambar
+        }
+        i++
+    }
+    log.Printf("Number of gambar files received: %d", len(gambarFiles))
 
-    // Ambil ID gambar yang akan dihapus
-    indexHapusStr := c.FormValue("index_hapus")
-    var indexHapus []string
-    if err := json.Unmarshal([]byte(indexHapusStr), &indexHapus); err != nil {
-        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid index_hapus format", nil))
+
+	//katgeori
+	var kategori []string
+    i = 0
+    for {
+        kategoriValue := c.FormValue(fmt.Sprintf("kategori[%d]", i))
+        if kategoriValue == "" {
+            break
+        }
+        kategori = append(kategori, kategoriValue)
+        i++
     }
 
-    // Buat request untuk service
+	log.Printf("Kategori yang diterima: %v", kategori)
+    // Buat request untuk update produk
     request := web.UpdatedProduk{
         Name:           name,
         Harga:          harga,
         Satuan:         satuan,
         MinPesanan:     minpesanan,
         Deskripsi:      deskripsistr,
-        KategoriProduk: json.RawMessage(kategoriProdukJSON),
+		KategoriProduk: kategori,
     }
 
-    // Panggil service untuk memperbarui produk
-    updatedProduk, errUpdate := controller.Produk.UpdateProduk(request, id, file, indexHapus)
+    // Update produk menggunakan service
+    updatedProduk, errUpdate := controller.Produk.UpdateProduk(request, id, gambarFiles)
     if errUpdate != nil {
+        log.Printf("Error updating product: %v", errUpdate)
         return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, errUpdate.Error(), nil))
     }
 
+    log.Printf("Product updated successfully with ID: %s", id)
     return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "Data berhasil diupdate", updatedProduk))
 }
