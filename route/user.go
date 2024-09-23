@@ -247,7 +247,9 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	masterlegal.GET("/list/dokumenumkm/:umkm_id", userMasterLegalController.List)
 
 	dokumenumkm := g.Group("/dokumenumkm")
-	dokumenumkm.POST("/create", userDokumenUmkmController.Create)
+	dokumenumkm.POST("/buat", userDokumenUmkmController.Create)
+	dokumenumkm.GET("/:id/:umkm_id", userDokumenUmkmController.GetDokumenId)
+	dokumenumkm.PUT("/edit/:id/:umkm_id", userDokumenUmkmController.UpdateProduk)
 
 	berita := g.Group("/berita")
 	berita.POST("/create", userBeritaController.Create, JWTProtection())

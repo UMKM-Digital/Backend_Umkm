@@ -11,3 +11,7 @@
 		DokumenId 	   int `validate:"required" json:"dokumen_id"`
 		DokumenUpload           json.RawMessage `json:"dok_upload"`
 	}
+
+	type  UpdateUmkmDokumen struct{
+		DokumenUpload           json.RawMessage `json:"dok_upload"`
+	}

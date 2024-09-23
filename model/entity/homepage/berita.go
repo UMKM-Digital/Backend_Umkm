@@ -1,6 +1,9 @@
 package entity
 
-import "umkm/model/domain"
+import (
+	"time"
+	"umkm/model/domain"
+)
 
 type BeritaFilterEntity struct {
 	Id      int    `json:"id"`
@@ -8,6 +11,7 @@ type BeritaFilterEntity struct {
 	Image   string `json:"image"`
 	Content string `json:"content"`
 	Author  string `json:"author"` // Ubah dari int ke string untuk menyimpan nama
+	Created_at time.Time
 }
 
 func ToBeritaFilterEntity(berita domain.Berita) BeritaFilterEntity {
@@ -17,6 +21,7 @@ func ToBeritaFilterEntity(berita domain.Berita) BeritaFilterEntity {
 		Image:   berita.Image,
 		Content: berita.Content,
 		Author:  berita.User.Username, // Ambil nama dari relasi User
+		Created_at: berita.CreatedAt,
 	}
 }
 
