@@ -30,14 +30,6 @@ func (repo *RepoUmkmImpl) CreateRequest(umkm domain.UMKM)(domain.UMKM, error) {
 	return umkm, nil
 }
 
-// func (repo *RepoUmkmImpl) GetUmkmList(ctx context.Context, umkmIDs []uuid.UUID)([]domain.UMKM, error){
-// 	var umkm []domain.UMKM
-// 	err := repo.db.Where("id IN (?))", umkmIDs).Find(&umkm).Error
-// 	if err != nil{
-// 		return []domain.UMKM{},err
-// 	}
-// 	return umkm, nil
-// }
 
 func (repo *RepoUmkmImpl) GetUmkmListByIds(ctx context.Context, umkmIDs []uuid.UUID, filters string, limit int, page int) ([]domain.UMKM, int, int, int, *int, *int, error) {
     var umkm []domain.UMKM

@@ -20,6 +20,7 @@ import (
 
 	// querybuilder "umkm/query_builder"
 	hakaksesrepo "umkm/repository/hakakses" // Tambahkan import untuk HakAkses repository
+	produkrepo "umkm/repository/produk"
 	umkmrepo "umkm/repository/umkm"
 
 	"fmt"
@@ -32,13 +33,15 @@ import (
 type UmkmServiceImpl struct {
 	umkmrepository     umkmrepo.CreateUmkm
 	hakaksesrepository hakaksesrepo.CreateHakakses // Tambahkan field untuk HakAkses repository
+	produkRepository produkrepo.CreateProduk
 	db                 *gorm.DB
 }
 
-func NewUmkmService(umkmrepository umkmrepo.CreateUmkm, hakaksesrepository hakaksesrepo.CreateHakakses, db *gorm.DB) *UmkmServiceImpl {
+func NewUmkmService(umkmrepository umkmrepo.CreateUmkm, hakaksesrepository hakaksesrepo.CreateHakakses, db *gorm.DB, produkRepository produkrepo.CreateProduk) *UmkmServiceImpl {
 	return &UmkmServiceImpl{
 		umkmrepository:     umkmrepository,
 		hakaksesrepository: hakaksesrepository,
+		produkRepository: produkRepository,
 		db:                 db,
 	}
 }
@@ -64,17 +67,6 @@ func (service *UmkmServiceImpl) CreateUmkm(umkm web.UmkmRequest, userID int, fil
 		return nil, errors.New("invalid type for Maps")
 	}
 
-	// var Images domain.JSONB
-	// if len(umkm.Gambar) > 0 {
-	//     var imgURLs []string
-	//     if err := json.Unmarshal(umkm.Gambar, &imgURLs); err != nil {
-	//         return nil, errors.New("invalid type for Images")
-	//     }
-	//     Images = domain.JSONB{"urls": imgURLs}
-	// } else {
-	//     Images = domain.JSONB{"urls": []string{}}
-	// }
-	// Handle gambar files
 	var Images domain.JSONB
 	var savedImageURLs []string
 	if len(files) > 0 {
@@ -191,19 +183,16 @@ func (s *UmkmServiceImpl) GetUmkmListByUserId(ctx context.Context, userId int, f
         return nil, 0, 0, 0, nil, nil, err
     }
 
-    umkmResponses := entity.ToUmkmfilterEntities(umkmList) // Convert UMKM entities to responses
+	products, err := s.produkRepository.GetProductsByUmkmIds(ctx, umkmIDs)
+    if err != nil {
+        return nil, 0, 0, 0, nil, nil, err
+    }
+
+
+    umkmResponses := entity.ToUmkmfilterEntities(umkmList, products) // Convert UMKM entities to responses
 
     return umkmResponses, totalCount, currentPage, totalPages, nextPage, prevPage, nil
 }
-
-
-
-
-
-
-
-
-
 
 
 func (service *UmkmServiceImpl) GetUmkmFilter(ctx context.Context, userID int, filters map[string]string, allowedFilters []string) ([]entity.UmkmFilterEntity, error) {

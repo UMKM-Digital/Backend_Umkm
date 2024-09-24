@@ -83,10 +83,17 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userKatgoriUmkmService := kategoriumkmservice.NewKategoriUmkmService(userKategoriUmkmRepo)
 	userKategoriUmkmController := kategoriumkmcontroller.NewKategeoriUmkmController(userKatgoriUmkmService)
 
+	//userproduk
+	produkQueryBuilder := query_builder_produk.NewProdukQueryBuilder(db)
+	userProdukrepo := produkrepo.NewProdukRepositoryImpl(db, produkQueryBuilder)
+	userProdukService := produkservice.NewProdukService(userProdukrepo)
+	userProdukController := produkcontroller.NewProdukController(userProdukService)
+
+	//umkm
 	umkmQueryBuilder := query_builder_umkm.NewUmkmQueryBuilder(db)
 	userUmkmRepo := umkmrepo.NewUmkmRepositoryImpl(db, umkmQueryBuilder)
-	userHakAksesRepo := hakaksesrepo.NewHakAksesRepositoryImpl(db) 
-	userUmkmService := umkmservice.NewUmkmService(userUmkmRepo, userHakAksesRepo, db)
+	userHakAksesRepo := hakaksesrepo.NewHakAksesRepositoryImpl(db)  
+	userUmkmService := umkmservice.NewUmkmService(userUmkmRepo, userHakAksesRepo, db, userProdukrepo)
 	userUmkmController := umkmcontroller.NewUmkmController(userUmkmService)
  
 
@@ -101,12 +108,6 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userKategoriProdukRepo := kategoriprodukrepo.NewKategoriProdukRepo(db,KategoriProdukQueryBuilder)
 	userKategoriProdukService := kategoriprodukservice.NewKategoriProdukService(userKategoriProdukRepo)
 	userKategoriProdukController := kategoriprodukcontroller.NewKategeoriProdukController(*userKategoriProdukService)
-
-	//userproduk
-	produkQueryBuilder := query_builder_produk.NewProdukQueryBuilder(db)
-	userProdukrepo := produkrepo.NewProdukRepositoryImpl(db, produkQueryBuilder)
-	userProdukService := produkservice.NewProdukService(userProdukrepo)
-	userProdukController := produkcontroller.NewProdukController(userProdukService)
 
 	//testimonial
 	userTestimonial := testimonialrepo.NewTestimonal(db)

@@ -1,6 +1,7 @@
 package produkrepo
 
 import (
+	"context"
 	"errors"
 	"umkm/model/domain"
 	query_builder_produk "umkm/query_builder/produk"
@@ -106,4 +107,16 @@ func (repo *ProdukRepoImpl) GetProduk(ProdukId uuid.UUID, filters string, limit 
 			return domain.Produk{}, errors.New("gagal memperbarui produk")
 		}
 		return produk, nil
+	}
+
+
+	func (r *ProdukRepoImpl) GetProductsByUmkmIds(ctx context.Context, umkmIDs []uuid.UUID) ([]domain.Produk, error) {
+		var products []domain.Produk
+	
+		// Menggunakan GORM untuk query dengan kondisi `IN`
+		if err := r.db.WithContext(ctx).Where("umkm_id IN ?", umkmIDs).Find(&products).Error; err != nil {
+			return nil, err
+		}
+	
+		return products, nil
 	}

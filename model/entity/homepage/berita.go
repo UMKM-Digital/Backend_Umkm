@@ -11,7 +11,7 @@ type BeritaFilterEntity struct {
 	Image   string `json:"image"`
 	Content string `json:"content"`
 	Author  string `json:"author"` // Ubah dari int ke string untuk menyimpan nama
-	Created_at time.Time
+	Created_at time.Time `json:"created_at"`
 }
 
 func ToBeritaFilterEntity(berita domain.Berita) BeritaFilterEntity {

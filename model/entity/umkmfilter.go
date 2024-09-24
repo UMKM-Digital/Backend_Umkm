@@ -11,23 +11,42 @@ type UmkmFilterEntity struct {
 	Name string `json:"name"`
 	Gambar domain.JSONB `json:"gambar"`
 	Lokasi string `json:"lokasi"`
-	// KategoriUmkm domain.JSONB `json:"kategori_umkm_id"`
+	PenanggunagJawab string `json:"nama_penanggung_jawab"`
+	KategoriUmkm domain.JSONB `json:"kategori_umkm_id"`
+	 TotalProduk        int           `json:"total_produk"`
 }
 
-func ToUmkmFilterEntity(umkm domain.UMKM) UmkmFilterEntity {
+func ToUmkmFilterEntity(umkm domain.UMKM, products []domain.Produk) UmkmFilterEntity {
+	totalProduk := CalculateTotalProdukByUmkm(umkm.IdUmkm, products)
 	return UmkmFilterEntity{
 	Id: umkm.IdUmkm,
 	Name: umkm.Name,
 	Gambar: umkm.Images,
 	Lokasi: umkm.Lokasi,
-	// KategoriUmkm: umkm.KategoriUmkmId,
+	PenanggunagJawab: umkm.NamaPenanggungJawab,
+	KategoriUmkm: umkm.KategoriUmkmId,
+	TotalProduk:        totalProduk, // Menambahkan total produk
 	}
 }
 
-func ToUmkmfilterEntities(umkm []domain.UMKM) []UmkmFilterEntity {
+func ToUmkmfilterEntities(umkmList []domain.UMKM, products []domain.Produk) []UmkmFilterEntity {
     var umkmEntities []UmkmFilterEntity
-    for _, umkm := range umkm {
-        umkmEntities = append(umkmEntities, ToUmkmFilterEntity(umkm))
+    for _, umkm := range umkmList {
+        umkmEntity := ToUmkmFilterEntity(umkm, products)
+        umkmEntities = append(umkmEntities, umkmEntity)
     }
     return umkmEntities
 }
+
+
+//menghitung produk
+func CalculateTotalProdukByUmkm(umkmId uuid.UUID, products []domain.Produk) int {
+    total := 0
+    for _, produk := range products {
+        if produk.UmkmId == umkmId {
+            total++
+        }
+    }
+    return total
+}
+

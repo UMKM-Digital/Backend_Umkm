@@ -1,6 +1,7 @@
 package produkrepo
 
 import (
+	"context"
 	"umkm/model/domain"
 
 	"github.com/google/uuid"
@@ -13,4 +14,5 @@ type CreateProduk interface {
 	// ProdukById(id uuid.UUID) (domain.Produk, error)
 	GetProduk(ProdukId uuid.UUID, filters string, limit int, page int, kategori_produk_id string) ([]domain.Produk, int, int, int, *int, *int, error)
 	UpdatedProduk(ProdukId uuid.UUID, produk domain.Produk) (domain.Produk, error)
+	GetProductsByUmkmIds(ctx context.Context, umkmIDs []uuid.UUID) ([]domain.Produk, error)
 }

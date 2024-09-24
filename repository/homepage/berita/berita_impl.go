@@ -45,7 +45,7 @@ func (repo *BeritaRepoImpl)  GetBeritaList(ctx context.Context, limit int, page 
     }
 
     // Filter berdasarkan beritaIDs
-    err =  query.Preload("User").Find(&berita).Error
+    err =  query.Preload("User").Order("created_at ASC").Find(&berita).Error
     if err != nil {
         return nil, 0, 0, 0, nil, nil, err
     }
