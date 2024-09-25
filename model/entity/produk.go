@@ -59,3 +59,73 @@ func ToProdukEntities(produklist []domain.Produk) []ProdukList {
     }
     return produkEntities
 }
+
+
+type ProdukWebEntity struct {
+	IdProduk   uuid.UUID `json:"id"`
+	Gambar domain.JSONB `json:"gambar_id"`
+	Name       string    `json:"nama"`
+	Harga int `json:"harga"`
+	NameUmkm   string    `json:"name"`
+}
+
+func ToProdukWebEntity(produk domain.Produk) ProdukWebEntity {
+	
+	return ProdukWebEntity{
+		IdProduk: produk.IdUmkm,
+		Gambar: produk.Gamabr,
+		Name:     produk.Nama,
+		Harga: produk.Harga,
+		NameUmkm: produk.Umkm.Name, // Assuming the Umkm relationship is populated
+	}
+}
+
+func ToProdukWebEntities(produkList []domain.Produk) []ProdukWebEntity {
+	var produkEntities []ProdukWebEntity
+	for _, produk := range produkList {
+		produkEntities = append(produkEntities, ToProdukWebEntity(produk))
+	}
+	return produkEntities
+}
+
+
+
+
+type ProdukWebIdEntity struct {
+	IdProduk   uuid.UUID `json:"id"`
+	Gambar domain.JSONB `json:"gambar_id"`
+	Name       string    `json:"nama"`
+	KategdoriProduk domain.JSONB `json:"kategori_produk_id"`
+	Harga int `json:"harga"`
+	NameUmkm   string    `json:"name"`
+	Satuan int `json:"satuan"`
+	MinPesanan int `json:"min_pesanan"`
+	Deskripsi string `json:"deskripsi"`
+	NoKontak             string    `json:"no_kontak"`
+	IdUmkm uuid.UUID `json:"id_umkm"`
+}
+
+func ToProdukWebIdEntity(produk domain.Produk) ProdukWebIdEntity {
+	
+	return ProdukWebIdEntity{
+		IdProduk: produk.IdUmkm,
+		Gambar: produk.Gamabr,
+		Name:     produk.Nama,
+		Harga: produk.Harga, // Assuming the Umkm relationship is populated
+		NoKontak: produk.Umkm.NoKontak,
+		Satuan: produk.Satuan,
+		MinPesanan: produk.Min_pesanan,
+		Deskripsi: produk.Deskripsi,
+		KategdoriProduk: produk.KategoriProduk,
+		NameUmkm: produk.Umkm.Name,
+		IdUmkm: produk.Umkm.IdUmkm,
+	}
+}
+
+func ToProdukWebIdEntities(produkList []domain.Produk) []ProdukWebIdEntity {
+	var produkEntities []ProdukWebIdEntity
+	for _, produk := range produkList {
+		produkEntities = append(produkEntities, ToProdukWebIdEntity(produk))
+	}
+	return produkEntities
+}

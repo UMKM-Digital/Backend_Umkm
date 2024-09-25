@@ -120,3 +120,67 @@ func (repo *ProdukRepoImpl) GetProduk(ProdukId uuid.UUID, filters string, limit 
 	
 		return products, nil
 	}
+
+	func(repo *ProdukRepoImpl) GetProdukList(limit int, page int)([]domain.Produk,int, int, int, *int, *int, error){
+		var produk []domain.Produk
+
+		var totalcount int64
+
+	if limit <= 0 {
+        limit = 15
+    }
+	// Mendapatkan query dengan limit dan pagination
+	query, err := repo.produkQueryBuilder.GetBuilderProdukListWeb(limit, page )
+	if err != nil {
+		return nil, 0, 0, 0, nil, nil, err
+	}
+
+	err = query.Preload("Umkm").Order("created_at DESC").Find(&produk).Error
+	if err != nil {
+		return nil, 0, 0, 0, nil, nil, err
+	}
+
+	ProdukQueryBuilder, err := repo.produkQueryBuilder.GetBuilderProdukListWeb( 0, 0)
+	if err != nil {
+		return nil, 0, 0, 0, nil, nil, err
+	}
+
+	err = ProdukQueryBuilder.Model(&domain.Produk{}).Count(&totalcount).Error
+	if err != nil {
+		return nil, 0, 0, 0, nil, nil, err
+	}
+	totalPages := 1
+    if limit > 0 {
+        totalPages = int((totalcount + int64(limit) - 1) / int64(limit))
+    }
+
+    // Jika page > totalPages, return kosong
+    if page > totalPages {
+        return nil, int(totalcount), page, totalPages, nil, nil, nil
+    }
+
+    currentPage := page
+
+    // Tentukan nextPage dan prevPage
+    var nextPage *int
+    if currentPage < totalPages {
+        np := currentPage + 1
+        nextPage = &np
+    }
+
+    var prevPage *int
+    if currentPage > 1 {
+        pp := currentPage - 1
+        prevPage = &pp
+    }
+
+	return produk, int(totalcount), currentPage, totalPages, nextPage, prevPage, nil
+	}
+
+	func(repo *ProdukRepoImpl) FindWebId(id uuid.UUID) (domain.Produk, error){
+		var produk domain.Produk
+	if err := repo.db.Preload("Umkm").Find(&produk, "id = ?", id).Error; err != nil {
+		return produk, err
+	}
+	return produk, nil
+	}

@@ -338,5 +338,25 @@ func imageExists(existingGambar []map[string]interface{}, imgID string) bool {
     return false
 }
 
+func (service *ProdukServiceImpl) 	GetProduk(limit int, page int) ([]entity.ProdukWebEntity,int, int, int, *int, *int, error){
+	GetProdukList, totalCount, currentPage, totalPages, nextPage, prevPage, err := service.produkrepository.GetProdukList(limit, page)
+    if err != nil {
+        return nil, 0, 0, 0, nil, nil, err
+    }
 
-//hitung produk
+	Produkresponse := entity.ToProdukWebEntities(GetProdukList)
+
+	return Produkresponse, totalCount, currentPage, totalPages, nextPage, prevPage, nil
+}
+
+func(service *ProdukServiceImpl) GetProdukWebId(id uuid.UUID)(entity.ProdukWebIdEntity, error){
+	GetProduk, errGetProduk := service.produkrepository.FindWebId(id)
+
+	if errGetProduk != nil {
+		return entity.ProdukWebIdEntity{}, errGetProduk
+	}
+
+	return entity.ToProdukWebIdEntity(GetProduk), nil
+}
+
+

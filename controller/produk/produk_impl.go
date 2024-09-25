@@ -115,7 +115,7 @@ func (controller *ProdukControllerImpl) GetProdukId(c echo.Context) error{
 		return c.JSON(http.StatusNotFound, model.ResponseToClient(http.StatusNotFound, false, errGetProduk.Error(), nil))
 	}
 
-	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "berhasil mengambil id transaksi", getProduk))
+	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "berhasil mengambil id produk", getProduk))
 }
 
 
@@ -261,4 +261,49 @@ func (controller *ProdukControllerImpl) UpdateProduk(c echo.Context) error {
 
     log.Printf("Product updated successfully with ID: %s", id)
     return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "Data berhasil diupdate", updatedProduk))
+}
+
+func(controller *ProdukControllerImpl) GetProdukListWeb(c echo.Context) error{
+	limitStr := c.QueryParam("limit")
+    pageStr := c.QueryParam("page")
+
+   
+    limit, err := strconv.Atoi(limitStr)
+    if err != nil || limit <= 0 {
+        limit = 10 
+    }
+
+    page, err := strconv.Atoi(pageStr)
+    if err != nil || page <= 0 {
+        page = 1
+    }
+
+	getProduk,totalCount, currentPage, totalPages, nextPage, prevPage, errGetProduk := controller.Produk.GetProduk(limit, page)
+
+	if errGetProduk != nil {
+		return c.JSON(http.StatusInternalServerError, model.ResponseToClientpagi(http.StatusInternalServerError, "false", err.Error(), model.Pagination{}, nil))
+	}
+
+	pagination := model.Pagination{
+        CurrentPage:  currentPage,
+        NextPage:     nextPage,
+        PrevPage:     prevPage,
+        TotalPages:   totalPages,
+        TotalRecords: totalCount,
+    }
+
+	return c.JSON(http.StatusOK, model.ResponseToClientpagi(http.StatusOK, "true", "berhasil", pagination, getProduk))
+}
+
+func(controller *ProdukControllerImpl) GetProdukWebId(c echo.Context) error{
+	IdProduk := c.Param("id")
+	id, _ := uuid.Parse(IdProduk)
+
+	getProduk, errGetProduk := controller.Produk.GetProdukWebId(id)
+
+	if errGetProduk != nil {
+		return c.JSON(http.StatusNotFound, model.ResponseToClient(http.StatusNotFound, false, errGetProduk.Error(), nil))
+	}
+
+	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "berhasil mengambil id produk", getProduk))
 }

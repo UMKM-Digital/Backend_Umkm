@@ -11,6 +11,7 @@ import (
 type ProdukQueryBuilder interface {
 	querybuilder.BaseQueryBuilderList
 	GetBuilderProduk(filters string, limit int, page int, kategori_produk_id string) (*gorm.DB, error) 
+	GetBuilderProdukListWeb( limit int, page int) (*gorm.DB, error) 
 }
 
 type ProdukQueryBuilderImpl struct {
@@ -45,6 +46,26 @@ func (produkQueryBuilder *ProdukQueryBuilderImpl) GetBuilderProduk(filters strin
 		}
 		query = query.Where(strings.Join(queryConditions, " OR "), queryParams...)
 	}
+
+	if limit <= 0 {
+        limit = 15
+    }
+
+
+	query, err := produkQueryBuilder.GetQueryBuilderList(query, limit, page)
+	if err != nil {
+		return nil, err
+	}
+
+	query = query.Preload("Umkm")
+
+	return query, nil
+}
+
+func (produkQueryBuilder *ProdukQueryBuilderImpl) GetBuilderProdukListWeb( limit int, page int) (*gorm.DB, error) {
+	query := produkQueryBuilder.db
+
+	// Implementasi filter di sini
 
 	if limit <= 0 {
         limit = 15

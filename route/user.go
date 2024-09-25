@@ -206,6 +206,9 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	Produk.GET("/list/:umkm_id", userProdukController.GetprodukList)
 	Produk.GET("/:id", userProdukController.GetProdukId)
 	Produk.PUT("/update/:id", userProdukController.UpdateProduk)
+	Produk.GET("/list", userProdukController.GetProdukListWeb)
+	Produk.GET("/list/:id", userProdukController.GetProdukWebId)
+
 
 	//testimonial
 	Testimonial := g.Group("/testimonial")
