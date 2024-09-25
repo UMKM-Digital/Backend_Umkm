@@ -2,6 +2,9 @@ package umkmservice
 
 import (
 	"context"
+	"encoding/json"
+	"log"
+	"os"
 
 	// "database/sql"
 	// "encoding/json"
@@ -242,4 +245,133 @@ func (service *UmkmServiceImpl) GetUmkmListWeb(ctx context.Context, userId int) 
 
 	// Convert UMKM entities to UmkmEntity format
 	return entity.ToUmkmListEntities(umkmList), nil
+}
+
+
+func(service *UmkmServiceImpl) GetUmkmId(id uuid.UUID)(entity.UmkmEntity, error){
+	GetUmkm, errGetUmkm := service.umkmrepository.GetUmkmID(id)
+
+	if errGetUmkm != nil {
+		return entity.UmkmEntity{}, errGetUmkm
+	}
+
+	return entity.ToUmkmEntity(GetUmkm), nil
+}
+
+func (service *UmkmServiceImpl) UpdateUmkmId(request web.Updateumkm, umkmid uuid.UUID, files []*multipart.FileHeader) (map[string]interface{}, error) {
+    // Ambil data UMKM berdasarkan ID
+    getUmkmById, err := service.umkmrepository.GetUmkmID(umkmid)
+    if err != nil {
+        return nil, err
+    }
+
+     // Hapus gambar lama jika ada
+	// Hapus gambar lama jika ada
+// Hapus gambar lama jika ada
+// Hapus gambar lama jika ada
+if images, ok := getUmkmById.Images["urls"].([]interface{}); ok {
+    for _, img := range images {
+        // Cek apakah gambar bertipe string
+        if imgPath, ok := img.(string); ok {
+            oldImagePath := imgPath // Pastikan path gambar tidak mengandung "uploads/" lagi
+            log.Printf("Attempting to remove old image: %s", oldImagePath) // Log path yang ingin dihapus
+
+            // Cek apakah file ada sebelum dihapus
+            if _, err := os.Stat(oldImagePath); err == nil {
+                if err := os.Remove(oldImagePath); err != nil {
+                    log.Printf("Failed to remove old image %s: %v", oldImagePath, err)
+                } else {
+                    log.Printf("Successfully removed old image: %s", oldImagePath)
+                }
+            } else {
+                log.Printf("Image does not exist: %s", oldImagePath)
+            }
+        } else {
+            log.Printf("Invalid image type: %v", img)
+        }
+    }
+} else {
+    log.Printf("Failed to parse images from UMKM")
+}
+
+
+
+
+    // Simpan gambar baru di folder uploads
+	var imageUrls []string
+	for _, file := range files {
+		// Mendapatkan ekstensi file
+		ext := filepath.Ext(file.Filename)
+		// Menghasilkan nama file acak dengan ekstensi yang sesuai
+		filename := generateRandomFileName(ext)
+		filePath := fmt.Sprintf("uploads/%s", filename)
+	
+		// Gunakan helper untuk menyimpan file
+		if err := helper.SaveFile(file, filePath); err != nil {
+			return nil, err
+		}
+	
+		// Tambahkan path gambar baru ke array imageUrls
+		imageUrls = append(imageUrls, filePath)  // Format: uploads/filename.jpg
+	}
+	
+
+ // Mengupdate KategoriUmkmId
+ var kategoriUmkm domain.JSONB
+ if len(request.Kategori_Umkm_Id) == 0 {
+	 kategoriUmkm = getUmkmById.KategoriUmkmId // Pakai data lama jika tidak ada perubahan
+ } else {
+	 if err := json.Unmarshal(request.Kategori_Umkm_Id, &kategoriUmkm); err != nil {
+		 return nil, fmt.Errorf("format kategori_umkm_id tidak valid: %v", err)
+	 }
+ }
+
+    // Tentukan informasi_jambuka (gunakan data lama jika input kosong)
+    var informasiJamBuka domain.JSONB
+    if len(request.Informasi_JamBuka) == 0 {
+        informasiJamBuka = getUmkmById.InformasiJambuka // Pakai data lama jika tidak ada perubahan
+    } else {
+        if err := json.Unmarshal(request.Informasi_JamBuka, &informasiJamBuka); err != nil {
+            return nil, fmt.Errorf("format informasi_jambuka tidak valid: %v", err)
+        }
+    }
+
+    // Tentukan maps (gunakan data lama jika input kosong)
+    var maps domain.JSONB
+    if len(request.Maps) == 0 {
+        maps = getUmkmById.Maps // Pakai data lama jika tidak ada perubahan
+    } else {
+        if err := json.Unmarshal(request.Maps, &maps); err != nil {
+            return nil, fmt.Errorf("format maps tidak valid: %v", err)
+        }
+    }
+
+    // Buat data produk yang akan diperbarui
+    produkRequest := domain.UMKM{
+        Name:                request.Name,
+        NoNpwp:              request.NoNpwp,
+        NamaPenanggungJawab: request.Nama_Penanggung_Jawab,
+        NoKontak:            request.No_Kontak,
+        Lokasi:              request.Lokasi,
+		KategoriUmkmId:      kategoriUmkm, // Update KategoriUmkmId di sini
+		InformasiJambuka: informasiJamBuka,
+        Images: map[string]interface{}{
+            "urls": imageUrls,  // Format gambar baru yang disimpan
+        },
+    }
+
+    // Update data UMKM di repository
+    updatedUmkm, err := service.umkmrepository.UpdateUmkmId(umkmid, produkRequest) // Tangkap dua nilai
+    if err != nil {
+        return nil, err
+    }
+
+    // Return response sukses
+    response := map[string]interface{}{
+        "code":    200,
+        "message": "UMKM berhasil diperbarui",
+        "data":    updatedUmkm, // Kembalikan hasil update
+    }
+
+    return response, nil
 }

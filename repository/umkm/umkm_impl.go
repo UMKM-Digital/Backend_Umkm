@@ -2,6 +2,7 @@ package umkmrepo
 
 import (
 	"context"
+	"errors"
 	"umkm/model/domain"
 	query_builder_umkm "umkm/query_builder/umkm"
 
@@ -117,4 +118,19 @@ func(repo *RepoUmkmImpl) GetUmkmListWeb(ctx context.Context, umkmIds []uuid.UUID
 		return []domain.UMKM{}, err
 	}
 	return umkm, nil
+}
+
+func(repo *RepoUmkmImpl) GetUmkmID(id uuid.UUID)(domain.UMKM, error){
+    var umkm domain.UMKM
+	if err := repo.db.First(&umkm, "id = ?", id).Error; err != nil {
+		return umkm, err
+	}
+	return umkm, nil
+}
+
+func(repo *RepoUmkmImpl) UpdateUmkmId(id uuid.UUID, umkm domain.UMKM)(domain.UMKM, error){
+    if err := repo.db.Model(&domain.UMKM{}).Where("id = ?", id).Updates(umkm).Error; err != nil {
+        return domain.UMKM{}, errors.New("gagal memperbarui umkm")
+    }
+    return umkm, nil
 }
