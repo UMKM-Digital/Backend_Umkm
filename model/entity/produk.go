@@ -41,6 +41,7 @@ type ProdukList struct{
 	Name string `json:"nama"`
 	Images domain.JSONB `json:"gambar_id"`
 	KategdoriProduk domain.JSONB `json:"kategori_produk_id"`
+	Harga int `json:"harga"`
 }
 
 func ToProdukList(produk domain.Produk) ProdukList{
@@ -49,6 +50,7 @@ func ToProdukList(produk domain.Produk) ProdukList{
 		Name: produk.Nama,
 		Images: produk.Gamabr,
 		KategdoriProduk: produk.KategoriProduk,
+		Harga: produk.Harga,
 	}
 }
 
@@ -103,6 +105,8 @@ type ProdukWebIdEntity struct {
 	Deskripsi string `json:"deskripsi"`
 	NoKontak             string    `json:"no_kontak"`
 	IdUmkm uuid.UUID `json:"id_umkm"`
+	DeskripsiUmkm string `json:"deskripsi_umkm"`
+	GambarUmkm domain.JSONB `json:"gambar_umkm"`
 }
 
 func ToProdukWebIdEntity(produk domain.Produk) ProdukWebIdEntity {
@@ -119,6 +123,8 @@ func ToProdukWebIdEntity(produk domain.Produk) ProdukWebIdEntity {
 		KategdoriProduk: produk.KategoriProduk,
 		NameUmkm: produk.Umkm.Name,
 		IdUmkm: produk.Umkm.IdUmkm,
+		DeskripsiUmkm: produk.Umkm.Deskripsi,
+		GambarUmkm: produk.Umkm.Images,
 	}
 }
 

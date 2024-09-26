@@ -186,3 +186,79 @@ func ToUmkmEntitiesWebList(umkmList []domain.UMKM) []UmkmEntityWebList {
 	}
 	return umkmListEntities
 }
+
+
+//detailumkm
+
+type UmkmDetailEntity struct{
+	Id uuid.UUID `json:"id"`
+	Gambar domain.JSONB `json:"gambar_umkm"`
+	Name string `json:"name_umkm"`
+	KatageoriUmkm domain.JSONB `json:"kategori_umkmk"`
+	NoKontak string `json:"no_kontak"`
+	Deskripsi string `json:"deskripsi_umkm"`
+	InformasiJambuka domain.JSONB `json:"jambuka_umkm"`
+	Lokasi string `json:"lokasi"`
+	Maps domain.JSONB `json:"maps"`
+	Produk []ProdukEntityDetailList `json:"data"`
+}
+
+type ProdukEntityDetailList struct {
+	Id     uuid.UUID   `json:"id"`   
+	Gambar domain.JSONB `json:"gambar_porduk"` // Menyimpan gambar produk
+	Nama string `json:"nama_produk"`
+	Harga int `json:"harga"`
+}
+
+func ToProdukEntityDetailList(produk domain.Produk) ProdukEntityDetailList {
+	return ProdukEntityDetailList{
+		Id:     produk.IdUmkm,     // Pastikan ini adalah ID produk yang benar
+		Gambar: produk.Gamabr, // Perbaiki dari Gamabr ke Gambar
+		Nama: produk.Nama,
+		Harga: produk.Harga,
+	}
+}
+
+func ToProdukEntitiesDetailList(produkList []domain.Produk) []ProdukEntityDetailList {
+	// Urutkan produk berdasarkan created_at dari terlama ke terbaru
+	sort.Slice(produkList, func(i, j int) bool {
+		return produkList[i].CreatedAt.Before(produkList[j].CreatedAt)
+	})
+
+	// Konversi seluruh produk ke ProdukEntityDetailList tanpa limit
+	var produkListEntities []ProdukEntityDetailList
+	for _, produk := range produkList {
+		produkListEntities = append(produkListEntities, ToProdukEntityDetailList(produk))
+	}
+	return produkListEntities
+}
+
+// ToUmkmEntityWebList mengonversi UMKM menjadi UmkmEntityWebList
+func ToUmkmEntityDetailList(umkm domain.UMKM) UmkmDetailEntity {
+	
+
+	// Panggil fungsi untuk mendapatkan 3 produk terbaru
+	produkList := ToProdukEntitiesDetailList(umkm.Produk)
+
+	return UmkmDetailEntity{
+		Id:           umkm.IdUmkm,
+		Name:         umkm.Name,
+		Gambar:       umkm.Images, // Pastikan ini adalah field gambar UMKM yang benar
+		Lokasi:       umkm.Lokasi,
+		KatageoriUmkm: umkm.KategoriUmkmId,
+		Deskripsi: umkm.Deskripsi,
+		InformasiJambuka: umkm.InformasiJambuka,
+		NoKontak: umkm.NoKontak,
+		Maps: umkm.Maps,
+		Produk: produkList,
+	}
+}
+
+// ToUmkmEntitiesWebList mengonversi daftar UMKM menjadi daftar UmkmEntityWebList
+func ToUmkmEntitiesDetailList(umkmList []domain.UMKM) []UmkmDetailEntity {
+	var umkmListEntities []UmkmDetailEntity
+	for _, umkm := range umkmList {
+		umkmListEntities = append(umkmListEntities, ToUmkmEntityDetailList(umkm)) // Perbaiki penamaan fungsi
+	}
+	return umkmListEntities
+}

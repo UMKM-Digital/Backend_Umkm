@@ -6,6 +6,7 @@ import (
 	"log"
 	"mime/multipart"
 	"net/http"
+	"strconv"
 
 	// "umkm/helper"
 	"umkm/helper"
@@ -222,10 +223,10 @@ func (controller *UmkmControllerImpl) GetUmmkmList(c echo.Context) error {
     filters, limit, page := helper.ExtractFilter(c.QueryParams())
     kategoriumkm := c.QueryParam("kategori")
     
-	getUmkm,totalCount, currentPage, totalPages, nextPage, prevPage, errGetTestimoni := controller.umkmservice.GetUmkmList(filters, limit, page, kategoriumkm)
+	getUmkm,totalCount, currentPage, totalPages, nextPage, prevPage, errGetUmkmDetail := controller.umkmservice.GetUmkmList(filters, limit, page, kategoriumkm)
 
-	if errGetTestimoni != nil {
-		return c.JSON(http.StatusInternalServerError, model.ResponseToClientpagi(http.StatusInternalServerError, "false", errGetTestimoni.Error(), model.Pagination{}, nil))
+	if errGetUmkmDetail != nil {
+		return c.JSON(http.StatusInternalServerError, model.ResponseToClientpagi(http.StatusInternalServerError, "false", errGetUmkmDetail.Error(), model.Pagination{}, nil))
 	}
 
 	pagination := model.Pagination{
@@ -237,4 +238,95 @@ func (controller *UmkmControllerImpl) GetUmmkmList(c echo.Context) error {
 	}
 	
 	return c.JSON(http.StatusOK, model.ResponseToClientpagi(http.StatusOK, "true", "berhasil", pagination, getUmkm))
+}
+
+
+// func (controller *UmkmControllerImpl)  GetUmkmListDetial(c echo.Context) error {
+   
+//     IdUmkm := c.Param("id")
+// 	id, _ := uuid.Parse(IdUmkm)
+//      // Ambil parameter limit dan page dari query string
+//      limitStr := c.QueryParam("limit")
+//      pageStr := c.QueryParam("page")
+ 
+//      limit := 10
+//     page := 1
+
+//      if limitStr != "" {
+//         parsedLimit, err := strconv.Atoi(limitStr)
+//         if err == nil && parsedLimit > 0 {
+//             limit = parsedLimit
+//         }
+//     }
+
+//     // Parsing parameter page jika tersedia
+//     if pageStr != "" {
+//         parsedPage, err := strconv.Atoi(pageStr)
+//         if err == nil && parsedPage > 0 {
+//             page = parsedPage
+//         }
+//     }
+// 	getUmkmDetailList, totalCount, currentPage, totalPages, nextPage, prevPage, errGetUmkmDetailList := controller.umkmservice.GetUmkmDetailList(id, limitStr, pageStr)
+
+    
+// 	pagination := model.Pagination{
+// 		CurrentPage:  currentPage,
+// 		NextPage:     nextPage,
+// 		PrevPage:     prevPage,
+// 		TotalPages:   totalPages,
+// 		TotalRecords: totalCount,
+// 	}
+
+// 	if errGetUmkmDetailList != nil {
+// 		return c.JSON(http.StatusInternalServerError, model.ResponseToClientpagi(http.StatusInternalServerError, "false", errGetUmkmDetailList.Error(), model.Pagination{}, nil))
+// 	}
+
+// 	return c.JSON(http.StatusOK, model.ResponseToClientpagi(http.StatusOK, "true", "success",pagination, getUmkmDetailList))
+// }
+
+
+func (controller *UmkmControllerImpl) GetUmkmListDetial(c echo.Context) error {
+    IdUmkm := c.Param("id")
+    id, _ := uuid.Parse(IdUmkm)
+
+    // Ambil parameter limit dan page dari query string
+    limitStr := c.QueryParam("limit")
+    pageStr := c.QueryParam("page")
+
+    // Default nilai untuk limit dan page jika tidak disediakan
+    limit := 10
+    page := 1
+
+    // Parsing parameter limit jika tersedia
+    if limitStr != "" {
+        parsedLimit, err := strconv.Atoi(limitStr)
+        if err == nil && parsedLimit > 0 {
+            limit = parsedLimit
+        }
+    }
+
+    // Parsing parameter page jika tersedia
+    if pageStr != "" {
+        parsedPage, err := strconv.Atoi(pageStr)
+        if err == nil && parsedPage > 0 {
+            page = parsedPage
+        }
+    }
+
+    // Panggil service untuk mendapatkan detail UMKM dengan pagination
+    getUmkmDetailList, totalCount, currentPage, totalPages, nextPage, prevPage, errGetUmkmDetailList := controller.umkmservice.GetUmkmDetailList(id, limit, page)
+
+    pagination := model.Pagination{
+        		CurrentPage:  currentPage,
+        		NextPage:     nextPage,
+        		PrevPage:     prevPage,
+        		TotalPages:   totalPages,
+        		TotalRecords: totalCount,
+        	}
+
+    if errGetUmkmDetailList != nil {
+        return c.JSON(http.StatusInternalServerError, model.ResponseToClientpagi(http.StatusInternalServerError, "false", errGetUmkmDetailList.Error(),model.Pagination{}, nil))
+    }
+
+    return c.JSON(http.StatusOK, model.ResponseToClientpagi(http.StatusOK, "true", "success",pagination, getUmkmDetailList))
 }

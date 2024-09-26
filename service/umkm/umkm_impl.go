@@ -389,3 +389,14 @@ if images, ok := getUmkmById.Images["urls"].([]interface{}); ok {
 
 		return umkmEntites,totalCount, currentPage, totalPages, nextPage,prevPage, nil
 	}
+
+
+	func(service *UmkmServiceImpl) GetUmkmDetailList(id uuid.UUID, limit int, page int)([]entity.UmkmDetailEntity,int, int, int, *int, *int, error){
+		GetTestimonialList,totalCount, currentPage, totalPages, nextPage, prevPage, err := service.umkmrepository.GetUmkmListDetailPaginated(id, limit, page)
+		if err != nil {
+			return nil, 0, 0, 0, nil, nil, err
+		}
+		umkmDetial := entity.ToUmkmEntitiesDetailList(GetTestimonialList)
+
+		return umkmDetial,totalCount, currentPage, totalPages, nextPage,prevPage, nil
+	}

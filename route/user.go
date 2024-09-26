@@ -182,6 +182,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	Umkm.GET("/:id", userUmkmController.GetUmkmId)
 	Umkm.PUT("/edit/:umkm_id", userUmkmController.UpdateUmkm)
 	Umkm.GET("/all/list", userUmkmController.GetUmmkmList)
+	Umkm.GET("/detail/list/:id", userUmkmController.GetUmkmListDetial)
 
 	//transaksi
 	Transaksi := g.Group("/transaksi")

@@ -12,6 +12,7 @@ type UmkmQueryBuilder interface {
 	querybuilder.BaseQueryBuilderList
 	GetBuilder(filters string, limit int, page int) (*gorm.DB, error)
     GetBuilderWebList(filters string, limit int, page int, KategoriUmkm string) (*gorm.DB, error)
+    GetBuilderDetailList( limit int, page int) (*gorm.DB, error) 
 }
 
 type UmkmQueryBuilderImpl struct {
@@ -83,6 +84,24 @@ func (umkmQueryBuilder *UmkmQueryBuilderImpl) GetBuilderWebList(filters string, 
 
     // Apply pagination
     query = query.Preload("HakAkses")
+
+    return query, nil
+}
+
+func (umkmQueryBuilder *UmkmQueryBuilderImpl) GetBuilderDetailList( limit int, page int) (*gorm.DB, error) {
+    query := umkmQueryBuilder.db
+
+    // Set default limit jika limit == 0
+    if limit <= 0 {
+        limit = 15
+    }
+
+    // Hitung offset
+    offset := (page - 1) * limit
+    query = query.Offset(offset).Limit(limit)
+
+    // Apply pagination
+    query = query.Preload("Produk")
 
     return query, nil
 }

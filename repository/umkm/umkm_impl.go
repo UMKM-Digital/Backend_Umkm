@@ -194,3 +194,71 @@ func (repo *RepoUmkmImpl) GetUmkmList(filters string, limit int, page int, kateg
 
 	return umkm, int(totalcount), currentPage, totalPages, nextPage, prevPage, nil
 }
+
+
+// func(RepoUmkmImpl *RepoUmkmImpl) GetUmkmListDetailId(id uuid.UUID) ([]domain.UMKM, error){
+//     var umkm []domain.UMKM
+// 	err := RepoUmkmImpl.db.Preload("Produk").Find(&umkm, "id = ?", id).Error
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return umkm, nil
+// }
+
+func (repo *RepoUmkmImpl) GetUmkmListDetailPaginated(id uuid.UUID, limit int, page int) ([]domain.UMKM, int, int, int, *int, *int, error) {
+    var umkm []domain.UMKM
+    var totalCount int64
+
+    // Menghitung total data sebelum melakukan query dengan pagination
+    err := repo.db.Model(&domain.UMKM{}).Where("id = ?", id).Error
+    if err != nil {
+        return nil, 0, 0, 0, nil, nil, err
+    }
+
+    // Menghitung offset berdasarkan halaman saat ini
+    offset := (page - 1) * limit
+
+    // Menggunakan query builder untuk mendapatkan detail UMKM
+    err = repo.db.Preload("Produk").
+        Where("id = ?", id).
+        Find(&umkm).Error // Memuat UMKM, tetapi tidak melakukan limit di sini
+    if err != nil {
+        return nil, 0, 0, 0, nil, nil, err
+    }
+
+    // Mengambil produk dengan pagination
+    var produkList []domain.Produk
+    err = repo.db.Model(&domain.Produk{}).
+        Where("umkm_id = ?", id). // Ganti `umkm_id` dengan nama kolom yang benar jika berbeda
+        Limit(limit).
+        Offset(offset).
+        Count(&totalCount).
+        Find(&produkList).Error
+
+    if err != nil {
+        return nil, 0, 0, 0, nil, nil, err
+    }
+
+    // Menghitung total halaman
+    totalPages := int((totalCount + int64(limit) - 1) / int64(limit))
+
+    // Menghitung halaman berikutnya dan sebelumnya
+    var nextPage *int
+    if page < totalPages {
+        nextPageVal := page + 1
+        nextPage = &nextPageVal
+    }
+
+    var prevPage *int
+    if page > 1 {
+        prevPageVal := page - 1
+        prevPage = &prevPageVal
+    }
+
+    // Menambahkan produk yang telah dipaginasikan ke dalam UMKM
+    for i := range umkm {
+        umkm[i].Produk = produkList // Mengupdate produk untuk UMKM
+    }
+
+    return umkm, int(totalCount), page, totalPages, nextPage, prevPage, nil
+}
