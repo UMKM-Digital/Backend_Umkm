@@ -2,6 +2,7 @@ package entity
 
 import (
 	"umkm/model/domain"
+	"sort"
 	"github.com/google/uuid"
 )
 
@@ -118,3 +119,70 @@ func ToUmkmEntities(umkmList []domain.UMKM) []UmkmEntity {
 	return umkmListEntities
 }
 
+
+// ProdukEntityWebList menyimpan informasi produk yang akan ditampilkan di web
+type ProdukEntityWebList struct {
+	Id     uuid.UUID   `json:"id"`   
+	Gambar domain.JSONB `json:"gambar"` // Menyimpan gambar produk
+}
+
+// UmkmEntityWebList menyimpan informasi UMKM yang akan ditampilkan di web
+type UmkmEntityWebList struct {
+	Id           uuid.UUID             `json:"id"` 
+	Name         string                `json:"name"`
+	Gambar       domain.JSONB          `json:"gambar"` // Menggunakan domain.JSONB untuk menyimpan gambar UMKM
+	Lokasi       string                `json:"lokasi"`
+	GambarProduk []ProdukEntityWebList  `json:"gambar_produk"` // Menyimpan daftar produk
+}
+
+// ToProdukEntityWebList mengonversi domain.Produk ke ProdukEntityWebList
+func ToProdukEntityWebList(produk domain.Produk) ProdukEntityWebList {
+	return ProdukEntityWebList{
+		Id:     produk.IdUmkm,     // Pastikan ini adalah ID produk yang benar
+		Gambar: produk.Gamabr, // Perbaiki dari Gamabr ke Gambar
+	}
+}
+
+// ToProdukEntitiesWebList mengonversi daftar produk menjadi daftar ProdukEntityWebList
+func ToProdukEntitiesWebList(produkList []domain.Produk) []ProdukEntityWebList {
+	// Urutkan produk berdasarkan created_at dari terbaru ke terlama
+	sort.Slice(produkList, func(i, j int) bool {
+		return produkList[i].Created_at.After(produkList[j].Created_at)
+	})
+
+	// Ambil maksimal 3 produk
+	var produkListEntities []ProdukEntityWebList
+	limit := 3
+	for i, produk := range produkList {
+		if i >= limit {
+			break
+		}
+		produkListEntities = append(produkListEntities, ToProdukEntityWebList(produk))
+	}
+	return produkListEntities
+}
+
+// ToUmkmEntityWebList mengonversi UMKM menjadi UmkmEntityWebList
+func ToUmkmEntityWebList(umkm domain.UMKM) UmkmEntityWebList {
+	
+
+	// Panggil fungsi untuk mendapatkan 3 produk terbaru
+	produkList := ToProdukEntitiesWebList(umkm.Produk)
+
+	return UmkmEntityWebList{
+		Id:           umkm.IdUmkm,
+		Name:         umkm.Name,
+		Gambar:       umkm.Images, // Pastikan ini adalah field gambar UMKM yang benar
+		Lokasi:       umkm.Lokasi,
+		GambarProduk: produkList,
+	}
+}
+
+// ToUmkmEntitiesWebList mengonversi daftar UMKM menjadi daftar UmkmEntityWebList
+func ToUmkmEntitiesWebList(umkmList []domain.UMKM) []UmkmEntityWebList {
+	var umkmListEntities []UmkmEntityWebList
+	for _, umkm := range umkmList {
+		umkmListEntities = append(umkmListEntities, ToUmkmEntityWebList(umkm)) // Perbaiki penamaan fungsi
+	}
+	return umkmListEntities
+}

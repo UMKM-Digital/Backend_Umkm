@@ -181,6 +181,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	Umkm.GET("/web/list", userUmkmController.GetUmkmListWeb, JWTProtection())
 	Umkm.GET("/:id", userUmkmController.GetUmkmId)
 	Umkm.PUT("/edit/:umkm_id", userUmkmController.UpdateUmkm)
+	Umkm.GET("/all/list", userUmkmController.GetUmmkmList)
 
 	//transaksi
 	Transaksi := g.Group("/transaksi")
@@ -203,7 +204,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	Produk := g.Group("/produk")
 	Produk.POST("/create", userProdukController.CreateProduk)
 	Produk.DELETE("/delete/:id", userProdukController.DeleteProdukId)
-	Produk.GET("/list/:umkm_id", userProdukController.GetprodukList)
+	Produk.GET("/list/all/:umkm_id", userProdukController.GetprodukList)
 	Produk.GET("/:id", userProdukController.GetProdukId)
 	Produk.PUT("/update/:id", userProdukController.UpdateProduk)
 	Produk.GET("/list", userProdukController.GetProdukListWeb)

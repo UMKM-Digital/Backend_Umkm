@@ -15,4 +15,5 @@ type CreateUmkm interface {
 	GetUmkmListWeb(ctx context.Context, umkmIds []uuid.UUID)([]domain.UMKM, error)
 	GetUmkmID(id uuid.UUID)(domain.UMKM, error)
 	UpdateUmkmId(id uuid.UUID, umkm domain.UMKM)(domain.UMKM, error)
+	GetUmkmList(filters string, limit int, page int, kategori_umkm string) ([]domain.UMKM, int, int, int, *int, *int, error) 
 }

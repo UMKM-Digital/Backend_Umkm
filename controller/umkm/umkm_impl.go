@@ -214,3 +214,24 @@ func (controller *UmkmControllerImpl) UpdateUmkm(c echo.Context) error {
     // Response sukses
     return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "berhasil di update", result))
 }
+
+func (controller *UmkmControllerImpl) GetUmmkmList(c echo.Context) error {
+    filters, limit, page := helper.ExtractFilter(c.QueryParams())
+    kategoriumkm := c.QueryParam("kategori")
+    
+	getUmkm,totalCount, currentPage, totalPages, nextPage, prevPage, errGetTestimoni := controller.umkmservice.GetUmkmList(filters, limit, page, kategoriumkm)
+
+	if errGetTestimoni != nil {
+		return c.JSON(http.StatusInternalServerError, model.ResponseToClientpagi(http.StatusInternalServerError, "false", errGetTestimoni.Error(), model.Pagination{}, nil))
+	}
+
+	pagination := model.Pagination{
+		CurrentPage:  currentPage,
+		NextPage:     nextPage,
+		PrevPage:     prevPage,
+		TotalPages:   totalPages,
+		TotalRecords: totalCount,
+	}
+	
+	return c.JSON(http.StatusOK, model.ResponseToClientpagi(http.StatusOK, "true", "berhasil", pagination, getUmkm))
+}

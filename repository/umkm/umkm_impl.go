@@ -134,3 +134,63 @@ func(repo *RepoUmkmImpl) UpdateUmkmId(id uuid.UUID, umkm domain.UMKM)(domain.UMK
     }
     return umkm, nil
 }
+
+func (repo *RepoUmkmImpl) GetUmkmList(filters string, limit int, page int, kategori_umkm string) ([]domain.UMKM, int, int, int, *int, *int, error) {
+    var umkm []domain.UMKM
+    var totalcount int64
+
+	if limit <= 0 {
+        limit = 15
+    }
+
+    if page <= 0 {
+        page = 1 // Default ke halaman pertama jika page <= 0
+    }
+    
+    query, err := repo.umkmQueryBuilder.GetBuilderWebList(filters, limit, page, kategori_umkm)
+	if err != nil {
+		return nil, 0, 0, 0, nil, nil, err
+	}
+
+
+    // Menggunakan Preload untuk mengambil produk terkait
+    err = query.Preload("Produk").Find(&umkm).Error
+    if err != nil {
+        return nil, 0, 0, 0, nil, nil, err
+    }
+
+    ProdukQueryBuilder, err := repo.umkmQueryBuilder.GetBuilderWebList(filters, 0, 0, kategori_umkm)
+	if err != nil {
+		return nil, 0, 0, 0, nil, nil, err
+	}
+    err = ProdukQueryBuilder.Model(&domain.UMKM{}).Count(&totalcount).Error
+	if err != nil {
+		return nil, 0, 0, 0, nil, nil, err
+	}
+    totalPages := 1
+    if limit > 0 {
+        totalPages = int((totalcount + int64(limit) - 1) / int64(limit))
+    }
+
+    // Jika page > totalPages, return kosong
+    if page > totalPages {
+        return nil, int(totalcount), page, totalPages, nil, nil, nil
+    }
+
+    currentPage := page
+
+    // Tentukan nextPage dan prevPage
+    var nextPage *int
+    if currentPage < totalPages {
+        np := currentPage + 1
+        nextPage = &np
+    }
+
+    var prevPage *int
+    if currentPage > 1 {
+        pp := currentPage - 1
+        prevPage = &pp
+    }
+
+	return umkm, int(totalcount), currentPage, totalPages, nextPage, prevPage, nil
+}
