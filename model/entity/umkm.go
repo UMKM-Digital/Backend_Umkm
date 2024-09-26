@@ -124,6 +124,7 @@ func ToUmkmEntities(umkmList []domain.UMKM) []UmkmEntity {
 type ProdukEntityWebList struct {
 	Id     uuid.UUID   `json:"id"`   
 	Gambar domain.JSONB `json:"gambar"` // Menyimpan gambar produk
+	Nama string `json:"nama_produk"`
 }
 
 // UmkmEntityWebList menyimpan informasi UMKM yang akan ditampilkan di web
@@ -140,6 +141,7 @@ func ToProdukEntityWebList(produk domain.Produk) ProdukEntityWebList {
 	return ProdukEntityWebList{
 		Id:     produk.IdUmkm,     // Pastikan ini adalah ID produk yang benar
 		Gambar: produk.Gamabr, // Perbaiki dari Gamabr ke Gambar
+		Nama: produk.Nama,
 	}
 }
 
