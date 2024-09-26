@@ -49,7 +49,7 @@ func (service *ProdukServiceImpl) CreateProduk(produk web.WebProduk, files map[s
 		for _, file := range files {
 			ext := filepath.Ext(file.Filename)
 			randomFileName := generateRandomFileName(ext)
-			newImagePath := filepath.Join("uploads/produk", randomFileName)
+			newImagePath := filepath.Join("uploads/Produk", randomFileName)
 
 			if err := helper.SaveFile(file, newImagePath); err != nil {
 				return nil, errors.New("failed to save image")
