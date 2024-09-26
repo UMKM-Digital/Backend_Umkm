@@ -75,7 +75,7 @@ func (controller *ProdukControllerImpl) CreateProduk(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, "Failed to parse form", nil))
 	}
 
-	files := c.Request().MultipartForm.File["images"]
+	files := c.Request().MultipartForm.File["gambar"]
 	fileHeaders := make(map[string]*multipart.FileHeader)
 	for _, file := range files {
 		fileHeaders[file.Filename] = file
