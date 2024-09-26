@@ -10,6 +10,7 @@ type UmkmRequest struct {
 	Informasi_JamBuka     json.RawMessage `json:"informasi_jambuka"`
 	No_Kontak             string          `json:"no_kontak"`
 	Lokasi                string          `json:"lokasi"`
+	Deskripsi                string          `json:"deskripsi"`
 	Maps                  json.RawMessage `json:"maps"`
 	Gambar                json.RawMessage `json:"gambar"`  // Field for images
 	UserId                int             `json:"user_id"` // Add UserId field
@@ -23,6 +24,7 @@ type Updateumkm struct{
 	Informasi_JamBuka     json.RawMessage `json:"informasi_jambuka"`
 	No_Kontak             string          `json:"no_kontak"`
 	Lokasi                string          `json:"lokasi"`
+	Deskripsi                string          `json:"deskripsi"`
 	Maps                  json.RawMessage `json:"maps"`
 	Gambar                json.RawMessage `json:"gambar"`
 }

@@ -173,6 +173,7 @@ func (controller *ProdukControllerImpl) UpdateProduk(c echo.Context) error {
     // Proses data produk lainnya
     name := c.FormValue("nama")
     deskripsistr := c.FormValue("deskripsi")
+	kategoriProdukID := c.FormValue("kategori_umkm_id")
     hargastr := c.FormValue("harga")
     harga, err := strconv.Atoi(hargastr)
     if err != nil {
@@ -229,19 +230,6 @@ func (controller *ProdukControllerImpl) UpdateProduk(c echo.Context) error {
     log.Printf("Number of gambar files received: %d", len(gambarFiles))
 
 
-	//katgeori
-	var kategori []string
-    i = 0
-    for {
-        kategoriValue := c.FormValue(fmt.Sprintf("kategori[%d]", i))
-        if kategoriValue == "" {
-            break
-        }
-        kategori = append(kategori, kategoriValue)
-        i++
-    }
-
-	log.Printf("Kategori yang diterima: %v", kategori)
     // Buat request untuk update produk
     request := web.UpdatedProduk{
         Name:           name,
@@ -249,7 +237,7 @@ func (controller *ProdukControllerImpl) UpdateProduk(c echo.Context) error {
         Satuan:         satuan,
         MinPesanan:     minpesanan,
         Deskripsi:      deskripsistr,
-		KategoriProduk: kategori,
+		KategoriProduk: json.RawMessage(kategoriProdukID),
     }
 
     // Update produk menggunakan service

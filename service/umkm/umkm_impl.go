@@ -101,6 +101,7 @@ func (service *UmkmServiceImpl) CreateUmkm(umkm web.UmkmRequest, userID int, fil
 		NoKontak:            umkm.No_Kontak,
 		Lokasi:              umkm.Lokasi,
 		Maps:                Maps,
+		Deskripsi: umkm.Deskripsi,
 	}
 
 	saveUmkm, errSaveUmkm := service.umkmrepository.CreateRequest(newUmkm)
@@ -127,6 +128,7 @@ func (service *UmkmServiceImpl) CreateUmkm(umkm web.UmkmRequest, userID int, fil
 		"images":                saveUmkm.Images,
 		"user_id":               userID,
 		"status":                hakAkses.Status,
+		"deskripsi": saveUmkm.Deskripsi,
 	}, nil
 }
 
@@ -317,14 +319,14 @@ if images, ok := getUmkmById.Images["urls"].([]interface{}); ok {
 	
 
  // Mengupdate KategoriUmkmId
- var kategoriUmkm domain.JSONB
- if len(request.Kategori_Umkm_Id) == 0 {
-	 kategoriUmkm = getUmkmById.KategoriUmkmId // Pakai data lama jika tidak ada perubahan
- } else {
-	 if err := json.Unmarshal(request.Kategori_Umkm_Id, &kategoriUmkm); err != nil {
-		 return nil, fmt.Errorf("format kategori_umkm_id tidak valid: %v", err)
-	 }
- }
+	var kategoriUmkm domain.JSONB
+	if len(request.Kategori_Umkm_Id) == 0 {
+		kategoriUmkm = getUmkmById.KategoriUmkmId // Pakai data lama jika tidak ada perubahan
+	} else {
+		if err := json.Unmarshal(request.Kategori_Umkm_Id, &kategoriUmkm); err != nil {
+			return nil, fmt.Errorf("format kategori_umkm_id tidak valid: %v", err)
+		}
+	}
 
     // Tentukan informasi_jambuka (gunakan data lama jika input kosong)
     var informasiJamBuka domain.JSONB
@@ -355,6 +357,7 @@ if images, ok := getUmkmById.Images["urls"].([]interface{}); ok {
         Lokasi:              request.Lokasi,
 		KategoriUmkmId:      kategoriUmkm, // Update KategoriUmkmId di sini
 		InformasiJambuka: informasiJamBuka,
+		Deskripsi: request.Deskripsi,
         Images: map[string]interface{}{
             "urls": imageUrls,  // Format gambar baru yang disimpan
         },

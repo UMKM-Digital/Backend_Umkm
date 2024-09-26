@@ -36,6 +36,7 @@ func (controller *UmkmControllerImpl) Create(c echo.Context) error {
     umkm.NoNpwp = c.FormValue("no_npwp")
     umkm.Nama_Penanggung_Jawab = c.FormValue("nama_penanggung_jawab")
     umkm.No_Kontak = c.FormValue("no_kontak")
+    umkm.Deskripsi = c.FormValue("deskripsi")
     umkm.Lokasi = c.FormValue("lokasi")
 
     // Handle JSON fields
@@ -182,6 +183,7 @@ func (controller *UmkmControllerImpl) UpdateUmkm(c echo.Context) error {
     kategoriUmkmID := c.FormValue("kategori_umkm_id")
     informasiJamBuka := c.FormValue("informasi_jam_buka")
     maps := c.FormValue("maps")
+    deskripsi := c.FormValue("deskripsi")
 
     log.Printf("Form values - Name: %s, NoNpwp: %s, KategoriUmkmId: %s, informasijambuka: %s, ", name, noNpwp, kategoriUmkmID, informasiJamBuka)
 
@@ -200,6 +202,7 @@ func (controller *UmkmControllerImpl) UpdateUmkm(c echo.Context) error {
         Nama_Penanggung_Jawab: namaPenanggungJawab,
         No_Kontak:          noKontak,
         Lokasi:             lokasi,
+        Deskripsi: deskripsi,
         Kategori_Umkm_Id:   json.RawMessage(kategoriUmkmID),
         Informasi_JamBuka: json.RawMessage(informasiJamBuka),
         Maps:               json.RawMessage(maps),

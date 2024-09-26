@@ -17,6 +17,7 @@ type UMKM struct {
     InformasiJambuka     JSONB     `gorm:"column:informasi_jambuka"`
     NoKontak             string    `gorm:"column:no_kontak"`
     Lokasi               string    `gorm:"column:lokasi"`
+    Deskripsi               string    `gorm:"column:deskripsi"`
     Maps                 JSONB     `gorm:"column:maps"`
     Images                 JSONB     `gorm:"column:gambar"` // Menggunakan JSONB untuk menyimpan URL gambar // Menyimpan URL gambar
     CreatedAt            time.Time `gorm:"column:created_at"`

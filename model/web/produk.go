@@ -26,7 +26,7 @@ type UpdatedProduk struct {
 	Satuan         int             `validate:"required" json:"satuan"`
 	MinPesanan     int             `validate:"required" json:"min_pesanan"`
 	Deskripsi      string          `validate:"required" json:"deskripsi"`
-	KategoriProduk  []string `validate:"required" json:"kategori_produk_id"`
+	KategoriProduk  json.RawMessage `validate:"required" json:"kategori_produk_id"`
 	  Index       int      `json:"index"`
 }
 

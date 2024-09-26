@@ -49,7 +49,7 @@ func (service *ProdukServiceImpl) CreateProduk(produk web.WebProduk, files map[s
 		for _, file := range files {
 			ext := filepath.Ext(file.Filename)
 			randomFileName := generateRandomFileName(ext)
-			newImagePath := filepath.Join("uploads", randomFileName)
+			newImagePath := filepath.Join("uploads/produk", randomFileName)
 
 			if err := helper.SaveFile(file, newImagePath); err != nil {
 				return nil, errors.New("failed to save image")
@@ -227,7 +227,7 @@ func (service *ProdukServiceImpl) UpdateProduk(request web.UpdatedProduk, id uui
         // Buat nama file baru dan simpan gambar
         ext := filepath.Ext(file.Filename)
         randomFileName := generateRandomFileName(ext)
-        newImagePath := filepath.Join("uploads", randomFileName)
+        newImagePath := filepath.Join("uploads/produk", randomFileName)
 
         src, err := file.Open()
         if err != nil {
@@ -270,26 +270,14 @@ func (service *ProdukServiceImpl) UpdateProduk(request web.UpdatedProduk, id uui
 		//kategori
 	
 		    // Kategori
-			var existingKategori []string
-			kategoriJSONB, ok := getProdukById.KategoriProduk["nama"].([]interface{})
-			if ok {
-				for _, kat := range kategoriJSONB {
-					if katStr, ok := kat.(string); ok {
-						existingKategori = append(existingKategori, katStr)
-					}
-				}
-			}
-		
-			log.Printf("Kategori sebelum update: %v", existingKategori)
-
-			// Ganti kategori pada indeks yang ditentukan
-			for idx, newKat := range request.KategoriProduk {
-				if idx < len(existingKategori) {
-					existingKategori[idx] = newKat // Ganti kategori pada indeks yang sesuai
-				} else {
-					log.Printf("Kategori baru di luar batas, tidak ada kategori untuk indeks %d", idx)
-				}
-			}
+			var kategoriPorudk domain.JSONB
+	if len(request.KategoriProduk) == 0 {
+		kategoriPorudk = getProdukById.KategoriProduk // Pakai data lama jika tidak ada perubahan
+	} else {
+		if err := json.Unmarshal(request.KategoriProduk, &kategoriPorudk); err != nil {
+			return nil, fmt.Errorf("format kategori_umkm_id tidak valid: %v", err)
+		}
+	}
 	  
 
     // Buat objek update produk
@@ -300,7 +288,7 @@ func (service *ProdukServiceImpl) UpdateProduk(request web.UpdatedProduk, id uui
         Satuan:     request.Satuan,
         Min_pesanan: request.MinPesanan,
         Deskripsi:  request.Deskripsi,
-		KategoriProduk: domain.JSONB{"nama":existingKategori},
+		KategoriProduk: kategoriPorudk,
     }
 
     // Perbarui produk di repository
@@ -319,7 +307,7 @@ func (service *ProdukServiceImpl) UpdateProduk(request web.UpdatedProduk, id uui
         "satuan":      updatedProduk.Satuan,
         "min_pesanan": updatedProduk.Min_pesanan,
         "deskripsi":   updatedProduk.Deskripsi,
-		"kategori": existingKategori,
+		"kategori": kategoriPorudk,
     }
 
     return response, nil
