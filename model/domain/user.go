@@ -10,8 +10,8 @@ type Users struct {
 	Role       string    `gorm:"column:role"`
 	No_Phone   string    `gorm:"column:no_phone"`
 	Picture    string    `gorm:"column:picture"`
-    Created_at time.Time `gorm:"column:created_at"`
-    Updated_at time.Time `gorm:"column:updated_at"`
+   CreatedAt            time.Time `gorm:"column:created_at;autoCreateTime"`
+	UpdatedAt            time.Time `gorm:"column:updated_at;autoUpdateTime"`
     HakAkses   []HakAkses `gorm:"foreignKey:user_id"`
     Berita   []Berita `gorm:"foreignKey:author"`
 }

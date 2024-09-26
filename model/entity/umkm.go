@@ -147,7 +147,7 @@ func ToProdukEntityWebList(produk domain.Produk) ProdukEntityWebList {
 func ToProdukEntitiesWebList(produkList []domain.Produk) []ProdukEntityWebList {
 	// Urutkan produk berdasarkan created_at dari terbaru ke terlama
 	sort.Slice(produkList, func(i, j int) bool {
-		return produkList[i].Created_at.After(produkList[j].Created_at)
+		return produkList[i].CreatedAt.After(produkList[j].CreatedAt)
 	})
 
 	// Ambil maksimal 3 produk

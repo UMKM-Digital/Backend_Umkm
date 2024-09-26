@@ -18,7 +18,7 @@ func ToBrandEntity(brandlogo domain.Brandlogo) BrandLogoEntity {
 		Id: brandlogo.Id,
 		BrandName: brandlogo.BrandName,
 		BrandLogo: brandlogo.BrandLogo,
-		Created:   brandlogo.Created_at,
+		Created:   brandlogo.CreatedAt,
 	}
 }
 

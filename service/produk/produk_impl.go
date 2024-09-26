@@ -227,7 +227,7 @@ func (service *ProdukServiceImpl) UpdateProduk(request web.UpdatedProduk, id uui
         // Buat nama file baru dan simpan gambar
         ext := filepath.Ext(file.Filename)
         randomFileName := generateRandomFileName(ext)
-        newImagePath := filepath.Join("uploads/produk", randomFileName)
+        newImagePath := filepath.Join("uploads/Produk", randomFileName)
 
         src, err := file.Open()
         if err != nil {

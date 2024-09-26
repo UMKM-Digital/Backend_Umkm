@@ -57,7 +57,7 @@ func (service *BrandLogoServiceImpl) CreateBrandlogo(brandlogo web.CreatedBrandL
 	newBrandlogo := domain.Brandlogo{
 		BrandName:  brandlogo.BrandName,
 		BrandLogo:  logoPath,
-		Created_at: time.Now(),
+		CreatedAt: time.Now(),
 	}
 
 	// Menyimpan brand logo baru ke repository
@@ -69,7 +69,7 @@ func (service *BrandLogoServiceImpl) CreateBrandlogo(brandlogo web.CreatedBrandL
 	return map[string]interface{}{
 		"nama_barang": saveBrandLogo.BrandName,
 		"gambar":      saveBrandLogo.BrandLogo,
-		"created_at":      saveBrandLogo.Created_at,
+		"created_at":      saveBrandLogo.CreatedAt,
 	}, nil
 }
 

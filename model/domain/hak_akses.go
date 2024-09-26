@@ -10,8 +10,8 @@ type HakAkses struct {
     UserId         int       `gorm:"column:user_id"`
     UmkmId         uuid.UUID `gorm:"column:umkm_id;type:uuid"`
     Status         int       `gorm:"column:status"`
-    CreatedAt      time.Time `gorm:"column:created_at"`
-    UpdatedAt      time.Time `gorm:"column:updated_at"`
+    CreatedAt            time.Time `gorm:"column:created_at;autoCreateTime"`
+	UpdatedAt            time.Time `gorm:"column:updated_at;autoUpdateTime"`
 	User       Users     `gorm:"foreignKey:UserId;references:IdUser"`
     UMKM       UMKM      `gorm:"foreignKey:UmkmId;references:IdUmkm"`
 }

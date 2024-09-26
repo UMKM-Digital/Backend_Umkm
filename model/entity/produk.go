@@ -30,8 +30,8 @@ func ToProdukEntity(produk domain.Produk) ProdukEntity {
 	 Satuan: produk.Satuan,
 	 MinPesanan: produk.Min_pesanan,
 	 KategdoriProduk: produk.KategoriProduk,
-	 Created: produk.Created_at,
-	 Update: produk.Updated_at,
+	 Created: produk.CreatedAt,
+	 Update: produk.UpdatedAt,
 	}
 }
 

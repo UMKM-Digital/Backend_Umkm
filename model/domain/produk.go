@@ -16,8 +16,8 @@ type Produk struct {
 	Min_pesanan int `gorm:"column:min_pesanan"`
 	KategoriProduk JSONB `gorm:"column:kategori_produk_id"`
 	Deskripsi string `gorm:"column:deskripsi"`
-	Created_at  time.Time`gorm:"column:created_at"`
-    Updated_at  time.Time `gorm:"column:updated_at"`
+	CreatedAt            time.Time `gorm:"column:created_at;autoCreateTime"`
+	UpdatedAt            time.Time `gorm:"column:updated_at;autoUpdateTime"`
 	Umkm    UMKM `gorm:"foreignKey:UmkmId"`
 }
 

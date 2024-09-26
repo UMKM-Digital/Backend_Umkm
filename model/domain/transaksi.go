@@ -22,8 +22,8 @@ type Transaksi struct{
 	NoHp     	   	string    `gorm:"column:no_hp"`
 	AlasanPerubahan     	   	string    `gorm:"column:status"`
 	TiketValidasi     	   	string    `gorm:"column:tiket_validasi"`
-    Created_at time.Time `gorm:"column:created_at"`
-    Updated_at time.Time `gorm:"column:updated_at"`
+    CreatedAt            time.Time `gorm:"column:created_at;autoCreateTime"`
+	UpdatedAt            time.Time `gorm:"column:updated_at;autoUpdateTime"`
     Umkm    UMKM `gorm:"foreignKey:umkm_id"`
 }
 

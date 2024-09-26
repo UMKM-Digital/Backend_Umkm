@@ -20,8 +20,10 @@ type UMKM struct {
     Deskripsi               string    `gorm:"column:deskripsi"`
     Maps                 JSONB     `gorm:"column:maps"`
     Images                 JSONB     `gorm:"column:gambar"` // Menggunakan JSONB untuk menyimpan URL gambar // Menyimpan URL gambar
-    CreatedAt            time.Time `gorm:"column:created_at"`
-    UpdatedAt            time.Time `gorm:"column:updated_at"`
+    // CreatedAt            time.Time `gorm:"column:created_at"`
+    // UpdatedAt            time.Time `gorm:"column:updated_at"`
+    CreatedAt            time.Time `gorm:"column:created_at;autoCreateTime"`
+	UpdatedAt            time.Time `gorm:"column:updated_at;autoUpdateTime"`
     HakAkses []HakAkses  `gorm:"foreignKey:UmkmId;references:IdUmkm"`
     KategoriProduk        []KategoriProduk `gorm:"foreignkey:umkm_id"`
     Produk               []Produk  `gorm:"foreignkey:UmkmId"`
