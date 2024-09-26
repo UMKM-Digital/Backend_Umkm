@@ -217,3 +217,7 @@ func (service *TranssaksiServiceImpl) GetTransaksiByDate(umkmID uuid.UUID, year 
     // Return data and pagination details in a similar format as `GetProdukList`
     return results, totalRecords, currentPage, totalPages, nextPage, prevPage, nil
 }
+
+func (repo *TranssaksiServiceImpl) DeleteByUmkmID(umkmID uuid.UUID) error {
+	return repo.db.Where("umkm_id = ?", umkmID).Delete(&domain.Produk{}).Error
+}

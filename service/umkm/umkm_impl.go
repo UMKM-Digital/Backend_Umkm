@@ -24,6 +24,7 @@ import (
 	// querybuilder "umkm/query_builder"
 	hakaksesrepo "umkm/repository/hakakses" // Tambahkan import untuk HakAkses repository
 	produkrepo "umkm/repository/produk"
+	transaksirepo "umkm/repository/transaksi"
 	umkmrepo "umkm/repository/umkm"
 
 	"fmt"
@@ -37,6 +38,8 @@ type UmkmServiceImpl struct {
 	umkmrepository     umkmrepo.CreateUmkm
 	hakaksesrepository hakaksesrepo.CreateHakakses // Tambahkan field untuk HakAkses repository
 	produkRepository produkrepo.CreateProduk
+	transaksiRepository transaksirepo.TransaksiRepo
+	
 	db                 *gorm.DB
 }
 
@@ -400,3 +403,84 @@ if images, ok := getUmkmById.Images["urls"].([]interface{}); ok {
 
 		return umkmDetial,totalCount, currentPage, totalPages, nextPage,prevPage, nil
 	}
+
+
+	
+// //
+// func (service *UmkmServiceImpl) Delete(id uuid.UUID) error {
+// 	// Cari UMKM berdasarkan ID
+// 	umkm, err := service.umkmrepository.GetUmkmID(id)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	// Konversi JSONB ke map[string]interface{}
+// 	var gambarURLs []string
+
+// 	gambarMap := make(map[string]interface{})
+
+// 	gambarBytes, err := json.Marshal(umkm.Images)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	if err := json.Unmarshal(gambarBytes, &gambarMap); err != nil {
+// 		return err
+// 	}
+
+// 	// Ambil gambar URLs dari map
+// 	if urls, ok := gambarMap["urls"].([]interface{}); ok {
+// 		for _, url := range urls {
+// 			if urlStr, ok := url.(string); ok {
+// 				gambarURLs = append(gambarURLs, urlStr)
+// 			}
+// 		}
+// 	} else {
+// 		return errors.New("invalid format for gambar URLs")
+// 	}
+
+// 	// Hapus file gambar
+// 	for _, gambarURL := range gambarURLs {
+// 		filePath := filepath.Join(gambarURL)
+// 		filePath = filepath.Clean(filePath)
+// 		log.Printf("Attempting to remove file: %s", filePath)
+
+// 		if _, err := os.Stat(filePath); os.IsNotExist(err) {
+// 			log.Printf("File does not exist: %s", filePath)
+// 			continue
+// 		}
+
+// 		if err := os.Remove(filePath); err != nil {
+// 			log.Printf("Error removing file %s: %v", filePath, err)
+// 			return err
+// 		}
+// 	}
+
+// 	// Hapus produk yang terkait dengan UMKM
+// 	if err := service.produkRepository.DeleteProdukId(id); err != nil {
+// 		return err
+// 	}
+
+// 	// Hapus kategori produk yang terkait dengan UMKM
+// 	if err := service..DeleteByUmkmID(id); err != nil {
+// 		return err
+// 	}
+
+// 	// Hapus transaksi yang terkait dengan UMKM
+// 	if err := service.transaksiRepository.(id); err != nil {
+// 		return err
+// 	}
+
+// 	// Hapus dokumen yang terkait dengan UMKM
+// 	if err := service.umkmrepository.DeleteUmkmId(id); err != nil {
+// 		return err
+// 	}
+
+// 	// Hapus hak akses yang terkait dengan UMKM
+// 	if err := service.hakaksesrepository.DeleteUmkmId(id); err != nil {
+// 		return err
+// 	}
+
+// 	// Hapus umkm dari database
+// 	return service.umkmrepository.DeleteUmkmId(id)
+// }

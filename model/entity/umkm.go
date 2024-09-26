@@ -90,6 +90,7 @@ type  UmkmEntity struct{
 	KategoriUmkmId domain.JSONB `json:"kategori_umkm_id"`
 	NamaPenanggungJawab string `json:"nama_penanggung_jawab"`
 	InformasiJamBuka domain.JSONB `json:"informasi_jambuka"`
+	Deskripsi string `json:"deskripsi"`
 	NoKontak string `json:"no_kontak"`
 	Lokasi string `json:"lokasi"`
 	Maps domain.JSONB `json:"maps"`

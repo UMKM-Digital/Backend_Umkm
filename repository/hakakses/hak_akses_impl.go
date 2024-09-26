@@ -4,6 +4,7 @@ import (
 	"context"
 	"umkm/model/domain"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -27,4 +28,8 @@ func (repo *HakAksesRepoUmkmImpl) GetHakAksesByUserId(ctx context.Context, userI
 		return nil, err
 	}
 	return hakAkses, nil
+}
+
+func(repo *HakAksesRepoUmkmImpl)DeleteUmkmId(id uuid.UUID) error{
+	return repo.db.Where("umkm_id = ?", id).Delete(&domain.HakAkses{}).Error
 }

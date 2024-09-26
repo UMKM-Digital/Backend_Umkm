@@ -89,6 +89,21 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userProdukService := produkservice.NewProdukService(userProdukrepo)
 	userProdukController := produkcontroller.NewProdukController(userProdukService)
 
+	userDokumenuMKM := dokumenumkmrepo.NewDokumenRepositoryImpl(db)
+	userDokumenUmkmService := dokumenumkmservice.NewDokumenUmkmService(userDokumenuMKM)
+	userDokumenUmkmController := dokumenumkmcontroller.NewDokumenUmkmController(userDokumenUmkmService)
+	transaksiQueryBuilder := general_query_builder.NewTransaksiQueryBuilder(db)
+
+	userTransaksiRepo := transaksirepo.NewTransaksiRepositoryImpl(db, transaksiQueryBuilder)
+	userTransaksiService := transaksiservice.NewTransaksiservice(userTransaksiRepo, db)
+	userTransaksiController := transaksicontroller.NewTransaksiController(userTransaksiService, db)
+	
+	KategoriProdukQueryBuilder := query_builder_kategori_produk.NewKategoriProdukQueryBuilder(db)
+	userKategoriProdukRepo := kategoriprodukrepo.NewKategoriProdukRepo(db,KategoriProdukQueryBuilder)
+	userKategoriProdukService := kategoriprodukservice.NewKategoriProdukService(userKategoriProdukRepo)
+	userKategoriProdukController := kategoriprodukcontroller.NewKategeoriProdukController(*userKategoriProdukService)
+
+
 	//umkm
 	umkmQueryBuilder := query_builder_umkm.NewUmkmQueryBuilder(db)
 	userUmkmRepo := umkmrepo.NewUmkmRepositoryImpl(db, umkmQueryBuilder)
@@ -96,18 +111,6 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userUmkmService := umkmservice.NewUmkmService(userUmkmRepo, userHakAksesRepo, db, userProdukrepo)
 	userUmkmController := umkmcontroller.NewUmkmController(userUmkmService)
  
-
-	// userQuerBuilder := querybuilder.NewBaseQueryBuilder(db)
-	transaksiQueryBuilder := general_query_builder.NewTransaksiQueryBuilder(db)
-	userTransaksiRepo := transaksirepo.NewTransaksiRepositoryImpl(db, transaksiQueryBuilder)
-	userTransaksiService := transaksiservice.NewTransaksiservice(userTransaksiRepo, db)
-	userTransaksiController := transaksicontroller.NewTransaksiController(userTransaksiService, db)
-
-	//userkategori produk
-	KategoriProdukQueryBuilder := query_builder_kategori_produk.NewKategoriProdukQueryBuilder(db)
-	userKategoriProdukRepo := kategoriprodukrepo.NewKategoriProdukRepo(db,KategoriProdukQueryBuilder)
-	userKategoriProdukService := kategoriprodukservice.NewKategoriProdukService(userKategoriProdukRepo)
-	userKategoriProdukController := kategoriprodukcontroller.NewKategeoriProdukController(*userKategoriProdukService)
 
 	//testimonial
 	userTestimonial := testimonialrepo.NewTestimonal(db)
@@ -134,10 +137,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userMasterLegalService := masterdokumenlegalservice.NewMasterLegalService(userMasterLegal)
 	userMasterLegalController := masterlegalcontroller.NewKategeoriProdukController(userMasterLegalService)
 
-	//dokumen
-	userDokumenuMKM := dokumenumkmrepo.NewDokumenRepositoryImpl(db)
-	userDokumenUmkmService := dokumenumkmservice.NewDokumenUmkmService(userDokumenuMKM)
-	userDokumenUmkmController := dokumenumkmcontroller.NewDokumenUmkmController(userDokumenUmkmService)
+	
 
 	//berita
 	beritaQueryBuilder := query_builder_berita.NewBeritaQueryBuilder(db)
