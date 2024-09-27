@@ -108,7 +108,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	umkmQueryBuilder := query_builder_umkm.NewUmkmQueryBuilder(db)
 	userUmkmRepo := umkmrepo.NewUmkmRepositoryImpl(db, umkmQueryBuilder)
 	userHakAksesRepo := hakaksesrepo.NewHakAksesRepositoryImpl(db)  
-	userUmkmService := umkmservice.NewUmkmService(userUmkmRepo, userHakAksesRepo, db, userProdukrepo)
+	userUmkmService := umkmservice.NewUmkmService(userUmkmRepo, userHakAksesRepo, db, userProdukrepo, userTransaksiRepo, userDokumenuMKM)
 	userUmkmController := umkmcontroller.NewUmkmController(userUmkmService)
  
 
@@ -183,6 +183,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	Umkm.PUT("/edit/:umkm_id", userUmkmController.UpdateUmkm)
 	Umkm.GET("/all/list", userUmkmController.GetUmmkmList)
 	Umkm.GET("/detail/list/:id", userUmkmController.GetUmkmListDetial)
+	Umkm.DELETE("/:id", userUmkmController.DeleteUmkmId)
 
 	//transaksi
 	Transaksi := g.Group("/transaksi")

@@ -332,17 +332,17 @@ func (controller *UmkmControllerImpl) GetUmkmListDetial(c echo.Context) error {
 }
 
 
-// func (controller *UmkmControllerImpl) DeleteProdukId(c echo.Context) error {
-// 	// Ambil ID dari URL dan konversi ke UUID
-// 	idStr := c.Param("id")
-// 	id, err := uuid.Parse(idStr)
-// 	if err != nil {
-// 		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid ID format", nil))
-// 	}
+func (controller *UmkmControllerImpl) DeleteUmkmId(c echo.Context) error {
+	// Ambil ID dari URL dan konversi ke UUID
+	idStr := c.Param("id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid ID format", nil))
+	}
 
-// 	if errDeleteProduk := controller.umkmservice.DeleteUmkm(id); errDeleteProduk != nil {
-// 		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, errDeleteProduk.Error(), nil))
-// 	}
+	if errDeleteProduk := controller.umkmservice.Delete(id); errDeleteProduk != nil {
+		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, errDeleteProduk.Error(), nil))
+	}
 
-// 	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "Delete Produk Success", nil))
-// }
+	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "Delete Produk Success", nil))
+}

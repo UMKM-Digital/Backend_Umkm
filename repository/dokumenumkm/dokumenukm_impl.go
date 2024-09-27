@@ -49,6 +49,14 @@ func(repo *UmkmDokumenImpl) UpdateDokumen(id int, umkmid uuid.UUID, dokumenumkm 
 	return dokumenumkm, nil
 }
 
-func(repo *UmkmDokumenImpl) DeleteDokumenUmkmId(id uuid.UUID) error{
-	return repo.db.Where("umkm_id = ?", id).Delete(&domain.UmkmDokumen{}).Error
-}
+	func(repo *UmkmDokumenImpl) DeleteDokumenUmkmId(id uuid.UUID) error{
+		return repo.db.Where("umkm_id = ?", id).Delete(&domain.UmkmDokumen{}).Error
+	}
+
+	func (repo *UmkmDokumenImpl) GetDokumnByUmkmId(id uuid.UUID) ([]domain.UmkmDokumen, error) {
+		var umkmDokumenList []domain.UmkmDokumen
+		if err := repo.db.Where("umkm_id = ?", id).Find(&umkmDokumenList).Error; err != nil {
+			return umkmDokumenList, err
+		}
+		return umkmDokumenList, nil
+	}

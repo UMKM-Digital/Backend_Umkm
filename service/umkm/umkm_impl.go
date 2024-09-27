@@ -22,8 +22,10 @@ import (
 	querybuilder "umkm/query_builder"
 
 	// querybuilder "umkm/query_builder"
+	dokumenumkmrepo "umkm/repository/dokumenumkm"
 	hakaksesrepo "umkm/repository/hakakses" // Tambahkan import untuk HakAkses repository
 	produkrepo "umkm/repository/produk"
+	transaksirepo "umkm/repository/transaksi"
 	umkmrepo "umkm/repository/umkm"
 
 	"fmt"
@@ -37,14 +39,18 @@ type UmkmServiceImpl struct {
 	umkmrepository     umkmrepo.CreateUmkm
 	hakaksesrepository hakaksesrepo.CreateHakakses // Tambahkan field untuk HakAkses repository
 	produkRepository produkrepo.CreateProduk
+	transaksiRepository transaksirepo.TransaksiRepo
+	dokumenrepository dokumenumkmrepo.DokumenUmkmrRepo
 	db                 *gorm.DB
 }
 
-func NewUmkmService(umkmrepository umkmrepo.CreateUmkm, hakaksesrepository hakaksesrepo.CreateHakakses, db *gorm.DB, produkRepository produkrepo.CreateProduk) *UmkmServiceImpl {
+func NewUmkmService(umkmrepository umkmrepo.CreateUmkm, hakaksesrepository hakaksesrepo.CreateHakakses, db *gorm.DB, produkRepository produkrepo.CreateProduk,transaksiRepository transaksirepo.TransaksiRepo,dokumenrepository dokumenumkmrepo.DokumenUmkmrRepo) *UmkmServiceImpl {
 	return &UmkmServiceImpl{
 		umkmrepository:     umkmrepository,
 		hakaksesrepository: hakaksesrepository,
 		produkRepository: produkRepository,
+		transaksiRepository: transaksiRepository,
+		dokumenrepository: dokumenrepository,
 		db:                 db,
 	}
 }
@@ -403,81 +409,203 @@ if images, ok := getUmkmById.Images["urls"].([]interface{}); ok {
 
 
 	
-// //
-// func (service *UmkmServiceImpl) Delete(id uuid.UUID) error {
-// 	// Cari UMKM berdasarkan ID
-// 	umkm, err := service.umkmrepository.GetUmkmID(id)
-// 	if err != nil {
-// 		return err
-// 	}
+	func (service *UmkmServiceImpl) Delete(id uuid.UUID) error {
+		// Cari UMKM berdasarkan ID
+		umkm, err := service.umkmrepository.GetUmkmID(id)
+		if err != nil {
+			return err
+		}
+	
+		// Konversi JSONB ke map[string]interface{} untuk mengakses URL gambar
+		var gambarURLs []string
+		gambarMap := make(map[string]interface{})
+	
+		gambarBytes, err := json.Marshal(umkm.Images)
+		if err != nil {
+			return err
+		}
+	
+		if err := json.Unmarshal(gambarBytes, &gambarMap); err != nil {
+			return err
+		}
+	
+		// Ambil gambar URLs dari map
+		if urls, ok := gambarMap["urls"].([]interface{}); ok {
+			for _, url := range urls {
+				if urlStr, ok := url.(string); ok {
+					gambarURLs = append(gambarURLs, urlStr)
+				}
+			}
+		} else {
+			return errors.New("invalid format for gambar URLs")
+		}
+	
+		// Hapus file gambar
+		for _, gambarURL := range gambarURLs {
+			filePath := filepath.Clean(gambarURL)
+			log.Printf("Attempting to remove file: %s", filePath)
+	
+			if _, err := os.Stat(filePath); os.IsNotExist(err) {
+				log.Printf("File does not exist: %s", filePath)
+				continue
+			}
+	
+			if err := os.Remove(filePath); err != nil {
+				log.Printf("Error removing file %s: %v", filePath, err)
+				return err
+			}
+		}
 
-// 	// Konversi JSONB ke map[string]interface{}
-// 	var gambarURLs []string
 
-// 	gambarMap := make(map[string]interface{})
+		produkList, err := service.produkRepository.GetProdukByUmkmId(id)
+		if err != nil {
+			return err
+		}
+	 
+		 // Hapus gambar dari setiap produk
+		 for _, produk := range produkList {
+			 var gambarProdukURLs []string
+			 gambarProdukMap := make(map[string]interface{})
+	 
+			 gambarBytes, err := json.Marshal(produk.Gamabr)
+			 if err != nil {
+				 return err
+			 }
+	 
+			 if err := json.Unmarshal(gambarBytes, &gambarProdukMap); err != nil {
+				 return err
+			 }
+	 
+			 // Ambil gambar URLs dari map untuk produk
+			 if urls, ok := gambarProdukMap["urls"].([]interface{}); ok {
+				 for _, url := range urls {
+					 if urlMap, ok := url.(map[string]interface{}); ok {
+						 if gambarURL, ok := urlMap["gambar"].(string); ok {
+							 gambarProdukURLs = append(gambarProdukURLs, gambarURL)
+						 }
+					 }
+				 }
+			 } else {
+				 return errors.New("invalid format for produk gambar URLs")
+			 }
 
-// 	gambarBytes, err := json.Marshal(umkm.Images)
-// 	if err != nil {
-// 		return err
-// 	}
+			    // Hapus file gambar produk
+				for _, gambarURL := range gambarProdukURLs {
+					filePath := filepath.Clean(gambarURL)
+					log.Printf("Attempting to remove product file: %s", filePath)
+		
+					if _, err := os.Stat(filePath); os.IsNotExist(err) {
+						log.Printf("File does not exist: %s", filePath)
+						continue
+					}
+		
+					if err := os.Remove(filePath); err != nil {
+						log.Printf("Error removing product file %s: %v", filePath, err)
+						return err
+					}
+				}
+		
+				// Hapus produk dari database
+			}
+		
 
-// 	if err := json.Unmarshal(gambarBytes, &gambarMap); err != nil {
-// 		return err
-// 	}
+			///
+			// Hapus dokumen dari folder dan database
+// Hapus dokumen dari folder dan database
+// Hapus dokumen dari folder dan database
+// Hapus dokumen dari folder
+dokumenList, err := service.dokumenrepository.GetDokumnByUmkmId(id)
+if err != nil {
+    return err
+}
 
-// 	// Ambil gambar URLs dari map
-// 	if urls, ok := gambarMap["urls"].([]interface{}); ok {
-// 		for _, url := range urls {
-// 			if urlStr, ok := url.(string); ok {
-// 				gambarURLs = append(gambarURLs, urlStr)
-// 			}
-// 		}
-// 	} else {
-// 		return errors.New("invalid format for gambar URLs")
-// 	}
+// Hapus file dokumen dari setiap dokumen
+for _, dokumen := range dokumenList {
+    // Mendapatkan path file dokumen dari JSONB
+    var dokumenUpload map[string]interface{}
+    gambarBytes, err := json.Marshal(dokumen.DokumenUpload)
+    if err != nil {
+        return err
+    }
 
-// 	// Hapus file gambar
-// 	for _, gambarURL := range gambarURLs {
-// 		filePath := filepath.Join(gambarURL)
-// 		filePath = filepath.Clean(filePath)
-// 		log.Printf("Attempting to remove file: %s", filePath)
+    // Unmarshal untuk mendapatkan struktur yang benar
+    if err := json.Unmarshal(gambarBytes, &dokumenUpload); err != nil {
+        return err
+    }
 
-// 		if _, err := os.Stat(filePath); os.IsNotExist(err) {
-// 			log.Printf("File does not exist: %s", filePath)
-// 			continue
-// 		}
+    // Debugging: Log isi dokumenUpload
+    log.Printf("dokumenUpload content: %+v", dokumenUpload)
 
-// 		if err := os.Remove(filePath); err != nil {
-// 			log.Printf("Error removing file %s: %v", filePath, err)
-// 			return err
-// 		}
-// 	}
+    // Ambil array dokumen_list
+    dokumenListArray, ok := dokumenUpload["dokumen_list"].([]interface{})
+    if !ok {
+        return errors.New("invalid format for dokumen_list")
+    }
 
-// 	// Hapus produk yang terkait dengan UMKM
-// 	if err := service.produkRepository.DeleteProdukUmkmId(id); err != nil {
-// 		return err
-// 	}
+    // Iterasi melalui setiap dokumen dalam dokumen_list
+    for _, doc := range dokumenListArray {
+        docMap, ok := doc.(map[string]interface{})
+        if !ok {
+            return errors.New("invalid format for dokumen in dokumen_list")
+        }
 
-// 	// Hapus kategori produk yang terkait dengan UMKM
-// 	if err := service.kategoriProdukRepository.DeleteKategoriUmkmId(id); err != nil {
-// 		return err
-// 	}
+        // Ambil path dari dokumen
+        filePath, ok := docMap["path"].(string)
+        if !ok {
+            return errors.New("invalid format for dokumen path")
+        }
 
-// 	// Hapus transaksi yang terkait dengan UMKM
-// 	if err := service.transaksiRepository.DeleteTransaksiUmkmId(id); err != nil {
-// 		return err
-// 	}
+        log.Printf("Attempting to remove document file: %s", filePath)
 
-// 	// Hapus dokumen yang terkait dengan UMKM
-// 	if err := service.umkmrepository.DeleteUmkmId(id); err != nil {
-// 		return err
-// 	}
+        // Cek apakah file ada
+        if _, err := os.Stat(filePath); os.IsNotExist(err) {
+            log.Printf("File does not exist: %s", filePath)
+            continue
+        }
 
-// 	// Hapus hak akses yang terkait dengan UMKM
-// 	if err := service.hakaksesrepository.DeleteUmkmId(id); err != nil {
-// 		return err
-// 	}
+        // Hapus file dokumen
+        if err := os.Remove(filePath); err != nil {
+            log.Printf("Error removing document file %s: %v", filePath, err)
+            return err
+        }
+    }
 
-// 	// Hapus umkm dari database
-// 	return service.umkmrepository.DeleteUmkmId(id)
-// }
+    // Di sini tidak ada penghapusan dari database, hanya hapus file
+}
+
+
+
+
+
+	
+		// Hapus produk yang terkait dengan UMKM
+		if err := service.produkRepository.DeleteProdukUmkmId(id); err != nil {
+			return err
+		}
+
+		
+	
+		// Hapus transaksi yang terkait dengan UMKM
+		if err := service.transaksiRepository.DeleteTransaksiUmkmId(id); err != nil {
+			return err
+		}
+	
+		// Hapus hak akses yang terkait dengan UMKM
+		if err := service.hakaksesrepository.DeleteUmkmId(id); err != nil {
+			return err
+		}
+	
+		// Hapus dokumen UMKM dari database
+		if err := service.dokumenrepository.DeleteDokumenUmkmId(id); err != nil {
+			return err
+		}
+		if err := service.dokumenrepository.DeleteDokumenUmkmId(id); err != nil {
+			return err
+		}
+		if err := service.umkmrepository.DeleteUmkmId(id); err != nil {
+			return err
+		}
+	
+		return nil
+	}
+	

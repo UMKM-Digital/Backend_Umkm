@@ -18,4 +18,5 @@ type CreateProduk interface {
 	GetProdukList(limit int, page int)([]domain.Produk,int, int, int, *int, *int, error)
 	FindWebId(id uuid.UUID) (domain.Produk, error)
 	DeleteProdukUmkmId(id uuid.UUID) error
+	GetProdukByUmkmId(id uuid.UUID) ([]domain.Produk, error) 
 }

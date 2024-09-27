@@ -19,5 +19,5 @@ type Umkm interface {
 	GetUmkmList(filters string, limit int, page int, kategori_umkm string)([]entity.UmkmEntityWebList,int, int, int, *int, *int, error)
 	// GetUmkmDetailList(id uuid.UUID)([]entity.UmkmDetailEntity, error)
 	GetUmkmDetailList(id uuid.UUID, limit int, page int)([]entity.UmkmDetailEntity,int, int, int, *int, *int, error)
-	// DeleteUmkm(id uuid.UUID) error
+	Delete(id uuid.UUID) error
 }

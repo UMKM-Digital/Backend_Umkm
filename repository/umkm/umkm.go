@@ -18,5 +18,5 @@ type CreateUmkm interface {
 	GetUmkmList(filters string, limit int, page int, kategori_umkm string) ([]domain.UMKM, int, int, int, *int, *int, error) 
 	// GetUmkmListDetailId(id uuid.UUID) ([]domain.UMKM, error)
 	GetUmkmListDetailPaginated(id uuid.UUID, limit int, page int) ([]domain.UMKM, int, int, int, *int, *int, error)
-	// DeleteUmkmId(id uuid.UUID) error
+	DeleteUmkmId(id uuid.UUID) error
 }

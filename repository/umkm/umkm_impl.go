@@ -264,9 +264,9 @@ func (repo *RepoUmkmImpl) GetUmkmListDetailPaginated(id uuid.UUID, limit int, pa
 }
 
 
-// func(repo *RepoUmkmImpl)DeleteUmkmId(id uuid.UUID) error{
-//     if err := repo.db.Delete(&domain.UMKM{}, id).Error; err != nil {
-// 		return err
-// 	}   
-// 	return nil
-// }
+func(repo *RepoUmkmImpl)DeleteUmkmId(id uuid.UUID) error{
+    if err := repo.db.Delete(&domain.UMKM{}, id).Error; err != nil {
+		return err
+	}   
+	return nil
+}
