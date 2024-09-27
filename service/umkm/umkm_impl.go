@@ -386,8 +386,8 @@ if images, ok := getUmkmById.Images["urls"].([]interface{}); ok {
 }
 
 
-	func(services *UmkmServiceImpl) GetUmkmList(filters string, limit int, page int, kategori_umkm string)([]entity.UmkmEntityWebList,int, int, int, *int, *int, error){
-		GetTestimonialList, totalCount, currentPage, totalPages, nextPage, prevPage, err := services.umkmrepository.GetUmkmList(filters, limit, page, kategori_umkm)
+	func(services *UmkmServiceImpl) GetUmkmList(filters string, limit int, page int, kategori_umkm string, sortOrder string)([]entity.UmkmEntityWebList,int, int, int, *int, *int, error){
+		GetTestimonialList, totalCount, currentPage, totalPages, nextPage, prevPage, err := services.umkmrepository.GetUmkmList(filters, limit, page, kategori_umkm, sortOrder)
 		if err != nil {
 			return nil, 0, 0, 0, nil, nil, err
 		}

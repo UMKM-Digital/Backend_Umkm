@@ -222,8 +222,9 @@ func (controller *UmkmControllerImpl) UpdateUmkm(c echo.Context) error {
 func (controller *UmkmControllerImpl) GetUmmkmList(c echo.Context) error {
     filters, limit, page := helper.ExtractFilter(c.QueryParams())
     kategoriumkm := c.QueryParam("kategori")
+    sortOrder := c.QueryParam("sortorder")
     
-	getUmkm,totalCount, currentPage, totalPages, nextPage, prevPage, errGetUmkmDetail := controller.umkmservice.GetUmkmList(filters, limit, page, kategoriumkm)
+	getUmkm,totalCount, currentPage, totalPages, nextPage, prevPage, errGetUmkmDetail := controller.umkmservice.GetUmkmList(filters, limit, page, kategoriumkm, sortOrder)
 
 	if errGetUmkmDetail != nil {
 		return c.JSON(http.StatusInternalServerError, model.ResponseToClientpagi(http.StatusInternalServerError, "false", errGetUmkmDetail.Error(), model.Pagination{}, nil))

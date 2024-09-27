@@ -326,16 +326,19 @@ func imageExists(existingGambar []map[string]interface{}, imgID string) bool {
     return false
 }
 
-func (service *ProdukServiceImpl) 	GetProduk(limit int, page int) ([]entity.ProdukWebEntity,int, int, int, *int, *int, error){
-	GetProdukList, totalCount, currentPage, totalPages, nextPage, prevPage, err := service.produkrepository.GetProdukList(limit, page)
-    if err != nil {
-        return nil, 0, 0, 0, nil, nil, err
-    }
+func (service *ProdukServiceImpl) GetProduk(limit int, page int, filters string, kategoriproduk string, sort string) ([]entity.ProdukWebEntity, int, int, int, *int, *int, error) {
+	// Panggil GetProdukList dari repository dengan parameter tambahan
+	GetProdukList, totalCount, currentPage, totalPages, nextPage, prevPage, err := service.produkrepository.GetProdukList(limit, page, filters, kategoriproduk, sort)
+	if err != nil {
+		return nil, 0, 0, 0, nil, nil, err
+	}
 
+	// Konversi hasil query ke dalam response entity
 	Produkresponse := entity.ToProdukWebEntities(GetProdukList)
 
 	return Produkresponse, totalCount, currentPage, totalPages, nextPage, prevPage, nil
 }
+
 
 func(service *ProdukServiceImpl) GetProdukWebId(id uuid.UUID)(entity.ProdukWebIdEntity, error){
 	GetProduk, errGetProduk := service.produkrepository.FindWebId(id)

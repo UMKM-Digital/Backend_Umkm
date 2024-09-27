@@ -11,7 +11,7 @@ import (
 type UmkmQueryBuilder interface {
 	querybuilder.BaseQueryBuilderList
 	GetBuilder(filters string, limit int, page int) (*gorm.DB, error)
-    GetBuilderWebList(filters string, limit int, page int, KategoriUmkm string) (*gorm.DB, error)
+    GetBuilderWebList(filters string, limit int, page int, KategoriUmkm string, sosortOrder string) (*gorm.DB, error)
     GetBuilderDetailList( limit int, page int) (*gorm.DB, error) 
 }
 
@@ -52,7 +52,7 @@ func (umkmQueryBuilder *UmkmQueryBuilderImpl) GetBuilder(filters string, limit i
 }
 
 
-func (umkmQueryBuilder *UmkmQueryBuilderImpl) GetBuilderWebList(filters string, limit int, page int, KategoriUmkm string) (*gorm.DB, error) {
+func (umkmQueryBuilder *UmkmQueryBuilderImpl) GetBuilderWebList(filters string, limit int, page int, KategoriUmkm string, sortOrder string) (*gorm.DB, error) {
     query := umkmQueryBuilder.db
 
     // Tambahkan filter sebelum pagination
@@ -72,6 +72,13 @@ func (umkmQueryBuilder *UmkmQueryBuilderImpl) GetBuilderWebList(filters string, 
 		}
 		query = query.Where(strings.Join(queryConditions, " OR "), queryParams...)
 	}
+
+     // Tentukan sorting berdasarkan `sortOrder`
+     if sortOrder == "UMKM Terbaru" {
+        query = query.Order("created_at DESC")
+    } else if sortOrder == "UMKM Terlama" {
+        query = query.Order("created_at ASC")
+    }
 
     // Set default limit jika limit == 0
     if limit <= 0 {

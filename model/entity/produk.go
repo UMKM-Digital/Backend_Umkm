@@ -69,6 +69,7 @@ type ProdukWebEntity struct {
 	Name       string    `json:"nama"`
 	Harga int `json:"harga"`
 	NameUmkm   string    `json:"name"`
+	KategoriProduk domain.JSONB `json:"kategori_produk"`
 }
 
 func ToProdukWebEntity(produk domain.Produk) ProdukWebEntity {
@@ -79,6 +80,7 @@ func ToProdukWebEntity(produk domain.Produk) ProdukWebEntity {
 		Name:     produk.Nama,
 		Harga: produk.Harga,
 		NameUmkm: produk.Umkm.Name, // Assuming the Umkm relationship is populated
+		KategoriProduk: produk.KategoriProduk,
 	}
 }
 

@@ -166,7 +166,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 
 	KatUmkmRoute := g.Group("/kategori")
 	KatUmkmRoute.POST("/umkm", userKategoriUmkmController.Create, JWTProtection())
-	KatUmkmRoute.GET("/umkm/list", userKategoriUmkmController.GetKategoriList, JWTProtection())
+	KatUmkmRoute.GET("/umkm/list", userKategoriUmkmController.GetKategoriList)
 	KatUmkmRoute.GET("/umkm/:id", userKategoriUmkmController.GetKategoriId, JWTProtection())
 	KatUmkmRoute.PUT("/umkm/:id", userKategoriUmkmController.UpdateKategoriId, JWTProtection())
 	KatUmkmRoute.DELETE("/umkm/delete/:id", userKategoriUmkmController.DeleteKategoriId, JWTProtection())

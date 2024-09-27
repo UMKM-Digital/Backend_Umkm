@@ -250,38 +250,41 @@ func (controller *ProdukControllerImpl) UpdateProduk(c echo.Context) error {
     log.Printf("Product updated successfully with ID: %s", id)
     return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "Data berhasil diupdate", updatedProduk))
 }
+func (controller *ProdukControllerImpl) GetProdukListWeb(c echo.Context) error {
+	// Gunakan helper untuk mengekstrak filters, limit, dan page
+	filters, limit, page := helper.ExtractFilter(c.QueryParams())
 
-func(controller *ProdukControllerImpl) GetProdukListWeb(c echo.Context) error{
-	limitStr := c.QueryParam("limit")
-    pageStr := c.QueryParam("page")
-
-   
-    limit, err := strconv.Atoi(limitStr)
-    if err != nil || limit <= 0 {
-        limit = 10 
-    }
-
-    page, err := strconv.Atoi(pageStr)
-    if err != nil || page <= 0 {
-        page = 1
-    }
-
-	getProduk,totalCount, currentPage, totalPages, nextPage, prevPage, errGetProduk := controller.Produk.GetProduk(limit, page)
-
-	if errGetProduk != nil {
-		return c.JSON(http.StatusInternalServerError, model.ResponseToClientpagi(http.StatusInternalServerError, "false", err.Error(), model.Pagination{}, nil))
+	// Jika limit atau page tidak valid, berikan nilai default
+	if limit <= 0 {
+		limit = 10
+	}
+	if page <= 0 {
+		page = 1
 	}
 
+	// Ambil kategori dan sort dari query parameters secara langsung
+	kategoriproduk := c.QueryParam("kategori")
+	sort := c.QueryParam("sort")
+
+	// Panggil service dengan parameter tambahan
+	getProduk, totalCount, currentPage, totalPages, nextPage, prevPage, errGetProduk := controller.Produk.GetProduk(limit, page, filters, kategoriproduk, sort)
+
+	if errGetProduk != nil {
+		return c.JSON(http.StatusInternalServerError, model.ResponseToClientpagi(http.StatusInternalServerError, "false", errGetProduk.Error(), model.Pagination{}, nil))
+	}
+
+	// Set up pagination
 	pagination := model.Pagination{
-        CurrentPage:  currentPage,
-        NextPage:     nextPage,
-        PrevPage:     prevPage,
-        TotalPages:   totalPages,
-        TotalRecords: totalCount,
-    }
+		CurrentPage:  currentPage,
+		NextPage:     nextPage,
+		PrevPage:     prevPage,
+		TotalPages:   totalPages,
+		TotalRecords: totalCount,
+	}
 
 	return c.JSON(http.StatusOK, model.ResponseToClientpagi(http.StatusOK, "true", "berhasil", pagination, getProduk))
 }
+
 
 func(controller *ProdukControllerImpl) GetProdukWebId(c echo.Context) error{
 	IdProduk := c.Param("id")

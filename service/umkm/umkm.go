@@ -16,7 +16,7 @@ type Umkm interface {
 	GetUmkmListWeb(ctx context.Context, userId int)([]entity.UmkmEntityList, error)
 	GetUmkmId(id uuid.UUID)(entity.UmkmEntity, error)
 	UpdateUmkmId(request web.Updateumkm, umkmid uuid.UUID, files []*multipart.FileHeader) (map[string]interface{}, error)
-	GetUmkmList(filters string, limit int, page int, kategori_umkm string)([]entity.UmkmEntityWebList,int, int, int, *int, *int, error)
+	GetUmkmList(filters string, limit int, page int, kategori_umkm string, sortOrder string)([]entity.UmkmEntityWebList,int, int, int, *int, *int, error)
 	// GetUmkmDetailList(id uuid.UUID)([]entity.UmkmDetailEntity, error)
 	GetUmkmDetailList(id uuid.UUID, limit int, page int)([]entity.UmkmDetailEntity,int, int, int, *int, *int, error)
 	Delete(id uuid.UUID) error

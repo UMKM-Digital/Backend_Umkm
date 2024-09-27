@@ -135,7 +135,7 @@ func(repo *RepoUmkmImpl) UpdateUmkmId(id uuid.UUID, umkm domain.UMKM)(domain.UMK
     return umkm, nil
 }
 
-func (repo *RepoUmkmImpl) GetUmkmList(filters string, limit int, page int, kategori_umkm string) ([]domain.UMKM, int, int, int, *int, *int, error) {
+func (repo *RepoUmkmImpl) GetUmkmList(filters string, limit int, page int, kategori_umkm string, sortOrder string) ([]domain.UMKM, int, int, int, *int, *int, error) {
     var umkm []domain.UMKM
     var totalcount int64
 
@@ -147,7 +147,7 @@ func (repo *RepoUmkmImpl) GetUmkmList(filters string, limit int, page int, kateg
         page = 1 // Default ke halaman pertama jika page <= 0
     }
     
-    query, err := repo.umkmQueryBuilder.GetBuilderWebList(filters, limit, page, kategori_umkm)
+    query, err := repo.umkmQueryBuilder.GetBuilderWebList(filters, limit, page, kategori_umkm, sortOrder)
 	if err != nil {
 		return nil, 0, 0, 0, nil, nil, err
 	}
@@ -159,7 +159,7 @@ func (repo *RepoUmkmImpl) GetUmkmList(filters string, limit int, page int, kateg
         return nil, 0, 0, 0, nil, nil, err
     }
 
-    ProdukQueryBuilder, err := repo.umkmQueryBuilder.GetBuilderWebList(filters, 0, 0, kategori_umkm)
+    ProdukQueryBuilder, err := repo.umkmQueryBuilder.GetBuilderWebList(filters, 0, 0, kategori_umkm, sortOrder)
 	if err != nil {
 		return nil, 0, 0, 0, nil, nil, err
 	}

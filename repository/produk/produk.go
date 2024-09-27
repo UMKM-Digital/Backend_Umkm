@@ -15,7 +15,7 @@ type CreateProduk interface {
 	GetProduk(ProdukId uuid.UUID, filters string, limit int, page int, kategori_produk_id string) ([]domain.Produk, int, int, int, *int, *int, error)
 	UpdatedProduk(ProdukId uuid.UUID, produk domain.Produk) (domain.Produk, error)
 	GetProductsByUmkmIds(ctx context.Context, umkmIDs []uuid.UUID) ([]domain.Produk, error)
-	GetProdukList(limit int, page int)([]domain.Produk,int, int, int, *int, *int, error)
+	GetProdukList(limit int, page int, filters string, kategoriproduk string, sort string) ([]domain.Produk, int, int, int, *int, *int, error)
 	FindWebId(id uuid.UUID) (domain.Produk, error)
 	DeleteProdukUmkmId(id uuid.UUID) error
 	GetProdukByUmkmId(id uuid.UUID) ([]domain.Produk, error) 
