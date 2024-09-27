@@ -5,8 +5,6 @@ import (
 	"umkm/model/entity"
 	"umkm/model/web"
 	kategoriprodukrepo "umkm/repository/kategori_produk"
-
-	"github.com/google/uuid"
 )
 
 type KategoriProdukServiceImpl struct {
@@ -21,7 +19,6 @@ func NewKategoriProdukService(kategorirepository kategoriprodukrepo.KategoriProd
 
 func (service *KategoriProdukServiceImpl) CreateKategori(kategoriproduk web.CreateCategoriProduk) (map[string]interface{}, error) {
     newKategoriProduk := domain.KategoriProduk{
-        Umkm: kategoriproduk.UmkmId, // This should align with uuid.UUID
         Nama: kategoriproduk.Name,
     }
 
@@ -31,13 +28,12 @@ func (service *KategoriProdukServiceImpl) CreateKategori(kategoriproduk web.Crea
     }
 
     return map[string]interface{}{
-        "umkm_id": saveKategoriProduk.Umkm, // Ensure field names are correct
         "nama":   saveKategoriProduk.Nama,
     }, nil
 }
 
-func (service *KategoriProdukServiceImpl) GetKategoriProdukList(umkmID uuid.UUID, filters string, limit int, page int) ([]entity.KategoriProdukEntity, int, int, int, *int, *int, error) {
-    getKategoriProdukList, totalcount, currentPage, totalPages, nextPage, prevPage, err := service.kategoriprodukrepository.GetKategoriProduk(umkmID, filters, limit, page)
+func (service *KategoriProdukServiceImpl) GetKategoriProdukList( filters string, limit int, page int) ([]entity.KategoriProdukEntity, int, int, int, *int, *int, error) {
+    getKategoriProdukList, totalcount, currentPage, totalPages, nextPage, prevPage, err := service.kategoriprodukrepository.GetKategoriProduk( filters, limit, page)
     if err != nil {
 		return nil, 0, 0, 0, nil, nil, err
     }

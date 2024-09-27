@@ -196,7 +196,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	//kategoriproduk
 	KatProdukRoute := g.Group("/kategoriproduk")
 	KatProdukRoute.POST("/create", userKategoriProdukController.Create)
-	KatProdukRoute.GET("/list/:umkm_id", userKategoriProdukController.GetKategoriList)
+	KatProdukRoute.GET("/list", userKategoriProdukController.GetKategoriList)
 	KatProdukRoute.GET("/:id", userKategoriProdukController.GetKategoriId)
 	KatProdukRoute.PUT("/update/:id", userKategoriProdukController.UpdateKategoriProduk)
 	KatProdukRoute.DELETE("/delete/:id", userKategoriProdukController.Delete)

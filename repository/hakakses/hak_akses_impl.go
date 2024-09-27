@@ -30,6 +30,6 @@ func (repo *HakAksesRepoUmkmImpl) GetHakAksesByUserId(ctx context.Context, userI
 	return hakAkses, nil
 }
 
-func(repo *HakAksesRepoUmkmImpl)DeleteUmkmId(id uuid.UUID) error{
+func(repo *HakAksesRepoUmkmImpl) DeleteUmkmId(id uuid.UUID) error{
 	return repo.db.Where("umkm_id = ?", id).Delete(&domain.HakAkses{}).Error
 }

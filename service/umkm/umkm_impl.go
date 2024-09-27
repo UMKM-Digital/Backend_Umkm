@@ -24,7 +24,6 @@ import (
 	// querybuilder "umkm/query_builder"
 	hakaksesrepo "umkm/repository/hakakses" // Tambahkan import untuk HakAkses repository
 	produkrepo "umkm/repository/produk"
-	transaksirepo "umkm/repository/transaksi"
 	umkmrepo "umkm/repository/umkm"
 
 	"fmt"
@@ -38,8 +37,6 @@ type UmkmServiceImpl struct {
 	umkmrepository     umkmrepo.CreateUmkm
 	hakaksesrepository hakaksesrepo.CreateHakakses // Tambahkan field untuk HakAkses repository
 	produkRepository produkrepo.CreateProduk
-	transaksiRepository transaksirepo.TransaksiRepo
-	
 	db                 *gorm.DB
 }
 
@@ -457,17 +454,17 @@ if images, ok := getUmkmById.Images["urls"].([]interface{}); ok {
 // 	}
 
 // 	// Hapus produk yang terkait dengan UMKM
-// 	if err := service.produkRepository.DeleteProdukId(id); err != nil {
+// 	if err := service.produkRepository.DeleteProdukUmkmId(id); err != nil {
 // 		return err
 // 	}
 
 // 	// Hapus kategori produk yang terkait dengan UMKM
-// 	if err := service..DeleteByUmkmID(id); err != nil {
+// 	if err := service.kategoriProdukRepository.DeleteKategoriUmkmId(id); err != nil {
 // 		return err
 // 	}
 
 // 	// Hapus transaksi yang terkait dengan UMKM
-// 	if err := service.transaksiRepository.(id); err != nil {
+// 	if err := service.transaksiRepository.DeleteTransaksiUmkmId(id); err != nil {
 // 		return err
 // 	}
 

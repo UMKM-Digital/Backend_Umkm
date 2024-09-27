@@ -45,7 +45,5 @@ func (transaksiQueryBuilder *KategoriProdukQueryBuilderImpl) GetBuilder(filters 
 		return nil, err
 	}
 
-	query = query.Preload("UMKM")
-
 	return query, nil
 }

@@ -25,7 +25,6 @@ type UMKM struct {
     CreatedAt            time.Time `gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt            time.Time `gorm:"column:updated_at;autoUpdateTime"`
     HakAkses []HakAkses  `gorm:"foreignKey:UmkmId;references:IdUmkm"`
-    KategoriProduk        []KategoriProduk `gorm:"foreignkey:umkm_id"`
     Produk               []Produk  `gorm:"foreignkey:UmkmId"`
     Transaksi            []Transaksi `gorm:"foreignkey:UmkmId"`
     Dokumen            []UmkmDokumen `gorm:"foreignkey:UmkmId"`

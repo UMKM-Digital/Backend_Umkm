@@ -344,3 +344,8 @@ func (repo *TransaksirepositoryImpl) GetTransaksiByDate(umkmID uuid.UUID, year i
 
     return results, int(totalRecords), currentPage, totalPages, nextPage, prevPage, nil
 }
+
+
+func(repo *TransaksirepositoryImpl) DeleteTransaksiUmkmId(id uuid.UUID) error{
+	return repo.db.Where("umkm_id = ?", id).Delete(&domain.Transaksi{}).Error
+}

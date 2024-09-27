@@ -29,7 +29,7 @@ func (repo *KategoriProdukRepoImpl) CreateKategoriProduk(kategoriproduk domain.K
 	return kategoriproduk, nil
 }
 
-func (repo *KategoriProdukRepoImpl) GetKategoriProduk(umkmID uuid.UUID, filters string, limit int, page int) ([]domain.KategoriProduk, int,int, int, *int, *int, error) {
+func (repo *KategoriProdukRepoImpl) GetKategoriProduk( filters string, limit int, page int) ([]domain.KategoriProduk, int,int, int, *int, *int, error) {
 	var kategori []domain.KategoriProduk
 	var totalcount int64
 
@@ -44,13 +44,13 @@ func (repo *KategoriProdukRepoImpl) GetKategoriProduk(umkmID uuid.UUID, filters 
 	}
 
 	// Terapkan filter untuk mendapatkan data
-	err = query.Where("umkm_id = ?", umkmID).Find(&kategori).Error
+	err = query.Order("id ASC").Find(&kategori).Error
 	if err != nil {
 		 return nil, 0, 0, 0, nil, nil, err
 	}
 
 	// Terapkan filter yang sama untuk menghitung total count
-	err = query.Model(&domain.KategoriProduk{}).Where("umkm_id = ?", umkmID).Count(&totalcount).Error
+	err = query.Model(&domain.KategoriProduk{}).Count(&totalcount).Error
 	if err != nil {
 		 return nil, 0, 0, 0, nil, nil, err
 	}
@@ -108,4 +108,9 @@ func (repo *KategoriProdukRepoImpl) DeleteKategoriProdukId(idproduk int) error {
 		return err
 	}
 	return nil
+}
+
+
+func(repo *KategoriProdukRepoImpl) DeleteKategoriUmkmId(id uuid.UUID) error{
+	return repo.db.Where("umkm_id = ?", id).Delete(&domain.KategoriProduk{}).Error
 }

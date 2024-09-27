@@ -17,4 +17,5 @@ type CreateProduk interface {
 	GetProductsByUmkmIds(ctx context.Context, umkmIDs []uuid.UUID) ([]domain.Produk, error)
 	GetProdukList(limit int, page int)([]domain.Produk,int, int, int, *int, *int, error)
 	FindWebId(id uuid.UUID) (domain.Produk, error)
+	DeleteProdukUmkmId(id uuid.UUID) error
 }

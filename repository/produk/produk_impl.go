@@ -184,3 +184,7 @@ func (repo *ProdukRepoImpl) GetProduk(ProdukId uuid.UUID, filters string, limit 
 	}
 	return produk, nil
 	}
+
+	func(repo *ProdukRepoImpl) DeleteProdukUmkmId(id uuid.UUID) error{
+		return repo.db.Where("umkm_id = ?", id).Delete(&domain.Produk{}).Error
+	}
