@@ -135,6 +135,8 @@ type UmkmEntityWebList struct {
 	Gambar       domain.JSONB          `json:"gambar"` // Menggunakan domain.JSONB untuk menyimpan gambar UMKM
 	Lokasi       string                `json:"lokasi"`
 	KategoriUmkm domain.JSONB 			`json:"kategori"`
+	InformasiJmbuka domain.JSONB        `json:"informasi_jambuka"`
+	Deskripsi string 					`json:"deskripsi"`
 	GambarProduk []ProdukEntityWebList  `json:"gambar_produk"` // Menyimpan daftar produk
 }
 
@@ -179,6 +181,8 @@ func ToUmkmEntityWebList(umkm domain.UMKM) UmkmEntityWebList {
 		Gambar:       umkm.Images, // Pastikan ini adalah field gambar UMKM yang benar
 		Lokasi:       umkm.Lokasi,
 		GambarProduk: produkList,
+		InformasiJmbuka: umkm.InformasiJambuka,
+		Deskripsi:  umkm.Deskripsi,
 		KategoriUmkm: umkm.KategoriUmkmId,
 	}
 }
