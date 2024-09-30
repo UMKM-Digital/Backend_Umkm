@@ -24,6 +24,7 @@ import (
 	// querybuilder "umkm/query_builder"
 	dokumenumkmrepo "umkm/repository/dokumenumkm"
 	hakaksesrepo "umkm/repository/hakakses" // Tambahkan import untuk HakAkses repository
+	masterdokumenlegalrepo "umkm/repository/masterdokumenlegal"
 	produkrepo "umkm/repository/produk"
 	transaksirepo "umkm/repository/transaksi"
 	umkmrepo "umkm/repository/umkm"
@@ -41,16 +42,18 @@ type UmkmServiceImpl struct {
 	produkRepository produkrepo.CreateProduk
 	transaksiRepository transaksirepo.TransaksiRepo
 	dokumenrepository dokumenumkmrepo.DokumenUmkmrRepo
+	masterdokumen masterdokumenlegalrepo.MasterDokumenLegal
 	db                 *gorm.DB
 }
 
-func NewUmkmService(umkmrepository umkmrepo.CreateUmkm, hakaksesrepository hakaksesrepo.CreateHakakses, db *gorm.DB, produkRepository produkrepo.CreateProduk,transaksiRepository transaksirepo.TransaksiRepo,dokumenrepository dokumenumkmrepo.DokumenUmkmrRepo) *UmkmServiceImpl {
+func NewUmkmService(umkmrepository umkmrepo.CreateUmkm, hakaksesrepository hakaksesrepo.CreateHakakses, db *gorm.DB, produkRepository produkrepo.CreateProduk,transaksiRepository transaksirepo.TransaksiRepo,dokumenrepository dokumenumkmrepo.DokumenUmkmrRepo, masterdokumen masterdokumenlegalrepo.MasterDokumenLegal) *UmkmServiceImpl {
 	return &UmkmServiceImpl{
 		umkmrepository:     umkmrepository,
 		hakaksesrepository: hakaksesrepository,
 		produkRepository: produkRepository,
 		transaksiRepository: transaksiRepository,
 		dokumenrepository: dokumenrepository,
+		masterdokumen: masterdokumen,
 		db:                 db,
 	}
 }
@@ -193,6 +196,18 @@ func (s *UmkmServiceImpl) GetUmkmListByUserId(ctx context.Context, userId int, f
     if err != nil {
         return nil, 0, 0, 0, nil, nil, err
     }
+	
+	// Fetch UmkmDokumen by UMKM IDs
+    umkmDokumenList, err := s.dokumenrepository.GetUmkmDokumenByUmkmIds(ctx, umkmIDs)
+    if err != nil {
+        return nil, 0, 0, 0, nil, nil, err
+    }
+
+    // Fetch MasterDokumenLegal
+    masterDokumenLegalList, err := s.masterdokumen.GetAllMasterDokumenLegal(ctx)
+    if err != nil {
+        return nil, 0, 0, 0, nil, nil, err
+    }
 
 	products, err := s.produkRepository.GetProductsByUmkmIds(ctx, umkmIDs)
     if err != nil {
@@ -200,7 +215,7 @@ func (s *UmkmServiceImpl) GetUmkmListByUserId(ctx context.Context, userId int, f
     }
 
 
-    umkmResponses := entity.ToUmkmfilterEntities(umkmList, products) // Convert UMKM entities to responses
+    umkmResponses := entity.ToUmkmfilterEntities(umkmList, products, umkmDokumenList, masterDokumenLegalList) // Convert UMKM entities to responses
 
     return umkmResponses, totalCount, currentPage, totalPages, nextPage, prevPage, nil
 }

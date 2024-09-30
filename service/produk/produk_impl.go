@@ -186,109 +186,90 @@ func (service *ProdukServiceImpl) GetProdukList(Produkid uuid.UUID, filters stri
 	return produkEntities,totalCount, currentPage, totalPages, nextPage,prevPage, nil
 }
 
-
-func (service *ProdukServiceImpl) UpdateProduk(request web.UpdatedProduk, id uuid.UUID, files map[int]*multipart.FileHeader) (map[string]interface{}, error) {
+func (service *ProdukServiceImpl) UpdateProduk(request web.UpdatedProduk, id uuid.UUID, files []*multipart.FileHeader) (map[string]interface{}, error) {
     // Ambil produk berdasarkan ID
     getProdukById, err := service.produkrepository.FindById(id)
     if err != nil {
         return nil, err
     }
 
-    // Parse data gambar JSONB yang ada
+    // Ambil gambar yang sudah ada dari produk
     var existingGambar []map[string]interface{}
-    gambarJSONB, ok := getProdukById.Gamabr["urls"].([]interface{})
-    if !ok {
-        return nil, errors.New("format gambar yang ada tidak valid")
-    }
-    for _, img := range gambarJSONB {
-        imgMap, ok := img.(map[string]interface{})
-        if !ok {
-            return nil, errors.New("format data gambar tidak valid")
+    if getProdukById.Gamabr["urls"] != nil {
+        gambarJSONB, ok := getProdukById.Gamabr["urls"].([]interface{})
+        if ok {
+            for _, img := range gambarJSONB {
+                imgMap, ok := img.(map[string]interface{})
+                if ok {
+                    existingGambar = append(existingGambar, imgMap) // Simpan gambar yang sudah ada
+                }
+            }
         }
-        existingGambar = append(existingGambar, imgMap)
-    }
-
-    // Buat map untuk pencarian gambar berdasarkan ID
-    gambarMap := make(map[int]int)
-    for idx, imgMap := range existingGambar {
-        id, ok := imgMap["id"].(float64) // ID dalam JSONB adalah float64
-        if !ok {
-            return nil, errors.New("format ID gambar tidak valid")
-        }
-        gambarMap[int(id)] = idx
     }
 
-    // Log existing gambar
-    log.Printf("Existing gambar data: %v", existingGambar)
-
-    // Proses file gambar baru
-    for imgID, file := range files {
-		
-        // Buat nama file baru dan simpan gambar
-        ext := filepath.Ext(file.Filename)
-        randomFileName := generateRandomFileName(ext)
-        newImagePath := filepath.Join("uploads/Produk", randomFileName)
-
-        src, err := file.Open()
-        if err != nil {
-            return nil, errors.New("gagal membuka file yang diunggah")
+    // Hapus gambar lama jika ada
+    for _, img := range existingGambar {
+        oldImagePath := img["gambar"].(string)
+        if oldImagePath != "" {
+            err := os.Remove(oldImagePath)
+            if err != nil {
+                return nil, errors.New("gagal menghapus gambar lama")
+            }
         }
-        defer src.Close()
+    }
 
-        if err := helper.SaveFile(file, newImagePath); err != nil {
-            return nil, errors.New("gagal menyimpan gambar")
-        }
+    // Proses untuk menyimpan gambar baru
+    var newImages []map[string]interface{}
+    for _, file := range files {
+        if file != nil {
+            ext := filepath.Ext(file.Filename)
+            randomFileName := generateRandomFileName(ext)
+            newImagePath := filepath.Join("uploads/Produk", randomFileName)
 
-        // Perbarui gambar yang ada atau tambahkan yang baru
-        if idx, found := gambarMap[imgID]; found {
+            src, err := file.Open()
+            if err != nil {
+                return nil, errors.New("gagal membuka file yang diunggah")
+            }
+            defer src.Close()
 
-			 // Hapus gambar lama jika ada
-			 oldImagePath := existingGambar[idx]["gambar"].(string)
-			 if oldImagePath != "" {
-				 err := os.Remove(oldImagePath)
-				 if err != nil {
-					 return nil, errors.New("gagal menghapus gambar lama")
-				 }
-			 }
+            if err := helper.SaveFile(file, newImagePath); err != nil {
+                return nil, errors.New("gagal menyimpan gambar")
+            }
 
-            // Perbarui gambar yang sudah ada
-            log.Printf("Updating existing gambar ID: %d at index: %d", imgID, idx)
-            existingGambar[idx]["gambar"] = filepath.ToSlash(newImagePath)
-        } else {
-            // Tambahkan sebagai gambar baru jika ID tidak ditemukan
-            log.Printf("Adding new gambar ID: %d", imgID)
-            existingGambar = append(existingGambar, map[string]interface{}{
-                "id":     imgID,
+            // Tambahkan gambar baru dengan ID yang otomatis
+            newImage := map[string]interface{}{
+                "id":     len(newImages) + 1, // Menghitung ID baru
                 "gambar": filepath.ToSlash(newImagePath),
-            })
+            }
+            newImages = append(newImages, newImage)
         }
     }
 
     // Persiapkan data gambar JSONB yang diperbarui
-    updatedGambarJSONB := domain.JSONB{"urls": existingGambar}
+    updatedGambarJSONB := domain.JSONB{"urls": newImages}
 
-		//kategori
-	
-		    // Kategori
-			var kategoriPorudk domain.JSONB
-	if len(request.KategoriProduk) == 0 {
-		kategoriPorudk = getProdukById.KategoriProduk // Pakai data lama jika tidak ada perubahan
-	} else {
-		if err := json.Unmarshal(request.KategoriProduk, &kategoriPorudk); err != nil {
-			return nil, fmt.Errorf("format kategori_umkm_id tidak valid: %v", err)
-		}
-	}
-	  
+    // Update produk
+    getProdukById.Gamabr = updatedGambarJSONB
+
+    // Kategori
+    var kategoriProduk domain.JSONB
+    if len(request.KategoriProduk) == 0 {
+        kategoriProduk = getProdukById.KategoriProduk // Pakai data lama jika tidak ada perubahan
+    } else {
+        if err := json.Unmarshal(request.KategoriProduk, &kategoriProduk); err != nil {
+            return nil, fmt.Errorf("format kategori tidak valid: %v", err)
+        }
+    }
 
     // Buat objek update produk
     ProdukRequest := domain.Produk{
-        Nama:       request.Name,
-        Gamabr:     updatedGambarJSONB,
-        Harga:      request.Harga,
-        Satuan:     request.Satuan,
-        Min_pesanan: request.MinPesanan,
-        Deskripsi:  request.Deskripsi,
-		KategoriProduk: kategoriPorudk,
+        Nama:           request.Name,
+        Gamabr:         getProdukById.Gamabr, // Gambar baru sudah disimpan
+        Harga:          request.Harga,
+        Satuan:         request.Satuan,
+        Min_pesanan:    request.MinPesanan,
+        Deskripsi:      request.Deskripsi,
+        KategoriProduk: kategoriProduk,
     }
 
     // Perbarui produk di repository
@@ -300,14 +281,12 @@ func (service *ProdukServiceImpl) UpdateProduk(request web.UpdatedProduk, id uui
     // Kembalikan data yang diperbarui
     response := map[string]interface{}{
         "name":        updatedProduk.Nama,
-        "gambar": map[string]interface{}{
-            "urls": existingGambar,
-        },
+        "gambar":      updatedProduk.Gamabr,
         "harga":       updatedProduk.Harga,
         "satuan":      updatedProduk.Satuan,
         "min_pesanan": updatedProduk.Min_pesanan,
         "deskripsi":   updatedProduk.Deskripsi,
-		"kategori": kategoriPorudk,
+        "kategori":    updatedProduk.KategoriProduk,
     }
 
     return response, nil
@@ -315,16 +294,6 @@ func (service *ProdukServiceImpl) UpdateProduk(request web.UpdatedProduk, id uui
 
 
 
-
-// Helper function to check if an image already exists
-func imageExists(existingGambar []map[string]interface{}, imgID string) bool {
-    for _, img := range existingGambar {
-        if img["id"].(string) == imgID {
-            return true
-        }
-    }
-    return false
-}
 
 func (service *ProdukServiceImpl) GetProduk(limit int, page int, filters string, kategoriproduk string, sort string) ([]entity.ProdukWebEntity, int, int, int, *int, *int, error) {
 	// Panggil GetProdukList dari repository dengan parameter tambahan

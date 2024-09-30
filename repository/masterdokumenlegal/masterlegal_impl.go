@@ -1,6 +1,7 @@
 package masterdokumenlegalrepo
 
 import (
+	"context"
 	"errors"
 	"umkm/model/domain"
 	query_builder_masterlegal "umkm/query_builder/masterlegal"
@@ -178,4 +179,19 @@ func (repo *MasterDokumenLegalRepoImpl) GetDokumenUmkmStatus(umkmId uuid.UUID, f
     }
 
     return results, int(totalcount), currentPage, totalPages, nextPage, prevPage, nil
+}
+
+
+func (r *MasterDokumenLegalRepoImpl) GetAllMasterDokumenLegal(ctx context.Context) ([]domain.MasterDokumenLegal, error) {
+    var masterDokumenLegalList []domain.MasterDokumenLegal
+
+    // Menggunakan Gorm untuk mendapatkan semua data master_dokumen_legal
+    err := r.db.WithContext(ctx).
+        Find(&masterDokumenLegalList).Error
+
+    if err != nil {
+        return nil, err
+    }
+
+    return masterDokumenLegalList, nil
 }

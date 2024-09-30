@@ -86,12 +86,16 @@ func (produkQueryBuilder *ProdukQueryBuilderImpl) GetBuilderProdukListWeb( limit
 	switch sort {
 	case "nama_a_z":
 		query = query.Order("nama ASC")
+	case "nama_z_a":
+		query = query.Order("nama DESC")
 	case "harga_terendah":
 		query = query.Order("harga ASC")
 	case "harga_tertinggi":
 		query = query.Order("harga DESC")
 	case "produk_terbaru":
 		query = query.Order("created_at DESC")
+	case "produk_terlama":
+		query = query.Order("created_at ASC")
 	default:
 		// Default sorting bisa diatur di sini jika diperlukan
 	}

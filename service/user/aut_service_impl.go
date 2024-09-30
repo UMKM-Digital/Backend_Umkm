@@ -268,3 +268,44 @@ func (service *AuthServiceImpl) VerifyOTPRegister(otp_code string, phone_code st
 		"message": "OTP verified successfully",
 	}, nil
 }
+
+func (service *AuthServiceImpl) CekInRequest(authID int, password string) (map[string]interface{}, error) {
+    user, getUserErr := service.authrepository.CekInPassword(authID)
+    if getUserErr != nil {
+        return nil, errors.New("user not found")
+    }
+
+    if checkPassword := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); checkPassword != nil {
+        return nil, errors.New("incorrect password")
+    }
+
+    // Return the user details or any necessary information upon successful password check
+    return map[string]interface{}{
+        "id":    user.IdUser,
+        "name":  user.Username,
+        "email": user.Email,
+    }, nil
+}
+
+
+//updatepasssword
+func (service *AuthServiceImpl) ChangePassword(authID int, oldPassword string, newPassword string) error {
+    // Dapatkan user berdasarkan authID
+    user, getUserErr := service.authrepository.CekInPassword(authID)
+    if getUserErr != nil {
+        return errors.New("user not found")
+    }
+
+    // Verifikasi apakah password lama sesuai
+    if checkPassword := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(oldPassword)); checkPassword != nil {
+        return errors.New("incorrect old password")
+    }
+
+    // Ubah ke password baru
+    if err := service.authrepository.UpdatePassword(authID, newPassword); err != nil {
+        return err
+    }
+
+    return nil
+}
+

@@ -14,10 +14,13 @@ type UmkmFilterEntity struct {
 	PenanggunagJawab string `json:"nama_penanggung_jawab"`
 	KategoriUmkm domain.JSONB `json:"kategori_umkm_id"`
 	 TotalProduk        int           `json:"total_produk"`
+	 Progres int 	`json:"progres"`
 }
 
-func ToUmkmFilterEntity(umkm domain.UMKM, products []domain.Produk) UmkmFilterEntity {
+func ToUmkmFilterEntity(umkm domain.UMKM, products []domain.Produk, dokumenList []domain.UmkmDokumen, masterDokumenList []domain.MasterDokumenLegal) UmkmFilterEntity {
 	totalProduk := CalculateTotalProdukByUmkm(umkm.IdUmkm, products)
+	progres := CalculateProgresDokumen(umkm.IdUmkm, dokumenList, masterDokumenList)
+
 	return UmkmFilterEntity{
 	Id: umkm.IdUmkm,
 	Name: umkm.Name,
@@ -26,13 +29,14 @@ func ToUmkmFilterEntity(umkm domain.UMKM, products []domain.Produk) UmkmFilterEn
 	PenanggunagJawab: umkm.NamaPenanggungJawab,
 	KategoriUmkm: umkm.KategoriUmkmId,
 	TotalProduk:        totalProduk, // Menambahkan total produk
+	Progres:            progres, 
 	}
 }
 
-func ToUmkmfilterEntities(umkmList []domain.UMKM, products []domain.Produk) []UmkmFilterEntity {
+func ToUmkmfilterEntities(umkmList []domain.UMKM, products []domain.Produk, dokumenList []domain.UmkmDokumen, masterDokumenList []domain.MasterDokumenLegal) []UmkmFilterEntity {
     var umkmEntities []UmkmFilterEntity
     for _, umkm := range umkmList {
-        umkmEntity := ToUmkmFilterEntity(umkm, products)
+        umkmEntity := ToUmkmFilterEntity(umkm, products, dokumenList, masterDokumenList)
         umkmEntities = append(umkmEntities, umkmEntity)
     }
     return umkmEntities
@@ -50,3 +54,32 @@ func CalculateTotalProdukByUmkm(umkmId uuid.UUID, products []domain.Produk) int 
     return total
 }
 
+
+func CalculateProgresDokumen(umkmId uuid.UUID, dokumenList []domain.UmkmDokumen, masterDokumenList []domain.MasterDokumenLegal) int {
+	// Hitung total dokumen yang wajib diupload
+	totalWajib := 0
+	totalDiisi := 0
+
+	// Loop untuk hitung dokumen yang wajib
+	for _, masterDokumen := range masterDokumenList {
+		if masterDokumen.Iswajib == 1 { // 1 berarti wajib
+			totalWajib++
+
+			// Cek apakah dokumen tersebut sudah diisi oleh UMKM
+			for _, dokumen := range dokumenList {
+				if dokumen.UmkmId == umkmId && dokumen.DokumenId == masterDokumen.IdMasterDokumenLegal {
+					totalDiisi++
+					break
+				}
+			}
+		}
+	}
+
+	// Jika tidak ada dokumen yang wajib, progres 100%
+	if totalWajib == 0 {
+		return 100
+	}
+
+	// Hitung progres dalam persen
+	return (totalDiisi * 100) / totalWajib
+}

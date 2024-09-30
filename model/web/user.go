@@ -22,7 +22,6 @@ type LoginRequest struct {
 type UpdateUserRequest struct {
     Username     string                `validate:"required" json:"username"`
     Email        string                `validate:"required,email" json:"email"`
-    Password     string                `validate:"required" json:"password"`
     No_Phone     string                `validate:"required" json:"no_phone"`
     Picture      *multipart.FileHeader `json:"profile_picture,omitempty" form:"profile_picture"`
 }
@@ -36,4 +35,8 @@ type User struct {
     ID          uint   `json:"id"`
     PhoneNumber string `json:"phone_number"`
     // Tambahkan field lain sesuai kebutuhan
+}
+
+type CekPassword struct{
+    Password string `validate:"required" json:"password"`	
 }

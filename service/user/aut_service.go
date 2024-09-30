@@ -14,4 +14,6 @@ type AuthUserService interface {
 	VerifyOTP(phone string, otp_code string)(map[string]interface{}, error)
 	SendOtpRegister(phone string) (map[string]interface{}, error)
 	VerifyOTPRegister(otp_code string, phone_number string)(map[string]interface{}, error)
+	CekInRequest(authID int, password string) (map[string]interface{}, error) 
+	ChangePassword(authID int, oldPassword string, newPassword string) error 
 }

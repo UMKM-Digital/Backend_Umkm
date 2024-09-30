@@ -11,5 +11,7 @@ type AuthUserRepo interface {
 	GetByID(idUser int) (domain.Users, error)
 	// UpdateId(idUser int, user domain.Users) (domain.Users, error)
 	FindUserByPhoneRegister(phone string)(*domain.Users, error)
+	CekInPassword(userId int) (*domain.Users, error)
+	UpdatePassword(userId int, newPassword string) error
 }
 	

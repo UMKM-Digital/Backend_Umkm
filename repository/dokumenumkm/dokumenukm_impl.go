@@ -1,6 +1,7 @@
 package dokumenumkmrepo
 
 import (
+	"context"
 	"errors"
 	"umkm/model/domain"
 
@@ -58,5 +59,22 @@ func(repo *UmkmDokumenImpl) UpdateDokumen(id int, umkmid uuid.UUID, dokumenumkm 
 		if err := repo.db.Where("umkm_id = ?", id).Find(&umkmDokumenList).Error; err != nil {
 			return umkmDokumenList, err
 		}
+		return umkmDokumenList, nil
+	}
+
+
+
+	func (r *UmkmDokumenImpl) GetUmkmDokumenByUmkmIds(ctx context.Context, umkmIDs []uuid.UUID) ([]domain.UmkmDokumen, error) {
+		var umkmDokumenList []domain.UmkmDokumen
+	
+		// Menggunakan `Where` untuk mendapatkan umkm_dokumen berdasarkan umkm_id
+		err := r.db.WithContext(ctx).
+			Where("umkm_id IN ?", umkmIDs).
+			Find(&umkmDokumenList).Error
+	
+		if err != nil {
+			return nil, err
+		}
+	
 		return umkmDokumenList, nil
 	}

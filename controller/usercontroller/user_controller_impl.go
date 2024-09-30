@@ -244,3 +244,51 @@ func (controller *UserControllerImpl) VerifyOTPHandlerRegister(c echo.Context) e
 		"code":    http.StatusOK,
 	})
 }
+
+func (controller *UserControllerImpl) CekPassword(c echo.Context) error {
+    user := new(web.CekPassword)
+
+    if err := c.Bind(&user); err != nil {
+        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, err.Error(), nil))
+    }
+
+    // Mendapatkan user ID dari token JWT yang sedang login
+    authID, errAuthID := helper.GetAuthId(c)
+    if errAuthID != nil {
+        return c.JSON(http.StatusUnauthorized, model.ResponseToClient(http.StatusUnauthorized, false, "unauthorized", nil))
+    }
+
+    // Memeriksa apakah password sesuai dengan user yang sedang login
+    userRes, errLogin := controller.userService.CekInRequest(authID, user.Password)
+    if errLogin != nil {
+        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, errLogin.Error(), nil))
+    }
+
+    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "password correct", userRes))
+}
+
+func (controller *UserControllerImpl) ChangePassword(c echo.Context) error {
+    // Struct untuk menerima input password lama dan baru dari request
+    var passwordChangeRequest struct {
+        OldPassword string `json:"old_password"`
+        NewPassword string `json:"new_password"`
+    }
+
+    // Bind input dari request ke struct
+    if err := c.Bind(&passwordChangeRequest); err != nil {
+        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, err.Error(), nil))
+    }
+
+    // Dapatkan authID dari JWT token yang aktif
+    authID, errAuthID := helper.GetAuthId(c)
+    if errAuthID != nil {
+        return c.JSON(http.StatusUnauthorized, model.ResponseToClient(http.StatusUnauthorized, false, "unauthorized", nil))
+    }
+
+    // Panggil service untuk mengubah password
+    if err := controller.userService.ChangePassword(authID, passwordChangeRequest.OldPassword, passwordChangeRequest.NewPassword); err != nil {
+        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, err.Error(), nil))
+    }
+
+    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "password changed successfully", nil))
+}

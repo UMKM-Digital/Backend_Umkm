@@ -83,6 +83,12 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userKatgoriUmkmService := kategoriumkmservice.NewKategoriUmkmService(userKategoriUmkmRepo)
 	userKategoriUmkmController := kategoriumkmcontroller.NewKategeoriUmkmController(userKatgoriUmkmService)
 
+	masterlegalQueryBuilder := query_builder_masterlegal.NewMasteLegalQueryBuilder(db)
+	userMasterLegal := masterdokumenlegalrepo.NewDokumenLegalRepoImpl(db, masterlegalQueryBuilder)
+	userMasterLegalService := masterdokumenlegalservice.NewMasterLegalService(userMasterLegal)
+	userMasterLegalController := masterlegalcontroller.NewKategeoriProdukController(userMasterLegalService)
+
+
 	//userproduk
 	produkQueryBuilder := query_builder_produk.NewProdukQueryBuilder(db)
 	userProdukrepo := produkrepo.NewProdukRepositoryImpl(db, produkQueryBuilder)
@@ -108,7 +114,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	umkmQueryBuilder := query_builder_umkm.NewUmkmQueryBuilder(db)
 	userUmkmRepo := umkmrepo.NewUmkmRepositoryImpl(db, umkmQueryBuilder)
 	userHakAksesRepo := hakaksesrepo.NewHakAksesRepositoryImpl(db)  
-	userUmkmService := umkmservice.NewUmkmService(userUmkmRepo, userHakAksesRepo, db, userProdukrepo, userTransaksiRepo, userDokumenuMKM)
+	userUmkmService := umkmservice.NewUmkmService(userUmkmRepo, userHakAksesRepo, db, userProdukrepo, userTransaksiRepo, userDokumenuMKM, userMasterLegal)
 	userUmkmController := umkmcontroller.NewUmkmController(userUmkmService)
  
 
@@ -131,12 +137,6 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userSlider := sliderrepo.NewSlider(db)
 	userSliderService := sliderservice.NewSliderService(userSlider)
 	userSliderController := slidercontroller.NewTestimonialController(*userSliderService)
-
-	masterlegalQueryBuilder := query_builder_masterlegal.NewMasteLegalQueryBuilder(db)
-	userMasterLegal := masterdokumenlegalrepo.NewDokumenLegalRepoImpl(db, masterlegalQueryBuilder)
-	userMasterLegalService := masterdokumenlegalservice.NewMasterLegalService(userMasterLegal)
-	userMasterLegalController := masterlegalcontroller.NewKategeoriProdukController(userMasterLegalService)
-
 	
 
 	//berita
@@ -160,6 +160,8 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	authRoute.POST("/sendotp-register", userAuthController.SendOtpRegister)
 	authRoute.POST("/verifyOtpRegister", userAuthController.VerifyOTPHandlerRegister)
 	// authRoute.POST("/logout", userAuthController.Logout, JWTProtection())
+	authRoute.POST("/cekpassword", userAuthController.CekPassword, JWTProtection())
+	authRoute.POST("/updatepassword", userAuthController.ChangePassword, JWTProtection())
 
 	meRoute := g.Group("/me")
 	meRoute.GET("", userAuthController.View, JWTProtection())
@@ -206,7 +208,9 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	Produk := g.Group("/produk")
 	Produk.POST("/create", userProdukController.CreateProduk)
 	Produk.DELETE("/delete/:id", userProdukController.DeleteProdukId)
+	//untuk mobile
 	Produk.GET("/list/all/:umkm_id", userProdukController.GetprodukList)
+	//
 	Produk.GET("/:id", userProdukController.GetProdukId)
 	Produk.PUT("/update/:id", userProdukController.UpdateProduk)
 	Produk.GET("/list", userProdukController.GetProdukListWeb)

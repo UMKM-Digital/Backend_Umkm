@@ -5,6 +5,7 @@ import (
 
 	"umkm/model/domain"
 
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -82,3 +83,30 @@ func (repo *AuthrepositoryImpl) FindUserByPhoneRegister(phone string) (*domain.U
 
 //verivy otp
 
+
+//cek in paswword
+func(repo *AuthrepositoryImpl) CekInPassword(userId int) (*domain.Users, error) {
+    user := new(domain.Users)
+
+    if err := repo.db.Where("id = ?", userId).Take(&user).Error; err != nil {
+        return nil, err
+    }
+
+    return user, nil
+}
+
+//ubah password
+func (repo *AuthrepositoryImpl) UpdatePassword(userId int, newPassword string) error {
+    // Hash password baru
+    hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+    if err != nil {
+        return err
+    }
+
+    // Update password di database
+    if err := repo.db.Model(&domain.Users{}).Where("id = ?", userId).Update("password", hashedPassword).Error; err != nil {
+        return err
+    }
+
+    return nil
+}

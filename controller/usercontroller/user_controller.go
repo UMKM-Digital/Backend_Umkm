@@ -12,4 +12,6 @@ type SellerController interface {
 	VerifyOTP(c echo.Context) error
 	SendOtpRegister(c echo.Context) error
 	VerifyOTPHandlerRegister(c echo.Context) error
+	CekPassword(c echo.Context) error
+	ChangePassword(c echo.Context) error
 }
