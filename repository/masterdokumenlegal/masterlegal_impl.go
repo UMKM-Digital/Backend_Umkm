@@ -197,8 +197,72 @@ func (r *MasterDokumenLegalRepoImpl) GetAllMasterDokumenLegal(ctx context.Contex
 }
 
 
-//all
-func (repo *MasterDokumenLegalRepoImpl) GetDokumenUmkmStatusAll(userId int, filters string, limit int, page int) ([]domain.UmkmDocumentsResponse, int, int, int, *int, *int, error) {
+// //all
+// func (repo *MasterDokumenLegalRepoImpl) GetDokumenUmkmStatusAll(userId int, filters string, limit int, page int) ([]domain.UmkmDocumentsResponse, int, int, int, *int, *int, error) {
+// 	var results []domain.DokumenStatusResponseALL
+// 	var totalCount int64
+
+// 	if limit <= 0 {
+// 		limit = 100
+// 	}
+
+// 	query, err := repo.masterlegalQuerybuilder.GetBuilderDokumenUmkmStatusAll(userId, filters, limit, page)
+// 	if err != nil {
+// 		return nil, 0, 0, 0, nil, nil, err
+// 	}
+
+// 	if err = query.Find(&results).Error; err != nil {
+// 		return nil, 0, 0, 0, nil, nil, err
+// 	}
+
+// 	// Hitung total dokumen
+// 	countQuery, err := repo.masterlegalQuerybuilder.GetBuilderDokumenUmkmStatusAll(userId, filters, 0, 0)
+// 	if err != nil {
+// 		return nil, 0, 0, 0, nil, nil, err
+// 	}
+
+// 	if err = countQuery.Count(&totalCount).Error; err != nil {
+// 		return nil, 0, 0, 0, nil, nil, err
+// 	}
+
+// 	totalPages := int((totalCount + int64(limit) - 1) / int64(limit))
+// 	if page > totalPages {
+// 		return nil, int(totalCount), page, totalPages, nil, nil, nil
+// 	}
+
+// 	currentPage := page
+// 	var nextPage *int
+// 	if currentPage < totalPages {
+// 		np := currentPage + 1
+// 		nextPage = &np
+// 	}
+
+// 	var prevPage *int
+// 	if currentPage > 1 {
+// 		pp := currentPage - 1
+// 		prevPage = &pp
+// 	}
+
+// 	// Mengelompokkan hasil berdasarkan umkm_id
+// 	umkmMap := make(map[uuid.UUID][]domain.DokumenStatusResponseALL)
+// 	for _, result := range results {
+// 		umkmMap[result.UmkmId] = append(umkmMap[result.UmkmId], result)
+// 	}
+
+// 	// Membangun respons akhir
+// 	var umkmDocumentsResponses []domain.UmkmDocumentsResponse
+// 	for umkmID, docs := range umkmMap {
+// 		umkmDocumentsResponses = append(umkmDocumentsResponses, domain.UmkmDocumentsResponse{
+// 			UmkmID:  umkmID,
+// 			Dokumen: docs,
+// 		})
+// 	}
+
+// 	return umkmDocumentsResponses, int(totalCount), currentPage, totalPages, nextPage, prevPage, nil
+// }
+
+
+func (repo *MasterDokumenLegalRepoImpl) GetDokumenUmkmStatusAll(userId int, filters string, limit int, page int) ([]domain.DokumenStatusResponseALL, int, int, int, *int, *int, error) {
 	var results []domain.DokumenStatusResponseALL
 	var totalCount int64
 
@@ -206,6 +270,7 @@ func (repo *MasterDokumenLegalRepoImpl) GetDokumenUmkmStatusAll(userId int, filt
 		limit = 100
 	}
 
+	// Fetch documents with status
 	query, err := repo.masterlegalQuerybuilder.GetBuilderDokumenUmkmStatusAll(userId, filters, limit, page)
 	if err != nil {
 		return nil, 0, 0, 0, nil, nil, err
@@ -215,7 +280,7 @@ func (repo *MasterDokumenLegalRepoImpl) GetDokumenUmkmStatusAll(userId int, filt
 		return nil, 0, 0, 0, nil, nil, err
 	}
 
-	// Hitung total dokumen
+	// Get total count of documents
 	countQuery, err := repo.masterlegalQuerybuilder.GetBuilderDokumenUmkmStatusAll(userId, filters, 0, 0)
 	if err != nil {
 		return nil, 0, 0, 0, nil, nil, err
@@ -243,20 +308,5 @@ func (repo *MasterDokumenLegalRepoImpl) GetDokumenUmkmStatusAll(userId int, filt
 		prevPage = &pp
 	}
 
-	// Mengelompokkan hasil berdasarkan umkm_id
-	umkmMap := make(map[uuid.UUID][]domain.DokumenStatusResponseALL)
-	for _, result := range results {
-		umkmMap[result.UmkmId] = append(umkmMap[result.UmkmId], result)
-	}
-
-	// Membangun respons akhir
-	var umkmDocumentsResponses []domain.UmkmDocumentsResponse
-	for umkmID, docs := range umkmMap {
-		umkmDocumentsResponses = append(umkmDocumentsResponses, domain.UmkmDocumentsResponse{
-			UmkmID:  umkmID,
-			Dokumen: docs,
-		})
-	}
-
-	return umkmDocumentsResponses, int(totalCount), currentPage, totalPages, nextPage, prevPage, nil
+	return results, int(totalCount), currentPage, totalPages, nextPage, prevPage, nil
 }

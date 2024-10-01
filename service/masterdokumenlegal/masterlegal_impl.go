@@ -107,7 +107,7 @@ func (service *MasterLegalServiceImpl) GetDokumenUmkmStatus(umkmId uuid.UUID, fi
     return dokumenStatusList, totalcount, currentPage, totalPages, nextPage, prevPage, nil
 }
 
-func (service *MasterLegalServiceImpl) GetDokumenUmkmStatusAll(userId int, filters string, limit int, page int) ([]domain.UmkmDocumentsResponse, int, int, int, *int, *int, error) {
+func (service *MasterLegalServiceImpl) GetDokumenUmkmStatusAll(userId int, filters string, limit int, page int) ([]domain.DokumenStatusResponseALL, int, int, int, *int, *int, error) {
 	// Panggil repository untuk mendapatkan data dokumen UMKM dengan pagination
 	dokumenStatusList, totalcount, currentPage, totalPages, nextPage, prevPage, err := service.masterlegal.GetDokumenUmkmStatusAll(userId, filters, limit, page)
 
