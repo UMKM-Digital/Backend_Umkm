@@ -24,7 +24,7 @@ func (repo *AboutUsRepoImpl) CreatedAboutUs(aboutUs domain.AboutUs) (domain.Abou
 
 func (repo *AboutUsRepoImpl) GetAboutUs() ([]domain.AboutUs, error) {
 	var aboutUs []domain.AboutUs
-	err := repo.db.Find(&aboutUs).Error
+	err := repo.db.Order("id ASC").Find(&aboutUs).Error
 	if err != nil {
 		return nil, err
 	}

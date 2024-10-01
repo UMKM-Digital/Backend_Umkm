@@ -25,7 +25,7 @@ func (repo *SliderRepoImpl) Created(slider domain.Slider) (domain.Slider, error)
 
 func (repo *SliderRepoImpl) GetSlider() ([]domain.Slider, error){
 	var slider []domain.Slider
-	err := repo.db.Find(&slider).Error
+	err := repo.db.Order("id ASC").Find(&slider).Error
 	if err != nil {
 		return nil, err
 	}

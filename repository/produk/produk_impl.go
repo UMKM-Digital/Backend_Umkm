@@ -60,7 +60,7 @@ func (repo *ProdukRepoImpl) GetProduk(ProdukId uuid.UUID, filters string, limit 
 	}
 
 	// Mendapatkan data produk
-	err = query.Where("umkm_id = ?", ProdukId).Find(&produk).Error
+	err = query.Where("umkm_id = ?", ProdukId).Order("created_at ASC").Find(&produk).Error
 	if err != nil {
 		return nil, 0, 0, 0, nil, nil, err
 	}

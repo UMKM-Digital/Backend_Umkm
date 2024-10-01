@@ -119,3 +119,28 @@ func (controller *MasterLegalControllerImpl) List(c echo.Context) error {
 
     return c.JSON(http.StatusOK, model.ResponseToClientpagi(http.StatusOK, "true", "Successfully retrieved documents", pagination, dokumenStatusList))
 }
+
+   // Controller tetap sama, pastikan userId diambil dari JWT
+func (controller *MasterLegalControllerImpl) ListAll(c echo.Context) error {
+    userId, err := helper.GetAuthId(c) // Mendapatkan userId dari JWT
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, model.ResponseToClientpagi(http.StatusInternalServerError, "false", err.Error(), model.Pagination{}, nil))
+	}
+
+    filters, limit, page := helper.ExtractFilter(c.QueryParams())
+
+    dokumenStatusList, totalCount, currentPage, totalPages, nextPage, prevPage, err := controller.masterLegalService.GetDokumenUmkmStatusAll(userId, filters, limit, page)
+    if err != nil {
+        return echo.NewHTTPError(http.StatusInternalServerError, "Failed to retrieve documents")
+    }
+
+    pagination := model.Pagination{
+        CurrentPage:  currentPage,
+        NextPage:     nextPage,
+        PrevPage:     prevPage,
+        TotalPages:   totalPages,
+        TotalRecords: totalCount,
+    }
+
+    return c.JSON(http.StatusOK, model.ResponseToClientpagi(http.StatusOK, "true", "Successfully retrieved documents", pagination, dokumenStatusList))
+}

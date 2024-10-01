@@ -21,7 +21,7 @@ func NewBaseQueryBuilderList(db *gorm.DB) *BaseQueryBuilderListImpl {
 func (baseQueryBuilder *BaseQueryBuilderListImpl) GetQueryBuilderList(query *gorm.DB, limit int, page int) (*gorm.DB, error) {
 	// Set limit dan pagination
 	if limit == 0 {
-		limit = 15
+		limit = 100
 	}
 	query = query.Limit(limit)
 

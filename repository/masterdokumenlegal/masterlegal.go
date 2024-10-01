@@ -15,4 +15,5 @@ type MasterDokumenLegal interface {
 	UpdateMasterLegalId(id int, dokumen domain.MasterDokumenLegal)(domain.MasterDokumenLegal, error)
 	GetDokumenUmkmStatus(umkmId uuid.UUID, filters string, limit int, page int) ([]domain.DokumenStatusResponse, int, int, int, *int, *int, error)
 	GetAllMasterDokumenLegal(ctx context.Context) ([]domain.MasterDokumenLegal, error) 
+	GetDokumenUmkmStatusAll(userId int, filters string, limit int, page int) ([]domain.UmkmDocumentsResponse, int, int, int, *int, *int, error) 
 }

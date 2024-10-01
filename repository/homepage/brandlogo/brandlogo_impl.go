@@ -25,7 +25,7 @@ func (repo *BrandLogoRepoImpl) CreatedBrandLogo(brandlogo domain.Brandlogo) (dom
 
 func (repo *BrandLogoRepoImpl) GetBrandLogo() ([]domain.Brandlogo, error) {
     var brandlogo []domain.Brandlogo
-    err := repo.db.Find(&brandlogo).Error
+    err := repo.db.Order("id ASC").Find(&brandlogo).Error
     if err != nil {
         return nil, err
     }

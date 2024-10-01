@@ -43,7 +43,7 @@ func NewKategoriUmkmRepositoryImpl(db *gorm.DB, kategoriQuerybuilder query_build
 				return nil, 0, 0, 0, nil, nil, err
 			}
 
-			err = query.Find(&kategori).Error
+			err = query.Order("id ASC").Find(&kategori).Error
 			if err != nil {
 				return nil, 0, 0, 0, nil, nil, err
 			}

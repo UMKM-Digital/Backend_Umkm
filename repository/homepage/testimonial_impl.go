@@ -26,7 +26,7 @@ func (repo *TestimonalRepoImpl) CreateTestimonial(testimonal domain.Testimonal) 
 
 func (repo *TestimonalRepoImpl) GetTestimonial() ([]domain.Testimonal, error) {
 	var testimonal []domain.Testimonal
-	err := repo.db.Find(&testimonal).Error
+	err := repo.db.Order("id ASC").Find(&testimonal).Error
 	if err != nil {
 		return nil, err
 	}
