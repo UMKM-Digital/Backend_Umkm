@@ -10,7 +10,7 @@ import (
 
 type ProdukQueryBuilder interface {
 	querybuilder.BaseQueryBuilderList
-	GetBuilderProduk(filters string, limit int, page int, kategori_produk_id string) (*gorm.DB, error) 
+	GetBuilderProduk(filters string, limit int, page int, kategori_produk_id string, sort string) (*gorm.DB, error) 
 	GetBuilderProdukListWeb( limit int, page int, filters string, kategoriproduk string, sort string) (*gorm.DB, error) 
 }
 
@@ -26,7 +26,7 @@ func NewProdukQueryBuilder(db *gorm.DB) *ProdukQueryBuilderImpl {
 	}
 }
 
-func (produkQueryBuilder *ProdukQueryBuilderImpl) GetBuilderProduk(filters string, limit int, page int, kategori_produk_id string) (*gorm.DB, error) {
+func (produkQueryBuilder *ProdukQueryBuilderImpl) GetBuilderProduk(filters string, limit int, page int, kategori_produk_id string, sort string) (*gorm.DB, error) {
 	query := produkQueryBuilder.db
 
 	// Implementasi filter di sini
@@ -45,6 +45,23 @@ func (produkQueryBuilder *ProdukQueryBuilderImpl) GetBuilderProduk(filters strin
 			queryParams = append(queryParams, fmt.Sprintf(`{"nama": ["%s"]}`, kategori))
 		}
 		query = query.Where(strings.Join(queryConditions, " OR "), queryParams...)
+	}
+
+	switch sort {
+	case "nama_a_z":
+		query = query.Order("nama ASC")
+	case "nama_z_a":
+		query = query.Order("nama DESC")
+	case "harga_terendah":
+		query = query.Order("harga ASC")
+	case "harga_tertinggi":
+		query = query.Order("harga DESC")
+	case "produk_terbaru":
+		query = query.Order("created_at DESC")
+	case "produk_terlama":
+		query = query.Order("created_at ASC")
+	default:
+		// Default sorting bisa diatur di sini jika diperlukan
 	}
 
 	if limit <= 0 {

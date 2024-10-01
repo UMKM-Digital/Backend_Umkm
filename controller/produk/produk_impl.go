@@ -121,6 +121,7 @@ func (controller *ProdukControllerImpl) GetProdukId(c echo.Context) error{
 func (controller *ProdukControllerImpl) GetprodukList(c echo.Context) error {
 	produkIDStr := c.Param("umkm_id")
 	kategoriProdukID := c.QueryParam("kategori")
+	Sort := c.QueryParam("sort")
 
 	filters, limit, page := helper.ExtractFilter(c.QueryParams())
 
@@ -134,7 +135,7 @@ func (controller *ProdukControllerImpl) GetprodukList(c echo.Context) error {
 	}
 
 	// Call service to get produk list and pagination data
-	result, totalCount, currentPage, totalPages, nextPage, prevPage, err := controller.Produk.GetProdukList(produkId, filters, limit, page, kategoriProdukID)
+	result, totalCount, currentPage, totalPages, nextPage, prevPage, err := controller.Produk.GetProdukList(produkId, filters, limit, page, kategoriProdukID, Sort)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
 	}

@@ -174,8 +174,8 @@ func(service *ProdukServiceImpl) GetProdukId(id uuid.UUID)(entity.ProdukEntity, 
 }
 
 
-func (service *ProdukServiceImpl) GetProdukList(Produkid uuid.UUID, filters string, limit int, page int, kategori_produk_id string) ([]entity.ProdukList, int, int, int, *int, *int, error) {
-	getProdukList, totalCount, currentPage, totalPages, nextPage, prevPage, errGetProdukList := service.produkrepository.GetProduk(Produkid, filters, limit, page, kategori_produk_id)
+func (service *ProdukServiceImpl) GetProdukList(Produkid uuid.UUID, filters string, limit int, page int, kategori_produk_id string, sort string) ([]entity.ProdukList, int, int, int, *int, *int, error) {
+	getProdukList, totalCount, currentPage, totalPages, nextPage, prevPage, errGetProdukList := service.produkrepository.GetProduk(Produkid, filters, limit, page, kategori_produk_id, sort)
 	if errGetProdukList != nil {
 		return nil, 0, 0, 0, nil, nil, errGetProdukList
 	}

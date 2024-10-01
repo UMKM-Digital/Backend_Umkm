@@ -46,7 +46,7 @@ func (repo *ProdukRepoImpl) FindById(id uuid.UUID) (domain.Produk, error) {
 	return produk, nil
 }
 
-func (repo *ProdukRepoImpl) GetProduk(ProdukId uuid.UUID, filters string, limit int, page int, kategori_produk_id string) ([]domain.Produk, int, int, int, *int, *int, error) {
+func (repo *ProdukRepoImpl) GetProduk(ProdukId uuid.UUID, filters string, limit int, page int, kategori_produk_id string, sort string) ([]domain.Produk, int, int, int, *int, *int, error) {
 	var produk []domain.Produk
 	var totalcount int64
 
@@ -54,7 +54,7 @@ func (repo *ProdukRepoImpl) GetProduk(ProdukId uuid.UUID, filters string, limit 
         limit = 15
     }
 	// Mendapatkan query dengan limit dan pagination
-	query, err := repo.produkQueryBuilder.GetBuilderProduk(filters, limit, page, kategori_produk_id)
+	query, err := repo.produkQueryBuilder.GetBuilderProduk(filters, limit, page, kategori_produk_id, sort)
 	if err != nil {
 		return nil, 0, 0, 0, nil, nil, err
 	}
@@ -65,7 +65,7 @@ func (repo *ProdukRepoImpl) GetProduk(ProdukId uuid.UUID, filters string, limit 
 		return nil, 0, 0, 0, nil, nil, err
 	}
 
-	ProdukQueryBuilder, err := repo.produkQueryBuilder.GetBuilderProduk(filters, 0, 0, kategori_produk_id)
+	ProdukQueryBuilder, err := repo.produkQueryBuilder.GetBuilderProduk(filters, 0, 0, kategori_produk_id, sort)
 	if err != nil {
 		return nil, 0, 0, 0, nil, nil, err
 	}
