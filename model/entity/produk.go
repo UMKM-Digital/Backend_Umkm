@@ -13,7 +13,7 @@ type ProdukEntity struct {
 	Images domain.JSONB `json:"gambar_id"`
 	Harga int `json:"harga"`
 	KategdoriProduk domain.JSONB `json:"kategori_produk_id"`
-	Satuan int `json:"satuan"`
+	Satuan string `json:"satuan"`
 	MinPesanan int `json:"min_pesanan"`
 	Deskripsi string `json:"deskripsi"`
 	Created time.Time `json:"created_at"`
@@ -102,7 +102,7 @@ type ProdukWebIdEntity struct {
 	KategdoriProduk domain.JSONB `json:"kategori_produk_id"`
 	Harga int `json:"harga"`
 	NameUmkm   string    `json:"name"`
-	Satuan int `json:"satuan"`
+	Satuan string `json:"satuan"`
 	MinPesanan int `json:"min_pesanan"`
 	Deskripsi string `json:"deskripsi"`
 	NoKontak             string    `json:"no_kontak"`

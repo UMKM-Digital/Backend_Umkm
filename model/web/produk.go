@@ -12,7 +12,7 @@ type WebProduk struct {
 	Name   string `validate:"required" json:"nama"`
 	GambarId json.RawMessage `validate:"required" json:"gambar_id"`
 	Harga int `validate:"required" json:"harga"`
-	Satuan int `validate:"required" json:"satuan"`
+	Satuan string `validate:"required" json:"satuan"`
 	MinPesanan int `validate:"required" json:"min_pesanan"`
 	Deskripsi string `validate:"required" json:"deskripsi"`
 	KategoriProduk json.RawMessage `validate:"required" json:"kategori_produk_id"`
@@ -23,7 +23,7 @@ type UpdatedProduk struct {
 	Name           string          `validate:"required" json:"nama"`
 	GambarIDs      json.RawMessage `validate:"required" json:"gambar_id"`
 	Harga          int             `validate:"required" json:"harga"`
-	Satuan         int             `validate:"required" json:"satuan"`
+	Satuan         string             `validate:"required" json:"satuan"`
 	MinPesanan     int             `validate:"required" json:"min_pesanan"`
 	Deskripsi      string          `validate:"required" json:"deskripsi"`
 	KategoriProduk  json.RawMessage `validate:"required" json:"kategori_produk_id"`

@@ -44,11 +44,6 @@ func (controller *ProdukControllerImpl) CreateProduk(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest,false, "Invalid harga format", nil))
 	}
 
-	produkstauanstr := c.FormValue("satuan")
-	produksatuan, err := strconv.Atoi(produkstauanstr)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid satuan format", nil))
-	}
 
 	produkminpesananstr := c.FormValue("min_pesanan")
 	produkminpesanan, err := strconv.Atoi(produkminpesananstr)
@@ -64,7 +59,7 @@ func (controller *ProdukControllerImpl) CreateProduk(c echo.Context) error {
 
 	produk.UmkmId = umkmID
 	produk.Harga = produkHarga
-	produk.Satuan = produksatuan
+	produk.Satuan = c.FormValue("satuan")
 	produk.MinPesanan = produkminpesanan
 	produk.Name = c.FormValue("nama")
 	produk.Deskripsi = c.FormValue("deskripsi")
@@ -174,6 +169,7 @@ func (controller *ProdukControllerImpl) UpdateProduk(c echo.Context) error {
     name := c.FormValue("nama")
     deskripsi := c.FormValue("deskripsi")
     kategoriJSON := c.FormValue("kategori") // Ambil kategori sebagai JSON
+    satuan := c.FormValue("satuan") // Ambil kategori sebagai JSON
     hargaStr := c.FormValue("harga")
     harga, err := strconv.Atoi(hargaStr)
     if err != nil {
@@ -181,12 +177,12 @@ func (controller *ProdukControllerImpl) UpdateProduk(c echo.Context) error {
         return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid harga format", nil))
     }
 
-    satuanStr := c.FormValue("satuan")
-    satuan, err := strconv.Atoi(satuanStr)
-    if err != nil {
-        log.Printf("Error converting satuan: %v", err)
-        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid satuan format", nil))
-    }
+    // satuanStr := c.FormValue("satuan")
+    // satuan, err := strconv.Atoi(satuanStr)
+    // if err != nil {
+    //     log.Printf("Error converting satuan: %v", err)
+    //     return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid satuan format", nil))
+    // }
 
     minPesananStr := c.FormValue("minpesanan")
     minPesanan, err := strconv.Atoi(minPesananStr)

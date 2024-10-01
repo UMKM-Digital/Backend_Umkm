@@ -12,7 +12,7 @@ type Produk struct {
 	Nama string `gorm:"column:nama"`
 	Gamabr   JSONB       `gorm:"column:gambar_id"`
 	Harga int `gorm:"column:harga"`
-	Satuan int `gorm:"column:satuan"`
+	Satuan string `gorm:"column:satuan"`
 	Min_pesanan int `gorm:"column:min_pesanan"`
 	KategoriProduk JSONB `gorm:"column:kategori_produk_id"`
 	Deskripsi string `gorm:"column:deskripsi"`
