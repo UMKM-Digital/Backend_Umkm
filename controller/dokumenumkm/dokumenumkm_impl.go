@@ -27,14 +27,14 @@ func (controller *DokumenUmkmControllerImpl) Create(c echo.Context) error {
 	dokumenLegal := new(web.CreateUmkmDokumenLegal)
 
 	// Konversi umkm_id dari string ke uuid.UUID
-	umkmIDStr := c.FormValue("umkm_id")
+	umkmIDStr := c.Param("umkm_id")
 	umkmID, err := uuid.Parse(umkmIDStr)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid UMKM ID format", nil))
 	}
 
 	// Konversi dokumen_id dari string ke int
-	dokumenIdStr := c.FormValue("dokumen_id")
+	dokumenIdStr := c.Param("dokumen_id")
 	dokumenid, err := strconv.Atoi(dokumenIdStr)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid Dokumen ID format", nil))

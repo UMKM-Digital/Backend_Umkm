@@ -167,11 +167,11 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	meRoute.GET("", userAuthController.View, JWTProtection())
 
 	KatUmkmRoute := g.Group("/kategori")
-	KatUmkmRoute.POST("/umkm", userKategoriUmkmController.Create, JWTProtection())
-	KatUmkmRoute.GET("/umkm/list", userKategoriUmkmController.GetKategoriList)
-	KatUmkmRoute.GET("/umkm/:id", userKategoriUmkmController.GetKategoriId, JWTProtection())
-	KatUmkmRoute.PUT("/umkm/:id", userKategoriUmkmController.UpdateKategoriId, JWTProtection())
-	KatUmkmRoute.DELETE("/umkm/delete/:id", userKategoriUmkmController.DeleteKategoriId, JWTProtection())
+	KatUmkmRoute.POST("/create", userKategoriUmkmController.Create, JWTProtection())
+	KatUmkmRoute.GET("/list", userKategoriUmkmController.GetKategoriList)
+	KatUmkmRoute.GET("/:id", userKategoriUmkmController.GetKategoriId, JWTProtection())
+	KatUmkmRoute.PUT("/update/:id", userKategoriUmkmController.UpdateKategoriId, JWTProtection())
+	KatUmkmRoute.DELETE("/delete/:id", userKategoriUmkmController.DeleteKategoriId, JWTProtection())
 
 	//umkm
 	Umkm := g.Group("/umkm")
@@ -260,7 +260,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	masterlegal.GET("/list/dokumenumkm/:umkm_id", userMasterLegalController.List)
 
 	dokumenumkm := g.Group("/dokumenumkm")
-	dokumenumkm.POST("/buat", userDokumenUmkmController.Create)
+	dokumenumkm.POST("/dokumen-legal-by-umkm/:dokumen_id/:umkm_id", userDokumenUmkmController.Create)
 	dokumenumkm.GET("/:id/:umkm_id", userDokumenUmkmController.GetDokumenId)
 	dokumenumkm.PUT("/edit/:id/:umkm_id", userDokumenUmkmController.UpdateProduk)
 

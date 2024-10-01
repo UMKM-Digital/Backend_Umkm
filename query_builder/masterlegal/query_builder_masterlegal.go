@@ -48,7 +48,7 @@ func (MasteLegalQueryBuilder *MasteLegalQueryBuilderImpl) GetBuilderMasterLegal(
 
 func (builder *MasteLegalQueryBuilderImpl) GetBuilderDokumenUmkmStatus(umkmId uuid.UUID, filters string, limit int, page int) (*gorm.DB, error) {
 	query := builder.db.Table("master_dokumen_legal").
-		Select("master_dokumen_legal.id,master_dokumen_legal.nama, CASE WHEN umkm_dokumen_legal.id IS NOT NULL THEN 1 ELSE 0 END AS status").
+		Select("master_dokumen_legal.id,master_dokumen_legal.nama, CASE WHEN umkm_dokumen_legal.id IS NOT NULL THEN 1 ELSE 0 END AS status, umkm_dokumen_legal.created_at AS tanggal_upload").
 		Joins("LEFT JOIN umkm_dokumen_legal ON master_dokumen_legal.id = umkm_dokumen_legal.dokumen_id AND umkm_dokumen_legal.umkm_id = ?", umkmId)
 
 	// Implementasi filter jika ada
