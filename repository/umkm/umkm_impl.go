@@ -270,3 +270,12 @@ func(repo *RepoUmkmImpl)DeleteUmkmId(id uuid.UUID) error{
 	}   
 	return nil
 }
+
+func (repo *RepoUmkmImpl) FindById(umkmId uuid.UUID) (domain.UMKM, error) {
+    var umkm domain.UMKM
+    err := repo.db.Where("id = ?", umkmId).First(&umkm).Error
+    if err != nil {
+        return umkm, err
+    }
+    return umkm, nil
+}

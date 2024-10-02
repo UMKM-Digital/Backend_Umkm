@@ -16,7 +16,9 @@ import (
 
 	// "umkm/model/entity"
 	"umkm/model/web"
+	hakaksesrepo "umkm/repository/hakakses"
 	produkrepo "umkm/repository/produk"
+	umkmrepo "umkm/repository/umkm"
 
 	"os"
 
@@ -25,11 +27,15 @@ import (
 
 type ProdukServiceImpl struct {
 	produkrepository produkrepo.CreateProduk
+    HakAkses hakaksesrepo.CreateHakakses
+    Umkm umkmrepo.CreateUmkm
 }
 
-func NewProdukService(produkrepository produkrepo.CreateProduk) *ProdukServiceImpl {
+func NewProdukService(produkrepository produkrepo.CreateProduk, HakAkses hakaksesrepo.CreateHakakses,   Umkm umkmrepo.CreateUmkm) *ProdukServiceImpl {
 	return &ProdukServiceImpl{
 		produkrepository: produkrepository,
+       HakAkses: HakAkses,
+       Umkm: Umkm,
 	}
 }
 
@@ -442,3 +448,39 @@ func(service *ProdukServiceImpl) GetProdukWebId(id uuid.UUID)(entity.ProdukWebId
 }
 
 
+//get all produk berdasarkan login
+func (service *ProdukServiceImpl) GetProdukByUser(userId int) ([]entity.ProdukEntityDetailMobile, error) {
+    // Ambil daftar UMKM yang user memiliki hak akses
+    umkmIds, err := service.HakAkses.GetUmkmIdsByUserId(userId)
+    if err != nil {
+        return nil, err
+    }
+    
+    produkList, err := service.produkrepository.GetProdukByUmkmLogin(umkmIds)
+    if err != nil {
+        return nil, err
+    }
+    
+    var produkDetailList []entity.ProdukEntityDetailMobile
+    for _, produk := range produkList {
+        // Ambil informasi UMKM berdasarkan umkm_id produk
+        umkm, err := service.Umkm.FindById(produk.UmkmId)
+        if err != nil {
+            return nil, err
+        }
+        
+        // Tambahkan nama UMKM ke entity produk
+        produkEntity := entity.ProdukEntityDetailMobile{
+            Id:           produk.IdUmkm,
+            Gambar:       produk.Gamabr,
+            NamaUmkm:     umkm.Name,
+            Nama:         produk.Nama,
+            Harga:        produk.Harga,
+            KategdoriProduk: produk.KategoriProduk,
+        }
+        
+        produkDetailList = append(produkDetailList, produkEntity)
+    }
+
+    return produkDetailList, nil
+}

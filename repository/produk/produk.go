@@ -19,4 +19,5 @@ type CreateProduk interface {
 	FindWebId(id uuid.UUID) (domain.Produk, error)
 	DeleteProdukUmkmId(id uuid.UUID) error
 	GetProdukByUmkmId(id uuid.UUID) ([]domain.Produk, error) 
+	GetProdukByUmkmLogin(umkmIds []uuid.UUID) ([]domain.Produk, error)
 }

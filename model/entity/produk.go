@@ -170,3 +170,34 @@ func ToProdukWebIdEntities(produkList []domain.Produk) []ProdukWebIdEntity {
 // 	}
 // 	return produkEntities
 // }
+
+
+//detail login buat mas dimas
+type ProdukEntityDetailMobile struct{
+	 	Id uuid.UUID `json:"id"`
+	 	Nama string `json:"nama"`
+	 	Gambar domain.JSONB `json:"gambar_id"`
+		NamaUmkm string 	`json:"name_umkm"`
+	 	KategdoriProduk domain.JSONB `json:"kategori_produk_id"`
+		Harga int `json:"harga"`
+}
+
+func ToProdukIdEntity(produk domain.Produk) ProdukEntityDetailMobile {
+	
+	return ProdukEntityDetailMobile{
+		Id: produk.IdUmkm,
+		Gambar: produk.Gamabr,
+		NamaUmkm: produk.Umkm.Name,
+		Nama:     produk.Nama,
+		Harga: produk.Harga, // Assuming the Umkm relationship is populated
+		KategdoriProduk: produk.KategoriProduk,
+	}
+}
+
+func ToProdukIdEntitieslogin(produkList []domain.Produk) []ProdukEntityDetailMobile {
+	var produkEntities []ProdukEntityDetailMobile
+	for _, produk := range produkList {
+		produkEntities = append(produkEntities, ToProdukIdEntity(produk))
+	}
+	return produkEntities
+}

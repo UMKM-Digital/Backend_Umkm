@@ -92,7 +92,10 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	//userproduk
 	produkQueryBuilder := query_builder_produk.NewProdukQueryBuilder(db)
 	userProdukrepo := produkrepo.NewProdukRepositoryImpl(db, produkQueryBuilder)
-	userProdukService := produkservice.NewProdukService(userProdukrepo)
+	umkmQueryBuilderlo := query_builder_umkm.NewUmkmQueryBuilder(db)
+	userUmkmRepolo := umkmrepo.NewUmkmRepositoryImpl(db, umkmQueryBuilderlo)
+	userHakAksesRepopro := hakaksesrepo.NewHakAksesRepositoryImpl(db)  
+	userProdukService := produkservice.NewProdukService(userProdukrepo, userHakAksesRepopro, userUmkmRepolo)
 	userProdukController := produkcontroller.NewProdukController(userProdukService)
 
 	userDokumenuMKM := dokumenumkmrepo.NewDokumenRepositoryImpl(db)
@@ -215,6 +218,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	Produk.PUT("/update/:id", userProdukController.UpdateProduk)
 	Produk.GET("/list", userProdukController.GetProdukListWeb)
 	Produk.GET("/list/:id", userProdukController.GetProdukWebId)
+	Produk.GET("/list/login", userProdukController.GetProdukByLogin, JWTProtection())
 
 
 	//testimonial

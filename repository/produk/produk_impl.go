@@ -202,3 +202,14 @@ func (repo *ProdukRepoImpl) GetProduk(ProdukId uuid.UUID, filters string, limit 
 		return produkList, nil
 	}
 	
+
+	func (repo *ProdukRepoImpl) GetProdukByUmkmLogin(umkmIds []uuid.UUID) ([]domain.Produk, error) {
+		var produkList []domain.Produk
+		// Ambil produk yang umkm_id-nya ada dalam daftar umkmIds
+		if err := repo.db.Order("created_at ASC").Where("umkm_id IN (?)", umkmIds).Find(&produkList).Error; err != nil {
+			return produkList, err
+		}
+		return produkList, nil
+	}
+	
+	

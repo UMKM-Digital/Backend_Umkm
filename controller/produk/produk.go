@@ -10,5 +10,5 @@ type ProdukController interface {
 	UpdateProduk(c echo.Context) error
 	GetProdukList(c echo.Context) error
 	GetProdukListWeb(c echo.Context) error
-
+	GetProdukByLogin(c echo.Context) error
 }

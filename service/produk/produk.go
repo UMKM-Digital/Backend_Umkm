@@ -16,4 +16,5 @@ type Produk interface {
 	UpdateProduk(request web.UpdatedProduk, id uuid.UUID, files []*multipart.FileHeader) (map[string]interface{}, error) 
 	GetProduk(limit int, page int, filters string, kategoriproduk string, sort string) ([]entity.ProdukWebEntity, int, int, int, *int, *int, error) 
 	GetProdukWebId(id uuid.UUID)(entity.ProdukWebIdEntity, error)
+	GetProdukByUser(userId int) ([]entity.ProdukEntityDetailMobile, error)
 }

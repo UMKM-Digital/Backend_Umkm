@@ -339,3 +339,24 @@ func(controller *ProdukControllerImpl) GetProdukWebId(c echo.Context) error{
 
 	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "berhasil mengambil id produk", getProduk))
 }
+
+
+func (controller *ProdukControllerImpl) GetProdukByLogin(c echo.Context) error {
+    // Ambil user ID dari token atau session (contoh menggunakan JWT)
+    userId, err := helper.GetAuthId(c)
+    if err != nil {
+        return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+            "message": "Unauthorized",
+        })
+    }
+
+    // Ambil semua produk yang terkait dengan UMKM yang dimiliki oleh user
+    produkEntities, err := controller.Produk.GetProdukByUser(userId)
+    if err != nil {
+        return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+            "message": "Gagal mengambil produk",
+        })
+    }
+
+    return c.JSON(http.StatusOK, produkEntities)
+}
