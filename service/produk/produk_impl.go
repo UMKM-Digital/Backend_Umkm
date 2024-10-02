@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"math/rand"
 	"mime/multipart"
 	"path/filepath"
 	"time"
@@ -35,71 +34,180 @@ func NewProdukService(produkrepository produkrepo.CreateProduk) *ProdukServiceIm
 }
 
 func generateRandomFileName(ext string) string {
-	rand.Seed(time.Now().UnixNano())
-	randomString := fmt.Sprintf("%d", rand.Intn(1000000))
-	return randomString + ext
+	now := time.Now()
+	
+	// Format the date as YYMMDD
+	datePrefix := now.Format("060102") // Format to YYMMDD
+
+	// Generate a new UUID
+	uniqueID := uuid.New().String()
+
+	// Include seconds in the file name
+	seconds := now.Format("150405") // Format to HHMMSS
+
+	// Combine everything into the final file name
+	return fmt.Sprintf("%s-%s-%s%s", datePrefix, uniqueID, seconds, ext)
 }
+
+// func (service *ProdukServiceImpl) CreateProduk(produk web.WebProduk, files map[string]*multipart.FileHeader) (map[string]interface{}, error) {
+// 	var Gambar domain.JSONB
+// 	var savedImageURLs []map[string]interface{}
+
+// 	// Handle gambar files
+// 	if len(files) > 0 {
+// 		for _, file := range files {
+// 			ext := filepath.Ext(file.Filename)
+// 			randomFileName := generateRandomFileName(ext)
+// 			newImagePath := filepath.Join("uploads/Produk", randomFileName)
+
+// 			if err := helper.SaveFile(file, newImagePath); err != nil {
+// 				return nil, errors.New("failed to save image")
+// 			}
+
+// 			// Save the image path in a format with forward slashes
+// 			// savedImageURLs = append(savedImageURLs, filepath.ToSlash(newImagePath))
+// 			savedImageURLs = append(savedImageURLs, map[string]interface{}{
+// 				"id":     len(savedImageURLs) + 1, // Assuming ID is generated sequentially
+// 				"gambar": filepath.ToSlash(newImagePath),
+// 			})
+// 		}
+
+// 		Gambar = domain.JSONB{"urls": savedImageURLs}
+// 	} else {
+// 		Gambar = domain.JSONB{"urls": []interface{}	{}}
+// 	}
+
+// 	KategoriProduk, err := helper.RawMessageToJSONB(produk.KategoriProduk)
+// 	if err != nil {
+// 		return nil, errors.New("invalid type for KategoriProduk")
+// 	}
+
+// 	newProduk := domain.Produk{
+// 		UmkmId:           produk.UmkmId,
+// 		Nama:             produk.Name,
+// 		Gamabr:           Gambar,
+// 		Harga:            produk.Harga,
+// 		Satuan:           produk.Satuan,
+// 		Min_pesanan:      produk.MinPesanan,
+// 		KategoriProduk:   KategoriProduk,
+// 		Deskripsi:        produk.Deskripsi,
+// 	}
+
+// 	saveProduk, errSaveProduk := service.produkrepository.CreateRequest(newProduk)
+// 	if errSaveProduk != nil {
+// 		return nil, errSaveProduk
+// 	}
+
+// 	return map[string]interface{}{
+// 		"umkm_id":            saveProduk.UmkmId,
+// 		"nama":               saveProduk.Nama,
+// 		"gambar":             saveProduk.Gamabr,
+// 		"harga":              saveProduk.Harga,
+// 		"satuan":             saveProduk.Satuan,
+// 		"minimal_pesanan":    saveProduk.Min_pesanan,
+// 		"kategori_produk_id": saveProduk.KategoriProduk,
+// 		"deskripsi":          saveProduk.Deskripsi,
+// 	}, nil
+// }
+
 
 func (service *ProdukServiceImpl) CreateProduk(produk web.WebProduk, files map[string]*multipart.FileHeader) (map[string]interface{}, error) {
-	var Gambar domain.JSONB
-	var savedImageURLs []map[string]interface{}
+    var Gambar domain.JSONB
+    var savedImageURLs []map[string]interface{}
 
-	// Handle gambar files
-	if len(files) > 0 {
-		for _, file := range files {
-			ext := filepath.Ext(file.Filename)
-			randomFileName := generateRandomFileName(ext)
-			newImagePath := filepath.Join("uploads/Produk", randomFileName)
+    // Ambil gambar yang ada jika ada
+    if produk.GambarId != nil && string(produk.GambarId) != "[]" {
+        var existingImages map[string]interface{}
+        if err := json.Unmarshal(produk.GambarId, &existingImages); err != nil {
+            return nil, errors.New("failed to parse existing images")
+        }
 
-			if err := helper.SaveFile(file, newImagePath); err != nil {
-				return nil, errors.New("failed to save image")
-			}
+        if urls, ok := existingImages["urls"].([]interface{}); ok {
+            for _, url := range urls {
+                if urlMap, ok := url.(map[string]interface{}); ok {
+                    savedImageURLs = append(savedImageURLs, urlMap)
+                }
+            }
+        }
+    }
 
-			// Save the image path in a format with forward slashes
-			// savedImageURLs = append(savedImageURLs, filepath.ToSlash(newImagePath))
-			savedImageURLs = append(savedImageURLs, map[string]interface{}{
-				"id":     len(savedImageURLs) + 1, // Assuming ID is generated sequentially
-				"gambar": filepath.ToSlash(newImagePath),
-			})
-		}
+    // Handle gambar files
+    if len(files) > 0 {
+        // Create a slice to preserve order
+        orderedFiles := make([]*multipart.FileHeader, 0, len(files))
+        
+        // Collect files in the order they are received
+        for _, file := range files {
+            orderedFiles = append(orderedFiles, file)
+        }
 
-		Gambar = domain.JSONB{"urls": savedImageURLs}
-	} else {
-		Gambar = domain.JSONB{"urls": []interface{}	{}}
-	}
+        for _, file := range orderedFiles {
+            ext := filepath.Ext(file.Filename)
+            randomFileName := generateRandomFileName(ext)
+            newImagePath := filepath.Join("uploads/Produk", randomFileName)
 
-	KategoriProduk, err := helper.RawMessageToJSONB(produk.KategoriProduk)
-	if err != nil {
-		return nil, errors.New("invalid type for KategoriProduk")
-	}
+            if err := helper.SaveFile(file, newImagePath); err != nil {
+                return nil, errors.New("failed to save image")
+            }
 
-	newProduk := domain.Produk{
-		UmkmId:           produk.UmkmId,
-		Nama:             produk.Name,
-		Gamabr:           Gambar,
-		Harga:            produk.Harga,
-		Satuan:           produk.Satuan,
-		Min_pesanan:      produk.MinPesanan,
-		KategoriProduk:   KategoriProduk,
-		Deskripsi:        produk.Deskripsi,
-	}
+            imageID := uuid.New().String() // Menghasilkan ID gambar yang unik
+            newImageEntry := map[string]interface{}{
+                "id":     imageID, // Menggunakan UUID sebagai ID
+                "gambar": filepath.ToSlash(newImagePath),
+            }
 
-	saveProduk, errSaveProduk := service.produkrepository.CreateRequest(newProduk)
-	if errSaveProduk != nil {
-		return nil, errSaveProduk
-	}
+            // Cek jika gambar sudah ada sebelum menambahkannya
+            exists := false
+            for _, img := range savedImageURLs {
+                if img["gambar"] == newImageEntry["gambar"] {
+                    exists = true
+                    break
+                }
+            }
 
-	return map[string]interface{}{
-		"umkm_id":            saveProduk.UmkmId,
-		"nama":               saveProduk.Nama,
-		"gambar":             saveProduk.Gamabr,
-		"harga":              saveProduk.Harga,
-		"satuan":             saveProduk.Satuan,
-		"minimal_pesanan":    saveProduk.Min_pesanan,
-		"kategori_produk_id": saveProduk.KategoriProduk,
-		"deskripsi":          saveProduk.Deskripsi,
-	}, nil
+            if !exists {
+                savedImageURLs = append(savedImageURLs, newImageEntry)
+            }
+        }
+
+        Gambar = domain.JSONB{"urls": savedImageURLs}
+    } else {
+        Gambar = domain.JSONB{"urls": []interface{}{}}
+    }
+
+    KategoriProduk, err := helper.RawMessageToJSONB(produk.KategoriProduk)
+    if err != nil {
+        return nil, errors.New("invalid type for KategoriProduk")
+    }
+
+    newProduk := domain.Produk{
+        UmkmId:         produk.UmkmId,
+        Nama:           produk.Name,
+        Gamabr:         Gambar,
+        Harga:          produk.Harga,
+        Satuan:         produk.Satuan,
+        Min_pesanan:    produk.MinPesanan,
+        KategoriProduk: KategoriProduk,
+        Deskripsi:      produk.Deskripsi,
+    }
+
+    saveProduk, errSaveProduk := service.produkrepository.CreateRequest(newProduk)
+    if errSaveProduk != nil {
+        return nil, errSaveProduk
+    }
+
+    return map[string]interface{}{
+        "umkm_id":            saveProduk.UmkmId,
+        "nama":               saveProduk.Nama,
+        "gambar":             saveProduk.Gamabr,
+        "harga":              saveProduk.Harga,
+        "satuan":             saveProduk.Satuan,
+        "minimal_pesanan":    saveProduk.Min_pesanan,
+        "kategori_produk_id": saveProduk.KategoriProduk,
+        "deskripsi":          saveProduk.Deskripsi,
+    }, nil
 }
+
 
 
 

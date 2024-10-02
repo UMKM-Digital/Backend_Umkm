@@ -55,7 +55,7 @@ func(controller *BeritaControllerImpl) LIst(c echo.Context) error{
    
     limit, err := strconv.Atoi(limitStr)
     if err != nil || limit <= 0 {
-        limit = 10 
+        limit = 0 
     }
 
     page, err := strconv.Atoi(pageStr)

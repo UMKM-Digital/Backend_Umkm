@@ -222,7 +222,7 @@ func (controller *UmkmControllerImpl) UpdateUmkm(c echo.Context) error {
 func (controller *UmkmControllerImpl) GetUmmkmList(c echo.Context) error {
     filters, limit, page := helper.ExtractFilter(c.QueryParams())
     kategoriumkm := c.QueryParam("kategori")
-    sortOrder := c.QueryParam("sortorder")
+    sortOrder := c.QueryParam("sort")
     
 	getUmkm,totalCount, currentPage, totalPages, nextPage, prevPage, errGetUmkmDetail := controller.umkmservice.GetUmkmList(filters, limit, page, kategoriumkm, sortOrder)
 

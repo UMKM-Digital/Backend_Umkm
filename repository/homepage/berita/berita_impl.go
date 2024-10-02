@@ -33,10 +33,10 @@ func (repo *BeritaRepoImpl)  GetBeritaList(ctx context.Context, limit int, page 
 	var berita []domain.Berita
     var totalcount int64
 
-    // Set default limit jika limit == 0
-    if limit <= 0 {
-        limit = 15
-    }
+    // // Set default limit jika limit == 0
+    // if limit <= 0 {
+    //     limit = 15
+    // }
 
     // Dapatkan query dengan filter dan pagination
     query, err := repo.beritarepo.GetBuilder( limit, page)
