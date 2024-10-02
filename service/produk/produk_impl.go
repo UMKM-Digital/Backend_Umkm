@@ -112,68 +112,82 @@ func generateRandomFileName(ext string) string {
 
 
 func (service *ProdukServiceImpl) CreateProduk(produk web.WebProduk, files map[string]*multipart.FileHeader) (map[string]interface{}, error) {
-    var Gambar domain.JSONB
-    var savedImageURLs []map[string]interface{}
+    // var Gambar domain.JSONB
+    // var savedImageURLs []map[string]interface{}
 
-    // Ambil gambar yang ada jika ada
-    if produk.GambarId != nil && string(produk.GambarId) != "[]" {
-        var existingImages map[string]interface{}
-        if err := json.Unmarshal(produk.GambarId, &existingImages); err != nil {
-            return nil, errors.New("failed to parse existing images")
-        }
-
-        if urls, ok := existingImages["urls"].([]interface{}); ok {
-            for _, url := range urls {
-                if urlMap, ok := url.(map[string]interface{}); ok {
-                    savedImageURLs = append(savedImageURLs, urlMap)
-                }
-            }
-        }
-    }
-
-    // Handle gambar files
-    if len(files) > 0 {
-        // Create a slice to preserve order
-        orderedFiles := make([]*multipart.FileHeader, 0, len(files))
+    // // Handle gambar files
+    // if len(files) > 0 {
+    //     // Create a slice to preserve order
+    //     orderedFiles := make([]*multipart.FileHeader, 0, len(files))
         
-        // Collect files in the order they are received
-        for _, file := range files {
-            orderedFiles = append(orderedFiles, file)
-        }
+    //     // Collect files in the order they are received
+    //     for _, file := range files {
+    //         orderedFiles = append(orderedFiles, file)
+    //     }
 
-        for _, file := range orderedFiles {
-            ext := filepath.Ext(file.Filename)
-            randomFileName := generateRandomFileName(ext)
-            newImagePath := filepath.Join("uploads/Produk", randomFileName)
+    //     for _, file := range orderedFiles {
+    //         ext := filepath.Ext(file.Filename)
+    //         randomFileName := generateRandomFileName(ext)
+    //         newImagePath := filepath.Join("uploads/Produk", randomFileName)
 
-            if err := helper.SaveFile(file, newImagePath); err != nil {
-                return nil, errors.New("failed to save image")
-            }
+    //         if err := helper.SaveFile(file, newImagePath); err != nil {
+    //             return nil, errors.New("failed to save image")
+    //         }
 
-            imageID := uuid.New().String() // Menghasilkan ID gambar yang unik
-            newImageEntry := map[string]interface{}{
-                "id":     imageID, // Menggunakan UUID sebagai ID
-                "gambar": filepath.ToSlash(newImagePath),
-            }
+    //         imageID := uuid.New().String() // Menghasilkan ID gambar yang unik
+    //         newImageEntry := map[string]interface{}{
+    //             "id":     imageID, // Menggunakan UUID sebagai ID
+    //             "gambar": filepath.ToSlash(newImagePath),
+    //         }
 
-            // Cek jika gambar sudah ada sebelum menambahkannya
-            exists := false
-            for _, img := range savedImageURLs {
-                if img["gambar"] == newImageEntry["gambar"] {
-                    exists = true
-                    break
-                }
-            }
+    //         // Cek jika gambar sudah ada sebelum menambahkannya
+    //         exists := false
+    //         for _, img := range savedImageURLs {
+    //             if img["gambar"] == newImageEntry["gambar"] {
+    //                 exists = true
+    //                 break
+    //             }
+    //         }
 
-            if !exists {
-                savedImageURLs = append(savedImageURLs, newImageEntry)
-            }
-        }
+    //         if !exists {
+    //             savedImageURLs = append(savedImageURLs, newImageEntry)
+    //         }
+    //     }
 
-        Gambar = domain.JSONB{"urls": savedImageURLs}
-    } else {
-        Gambar = domain.JSONB{"urls": []interface{}{}}
-    }
+    //     Gambar = domain.JSONB{"urls": savedImageURLs}
+    // } else {
+    //     Gambar = domain.JSONB{"urls": []interface{}{}}
+    // }
+
+     // Proses untuk menyimpan gambar baru
+     var newImages []map[string]interface{}
+     for _, file := range files {
+         if file != nil {
+             ext := filepath.Ext(file.Filename)
+             randomFileName := generateRandomFileName(ext)
+             newImagePath := filepath.Join("uploads/Produk", randomFileName)
+ 
+             src, err := file.Open()
+             if err != nil {
+                 return nil, errors.New("gagal membuka file yang diunggah")
+             }
+             defer src.Close()
+ 
+             if err := helper.SaveFile(file, newImagePath); err != nil {
+                 return nil, errors.New("gagal menyimpan gambar")
+             }
+ 
+             // Tambahkan gambar baru dengan ID yang otomatis
+             newImage := map[string]interface{}{
+                 "id":     len(newImages) + 1, // Menghitung ID baru
+                 "gambar": filepath.ToSlash(newImagePath),
+             }
+             newImages = append(newImages, newImage)
+         }
+     }
+ 
+     // Persiapkan data gambar JSONB yang diperbarui
+     updatedGambarJSONB := domain.JSONB{"urls": newImages}
 
     KategoriProduk, err := helper.RawMessageToJSONB(produk.KategoriProduk)
     if err != nil {
@@ -183,7 +197,7 @@ func (service *ProdukServiceImpl) CreateProduk(produk web.WebProduk, files map[s
     newProduk := domain.Produk{
         UmkmId:         produk.UmkmId,
         Nama:           produk.Name,
-        Gamabr:         Gambar,
+        Gamabr:         updatedGambarJSONB,
         Harga:          produk.Harga,
         Satuan:         produk.Satuan,
         Min_pesanan:    produk.MinPesanan,
