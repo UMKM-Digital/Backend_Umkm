@@ -366,3 +366,17 @@ func (controller *ProdukControllerImpl) GetProdukByLogin(c echo.Context) error {
 
     return c.JSON(http.StatusOK, produkEntities)
 }
+
+
+func(controller *ProdukControllerImpl) GetProdukBaru(c echo.Context) error{
+	IdUmkm := c.Param("id")
+	id, _ := uuid.Parse(IdUmkm)
+
+	getProduk, errGetProduk := controller.Produk.GetProdukBaru(id)
+
+	if errGetProduk != nil {
+		return c.JSON(http.StatusNotFound, model.ResponseToClient(http.StatusNotFound, false, errGetProduk.Error(), nil))
+	}
+
+	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "berhasil mengambil id produk", getProduk))
+}

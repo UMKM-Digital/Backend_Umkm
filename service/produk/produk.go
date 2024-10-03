@@ -17,4 +17,5 @@ type Produk interface {
 	GetProduk(limit int, page int, filters string, kategoriproduk string, sort string) ([]entity.ProdukWebEntity, int, int, int, *int, *int, error) 
 	GetProdukWebId(id uuid.UUID)(entity.ProdukWebIdEntity, error)
 	GetProdukByUser(userId int) ([]entity.ProdukEntityDetailMobile, error)
+	GetProdukBaru(UmkmId uuid.UUID)([]entity.ProdukTerbaru, error)
 }

@@ -201,3 +201,29 @@ func ToProdukIdEntitieslogin(produkList []domain.Produk) []ProdukEntityDetailMob
 	}
 	return produkEntities
 }
+
+//list produk terbaru
+type ProdukTerbaru struct {
+	Id     uuid.UUID   `json:"id"`   
+	Gambar domain.JSONB `json:"gambar_porduk"` // Menyimpan gambar produk
+	Nama string `json:"nama_produk"`
+	Harga int `json:"harga"`
+}
+
+func ToProdukBaru(produk domain.Produk) ProdukTerbaru {
+	
+	return ProdukTerbaru{
+		Id: produk.IdUmkm,
+		Gambar: produk.Gamabr,
+		Nama:     produk.Nama,
+		Harga: produk.Harga, // Assuming the Umkm relationship is populated
+	}
+}
+
+func ToProdukIdEntitiesBaru(produkList []domain.Produk) []ProdukTerbaru {
+	var produkEntities []ProdukTerbaru
+	for _, produk := range produkList {
+		produkEntities = append(produkEntities, ToProdukBaru(produk))
+	}
+	return produkEntities
+}

@@ -452,3 +452,14 @@ func (service *ProdukServiceImpl) GetProdukByUser(userId int) ([]entity.ProdukEn
 
     return produkDetailList, nil
 }
+
+
+//produk terbaru
+
+func(service ProdukServiceImpl) GetProdukBaru(UmkmId uuid.UUID)([]entity.ProdukTerbaru, error){
+    GetTestimonialList, err := service.produkrepository.GetProdukBaru(UmkmId)
+    if err != nil {
+        return nil, err
+    }
+    return entity.ToProdukIdEntitiesBaru(GetTestimonialList), nil
+}
