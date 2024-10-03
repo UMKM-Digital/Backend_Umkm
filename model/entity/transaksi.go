@@ -21,6 +21,8 @@ type TransaksiEntity struct {
 	IdKategoriProduk []KategoriProduk    ` json:"id_kategori_produk"`
 	TotalBelanja     decimal.Decimal `json:"total_jml"`
 	TiketValidasi  string    `json:"tiket_validasi"`
+	Status         int 		 `json:"status"`
+	Deskripsi   string        `json:"deskripsi"`
 
 }
 
@@ -51,6 +53,8 @@ func ToTransaksiEntity(transaksi domain.Transaksi) TransaksiEntity {
 		IdKategoriProduk: kategori,
 		TotalBelanja:     transaksi.TotalJml,
 		TiketValidasi: transaksi.TiketValidasi,
+		Status: transaksi.Status,
+		Deskripsi: transaksi.Keterangan,
 	}
 }
 

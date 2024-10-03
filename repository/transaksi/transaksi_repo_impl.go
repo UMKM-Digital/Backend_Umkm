@@ -147,6 +147,7 @@ func (repo *TransaksirepositoryImpl) GetFilterTransaksiWebTahun(umkmID string, p
 	// Query utama dengan pagination
 	query := repo.db.Model(&domain.Transaksi{}).
 		Select(`
+			umkm_id, 
             EXTRACT(YEAR FROM tanggal) AS year,
             COUNT(*) AS jumlah_transaksi,
             SUM(CASE WHEN status = 1 THEN 1 ELSE 0 END) AS jml_transaksi_berlaku,
@@ -155,7 +156,7 @@ func (repo *TransaksirepositoryImpl) GetFilterTransaksiWebTahun(umkmID string, p
             SUM(CASE WHEN status = 0 THEN total_jml ELSE 0 END) AS total_batal
         `).
 		Where("umkm_id = ?", umkmID).
-		Group("EXTRACT(YEAR FROM tanggal)").
+		Group("umkm_id,EXTRACT(YEAR FROM tanggal)").
 		Order("EXTRACT(YEAR FROM tanggal) ASC").
 		Limit(limit).
 		Offset(offset)
@@ -202,17 +203,18 @@ func (repo *TransaksirepositoryImpl) GetTransaksiByMonth(umkmID string, year int
 	// Query untuk mengambil transaksi dengan limit dan offset
 	query := repo.db.Model(&domain.Transaksi{}).
 		Select(`
-            EXTRACT(MONTH FROM tanggal) AS month,
-            COUNT(*) AS jumlah_transaksi,
-            SUM(CASE WHEN status = 1 THEN 1 ELSE 0 END) AS jml_transaksi_berlaku,
-            SUM(CASE WHEN status = 0 THEN 1 ELSE 0 END) AS jml_transaksi_batal,
-            SUM(CASE WHEN status = 1 THEN total_jml ELSE 0 END) AS total_berlaku,
-            SUM(CASE WHEN status = 0 THEN total_jml ELSE 0 END) AS total_batal
-        `).
-		Where("umkm_id = ?", umkmID).
-		Where("EXTRACT(YEAR FROM tanggal) = ?", year).
-		Group("month").
-		Order("month").
+			umkm_id,
+			EXTRACT(YEAR FROM tanggal) AS year,
+			EXTRACT(MONTH FROM tanggal) AS month,
+			COUNT(*) AS jumlah_transaksi,
+			SUM(CASE WHEN status = 1 THEN 1 ELSE 0 END) AS jml_transaksi_berlaku,
+			SUM(CASE WHEN status = 0 THEN 1 ELSE 0 END) AS jml_transaksi_batal,
+			SUM(CASE WHEN status = 1 THEN total_jml ELSE 0 END) AS total_berlaku,
+			SUM(CASE WHEN status = 0 THEN total_jml ELSE 0 END) AS total_batal
+		`).
+		Where("umkm_id = ? AND EXTRACT(YEAR FROM tanggal) = ?", umkmID, year). // Correct year filtering
+		Group("umkm_id, year, month").   // Group by year and month
+		Order("month ASC").
 		Limit(limit).
 		Offset(offset)
 
@@ -301,6 +303,9 @@ func (repo *TransaksirepositoryImpl) GetTransaksiByDate(umkmID uuid.UUID, year i
     // Query untuk mengambil data dengan limit dan offset
     dataQuery := repo.db.Model(&domain.Transaksi{}).
         Select(`
+		umkm_id,
+			EXTRACT(YEAR FROM tanggal) AS year,
+			EXTRACT(MONTH FROM tanggal) AS month,
             DATE(tanggal) as date,
             COUNT(*) as jumlah_transaksi,
             SUM(CASE WHEN status = 1 THEN 1 ELSE 0 END) as jml_transaksi_berlaku,
@@ -311,7 +316,7 @@ func (repo *TransaksirepositoryImpl) GetTransaksiByDate(umkmID uuid.UUID, year i
         Where("umkm_id = ?", umkmID).
         Where("EXTRACT(YEAR FROM tanggal) = ?", year).
         Where("EXTRACT(MONTH FROM tanggal) = ?", month).
-        Group("DATE(tanggal)").
+        Group("umkm_id, year, month, DATE(tanggal)").
         Order("DATE(tanggal)").
         Limit(limit).
         Offset(offset)
