@@ -229,7 +229,8 @@ func (repo *RepoUmkmImpl) GetUmkmListDetailPaginated(id uuid.UUID, limit int, pa
     // Mengambil produk dengan pagination
     var produkList []domain.Produk
     err = repo.db.Model(&domain.Produk{}).
-        Where("umkm_id = ?", id). // Ganti `umkm_id` dengan nama kolom yang benar jika berbeda
+        Where("umkm_id = ?", id).
+        Order("created_at ASC").   // Ganti `umkm_id` dengan nama kolom yang benar jika berbeda
         Limit(limit).
         Offset(offset).
         Count(&totalCount).

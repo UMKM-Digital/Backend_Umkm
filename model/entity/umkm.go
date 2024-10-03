@@ -199,18 +199,19 @@ func ToUmkmEntitiesWebList(umkmList []domain.UMKM) []UmkmEntityWebList {
 
 //detailumkm
 
-type UmkmDetailEntity struct{
-	Id uuid.UUID `json:"id"`
-	Gambar domain.JSONB `json:"gambar_umkm"`
-	Name string `json:"name_umkm"`
-	KatageoriUmkm domain.JSONB `json:"kategori_umkmk"`
-	NoKontak string `json:"no_kontak"`
-	Deskripsi string `json:"deskripsi_umkm"`
-	InformasiJambuka domain.JSONB `json:"jambuka_umkm"`
-	Lokasi string `json:"lokasi"`
-	Maps domain.JSONB `json:"maps"`
-	Produk []ProdukEntityDetailList `json:"data"`
+type UmkmDetailEntity struct {
+	Id                uuid.UUID                     `json:"id"`
+	Gambar            domain.JSONB                  `json:"gambar_umkm"`
+	Name              string                         `json:"name_umkm"`
+	KatageoriUmkm     domain.JSONB                  `json:"kategori_umkmk"`
+	NoKontak          string                         `json:"no_kontak"`
+	Deskripsi         string                         `json:"deskripsi_umkm"`
+	InformasiJambuka  domain.JSONB                  `json:"jambuka_umkm"`
+	Lokasi            string                         `json:"lokasi"`
+	Maps              domain.JSONB                  `json:"maps"`
+	Produk            []ProdukEntityDetailList       `json:"all_products"` // Produk yang terpaginasikan
 }
+
 
 type ProdukEntityDetailList struct {
 	Id     uuid.UUID   `json:"id"`   
@@ -241,6 +242,27 @@ func ToProdukEntitiesDetailList(produkList []domain.Produk) []ProdukEntityDetail
 	}
 	return produkListEntities
 }
+//
+func ToProdukEntitiesDetailListNew(produkList []domain.Produk) []ProdukEntityDetailList {
+	// Urutkan produk berdasarkan created_at dari terbaru ke terlama
+	sort.Slice(produkList, func(i, j int) bool {
+		return produkList[i].CreatedAt.After(produkList[j].CreatedAt)
+	})
+
+	// Ambil maksimal 4 produk
+	limit := 4
+	if len(produkList) < limit {
+		limit = len(produkList)
+	}
+
+	// Konversi hanya 4 produk teratas ke ProdukEntityDetailList
+	var produkListEntities []ProdukEntityDetailList
+	for i := 0; i < limit; i++ {
+		produkListEntities = append(produkListEntities, ToProdukEntityDetailList(produkList[i]))
+	}
+	return produkListEntities
+}
+
 
 // ToUmkmEntityWebList mengonversi UMKM menjadi UmkmEntityWebList
 func ToUmkmEntityDetailList(umkm domain.UMKM) UmkmDetailEntity {
@@ -248,6 +270,7 @@ func ToUmkmEntityDetailList(umkm domain.UMKM) UmkmDetailEntity {
 
 	// Panggil fungsi untuk mendapatkan 3 produk terbaru
 	produkList := ToProdukEntitiesDetailList(umkm.Produk)
+	
 
 	return UmkmDetailEntity{
 		Id:           umkm.IdUmkm,

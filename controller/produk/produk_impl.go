@@ -95,27 +95,31 @@ func (controller *ProdukControllerImpl) CreateProduk(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid UMKM ID format", nil))
 	}
 
+	// Konversi harga dari string ke integer
 	produkHargastr := c.FormValue("harga")
 	produkHarga, err := strconv.Atoi(produkHargastr)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid harga format", nil))
 	}
 
-	produkminpesananstr := c.FormValue("min_pesanan")
-	produkminpesanan, err := strconv.Atoi(produkminpesananstr)
+	// Konversi min_pesanan dari string ke integer
+	produkMinPesananStr := c.FormValue("min_pesanan")
+	produkMinPesanan, err := strconv.Atoi(produkMinPesananStr)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid min_pesanan format", nil))
 	}
 
-	kategorid := c.FormValue("kategori_produk_id")
-	if kategorid != "" {
-		produk.KategoriProduk = json.RawMessage(kategorid)
+	// Konversi kategori_produk_id ke json.RawMessage
+	kategoriID := c.FormValue("kategori_produk_id")
+	if kategoriID != "" {
+		produk.KategoriProduk = json.RawMessage(kategoriID)
 	}
 
+	// Set field produk lainnya
 	produk.UmkmId = umkmID
 	produk.Harga = produkHarga
 	produk.Satuan = c.FormValue("satuan")
-	produk.MinPesanan = produkminpesanan
+	produk.MinPesanan = produkMinPesanan
 	produk.Name = c.FormValue("nama")
 	produk.Deskripsi = c.FormValue("deskripsi")
 
@@ -124,25 +128,27 @@ func (controller *ProdukControllerImpl) CreateProduk(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, "Failed to parse form", nil))
 	}
 
-	files := c.Request().MultipartForm.File["gambar"] // Ambil semua file gambar
-
-	// Buat map untuk menyimpan file header
-	fileHeaders := make(map[string]*multipart.FileHeader)
-
-	// Mengumpulkan file header sesuai urutan upload
-	for _, file := range files {
-		fileHeaders[file.Filename] = file
+	// Ambil semua file gambar yang diunggah
+	files := c.Request().MultipartForm.File["gambar"]
+	if len(files) == 0 {
+		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "No images uploaded", nil))
 	}
 
-	// Produk GambarId diatur sebagai array JSON kosong
-	produk.GambarId = json.RawMessage([]byte("[]")) // Default empty JSON array
+	// Simpan file sesuai urutan yang diupload
+	fileHeaders := make([]*multipart.FileHeader, 0) // Menggunakan slice untuk urutan file
+	for _, file := range files {
+		fileHeaders = append(fileHeaders, file) // Simpan dalam urutan aslinya
+	}
+
+	// Call service untuk menyimpan produk dan gambar
 	result, errSaveProduk := controller.Produk.CreateProduk(*produk, fileHeaders)
 	if errSaveProduk != nil {
 		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, errSaveProduk.Error(), nil))
 	}
 
-	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "membut produk berhasil", result))
+	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "Produk berhasil dibuat", result))
 }
+
 
 
 func (controller *ProdukControllerImpl) DeleteProdukId(c echo.Context) error {

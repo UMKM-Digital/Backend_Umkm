@@ -116,84 +116,47 @@ func generateRandomFileName(ext string) string {
 // 	}, nil
 // }
 
+func (service *ProdukServiceImpl) CreateProduk(produk web.WebProduk, files []*multipart.FileHeader) (map[string]interface{}, error) {
+    // Proses untuk menyimpan gambar baru
+    var newImages []map[string]interface{}
+    index := 0 // Menggunakan integer untuk indeks gambar
 
-func (service *ProdukServiceImpl) CreateProduk(produk web.WebProduk, files map[string]*multipart.FileHeader) (map[string]interface{}, error) {
-    // var Gambar domain.JSONB
-    // var savedImageURLs []map[string]interface{}
+    for _, file := range files {
+        if file != nil {
+            // Menggunakan nama file asli
+            ext := filepath.Ext(file.Filename)
 
-    // // Handle gambar files
-    // if len(files) > 0 {
-    //     // Create a slice to preserve order
-    //     orderedFiles := make([]*multipart.FileHeader, 0, len(files))
-        
-    //     // Collect files in the order they are received
-    //     for _, file := range files {
-    //         orderedFiles = append(orderedFiles, file)
-    //     }
+            // Menghasilkan nama file baru menggunakan fungsi generateRandomFileName
+            newImageName := generateRandomFileName(ext)
+            newImagePath := filepath.Join("uploads/Produk", newImageName)
 
-    //     for _, file := range orderedFiles {
-    //         ext := filepath.Ext(file.Filename)
-    //         randomFileName := generateRandomFileName(ext)
-    //         newImagePath := filepath.Join("uploads/Produk", randomFileName)
+            src, err := file.Open()
+            if err != nil {
+                return nil, errors.New("gagal membuka file yang diunggah")
+            }
+            defer src.Close()
 
-    //         if err := helper.SaveFile(file, newImagePath); err != nil {
-    //             return nil, errors.New("failed to save image")
-    //         }
+            // Menyimpan file dengan nama aslinya
+            if err := helper.SaveFile(file, newImagePath); err != nil {
+                return nil, errors.New("gagal menyimpan gambar")
+            }
 
-    //         imageID := uuid.New().String() // Menghasilkan ID gambar yang unik
-    //         newImageEntry := map[string]interface{}{
-    //             "id":     imageID, // Menggunakan UUID sebagai ID
-    //             "gambar": filepath.ToSlash(newImagePath),
-    //         }
+            // Tambahkan gambar baru dengan ID yang otomatis
+            newImage := map[string]interface{}{
+                "id":     index + 1, // Menggunakan integer untuk menghitung ID baru
+                "gambar": filepath.ToSlash(newImagePath),
+            }
+            newImages = append(newImages, newImage)
 
-    //         // Cek jika gambar sudah ada sebelum menambahkannya
-    //         exists := false
-    //         for _, img := range savedImageURLs {
-    //             if img["gambar"] == newImageEntry["gambar"] {
-    //                 exists = true
-    //                 break
-    //             }
-    //         }
+            // Log gambar yang disimpan
+            log.Printf("Gambar ke-%d disimpan dengan nama file: %s", index+1, newImageName)
+            
+            index++ // Menambah indeks
+        }
+    }
 
-    //         if !exists {
-    //             savedImageURLs = append(savedImageURLs, newImageEntry)
-    //         }
-    //     }
-
-    //     Gambar = domain.JSONB{"urls": savedImageURLs}
-    // } else {
-    //     Gambar = domain.JSONB{"urls": []interface{}{}}
-    // }
-
-     // Proses untuk menyimpan gambar baru
-     var newImages []map[string]interface{}
-     for _, file := range files {
-         if file != nil {
-             ext := filepath.Ext(file.Filename)
-             randomFileName := generateRandomFileName(ext)
-             newImagePath := filepath.Join("uploads/Produk", randomFileName)
- 
-             src, err := file.Open()
-             if err != nil {
-                 return nil, errors.New("gagal membuka file yang diunggah")
-             }
-             defer src.Close()
- 
-             if err := helper.SaveFile(file, newImagePath); err != nil {
-                 return nil, errors.New("gagal menyimpan gambar")
-             }
- 
-             // Tambahkan gambar baru dengan ID yang otomatis
-             newImage := map[string]interface{}{
-                 "id":     len(newImages) + 1, // Menghitung ID baru
-                 "gambar": filepath.ToSlash(newImagePath),
-             }
-             newImages = append(newImages, newImage)
-         }
-     }
- 
-     // Persiapkan data gambar JSONB yang diperbarui
-     updatedGambarJSONB := domain.JSONB{"urls": newImages}
+    // Persiapkan data gambar JSONB yang diperbarui
+    updatedGambarJSONB := domain.JSONB{"urls": newImages}
 
     KategoriProduk, err := helper.RawMessageToJSONB(produk.KategoriProduk)
     if err != nil {
@@ -231,6 +194,9 @@ func (service *ProdukServiceImpl) CreateProduk(produk web.WebProduk, files map[s
 
 
 
+
+
+
 //
 func (service *ProdukServiceImpl) DeleteProduk(id uuid.UUID) error {
 	// Cari produk berdasarkan ID
@@ -243,7 +209,7 @@ func (service *ProdukServiceImpl) DeleteProduk(id uuid.UUID) error {
 	var gambarURLs []string
 	gambarMap := make(map[string]interface{})
 
-	gambarBytes, err := json.Marshal(produk.Gamabr)
+	gambarBytes, err := json.Marshal(produk.Gamabr) // Pastikan Anda mengakses field yang benar
 	if err != nil {
 		return err
 	}
@@ -255,8 +221,10 @@ func (service *ProdukServiceImpl) DeleteProduk(id uuid.UUID) error {
 	// Ambil gambar URLs dari map
 	if urls, ok := gambarMap["urls"].([]interface{}); ok {
 		for _, url := range urls {
-			if urlStr, ok := url.(string); ok {
-				gambarURLs = append(gambarURLs, urlStr)
+			if gambarObj, ok := url.(map[string]interface{}); ok {
+				if gambarStr, ok := gambarObj["gambar"].(string); ok {
+					gambarURLs = append(gambarURLs, gambarStr)
+				}
 			}
 		}
 	} else {
@@ -266,7 +234,6 @@ func (service *ProdukServiceImpl) DeleteProduk(id uuid.UUID) error {
 	// Hapus file gambar
 	for _, gambarURL := range gambarURLs {
 		// Normalisasi path
-		// Jika gambarURL sudah berisi prefix 'uploads/', kita tidak perlu menambahkannya lagi
 		filePath := filepath.Join(gambarURL)
 
 		// Normalisasi path untuk memastikan tidak ada folder berulang
@@ -290,6 +257,7 @@ func (service *ProdukServiceImpl) DeleteProduk(id uuid.UUID) error {
 	// Hapus produk dari database
 	return service.produkrepository.DeleteProdukId(id)
 }
+
 
 func(service *ProdukServiceImpl) GetProdukId(id uuid.UUID)(entity.ProdukEntity, error){
 	GetProduk, errGetProduk := service.produkrepository.FindById(id)
