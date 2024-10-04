@@ -198,9 +198,9 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	Transaksi.POST("/umkm", userTransaksiController.Create)
 	Transaksi.GET("/:id", userTransaksiController.GetKategoriId)
 	Transaksi.GET("/:umkm_id/:date", userTransaksiController.GetTransaksiFilterList)
-	Transaksi.GET("/web/:umkm_id", userTransaksiController.GetTransaksiByYear)
-	Transaksi.GET("/web/mounth/:umkm_id", userTransaksiController.GetTransaksiByMonth)
-	Transaksi.GET("/web/date/:umkm_id", userTransaksiController.GetTransaksiByDate)
+	Transaksi.GET("/rekap-transaksi-tahunan", userTransaksiController.GetTransaksiByYear, JWTProtection())
+	Transaksi.GET("/rekap-transaksi-bulanan", userTransaksiController.GetTransaksiByMonth, JWTProtection())
+	Transaksi.GET("/rekap-transaksi-harian", userTransaksiController.GetTransaksiByDate, JWTProtection())
 
 	//kategoriproduk
 	KatProdukRoute := g.Group("/kategoriproduk")

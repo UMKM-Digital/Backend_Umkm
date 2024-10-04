@@ -126,9 +126,9 @@ func (service *TranssaksiServiceImpl) GetTransaksiFilter(umkmID uuid.UUID, filte
 
 
 // transaksi web
-func (service *TranssaksiServiceImpl) GetTransaksiByYear(umkmID string, page int, limit int, filter string) ([]map[string]interface{}, int, int, int, *int, *int, error) {
+func (service *TranssaksiServiceImpl) GetTransaksiByYear(id int, page int, limit int, filter string) ([]map[string]interface{}, int, int, int, *int, *int, error) {
     // Panggil repository untuk mengambil data transaksi dengan pagination
-    transactions, totalRecords, currentPage, totalPages, nextPage, prevPage, err := service.transaksirepository.GetFilterTransaksiWebTahun(umkmID, page, limit, filter)
+    transactions, totalRecords, currentPage, totalPages, nextPage, prevPage, err := service.transaksirepository.GetFilterTransaksiWebTahunByUserID(id, page, limit, filter)
     if err != nil {
         return nil, 0, 0, 0, nil, nil, fmt.Errorf("failed to retrieve transactions: %w", err)
     }
@@ -154,9 +154,9 @@ func (service *TranssaksiServiceImpl) GetTransaksiByYear(umkmID string, page int
 }
 
 
-func (service *TranssaksiServiceImpl) GetTransaksiByMonth(umkmID string, year int, page int, limit int, filter string) ([]map[string]interface{}, int, int, int, *int, *int, error) {
+func (service *TranssaksiServiceImpl) GetTransaksiByMonth(umkmID uuid.UUID, user_id int,  year int, page int, limit int, filter string) ([]map[string]interface{}, int, int, int, *int, *int, error) {
     // Panggil repository untuk mengambil data transaksi dengan pagination
-    transactions, totalRecords, currentPage, totalPages, nextPage, prevPage, err := service.transaksirepository.GetTransaksiByMonth(umkmID, year, page, limit, filter)
+    transactions, totalRecords, currentPage, totalPages, nextPage, prevPage, err := service.transaksirepository.GetTransaksiByMonth(user_id, umkmID,  year, page, limit, filter)
     if err != nil {
         return nil, 0, 0, 0, nil, nil, fmt.Errorf("failed to retrieve transactions: %w", err)
     }
@@ -185,9 +185,9 @@ func (service *TranssaksiServiceImpl) GetTransaksiByMonth(umkmID string, year in
 
 
 
-func (service *TranssaksiServiceImpl) GetTransaksiByDate(umkmID uuid.UUID, year int, month int, page int, limit int, filter string) ([]map[string]interface{}, int, int, int, *int, *int, error) {
+func (service *TranssaksiServiceImpl) GetTransaksiByDate(umkmID uuid.UUID, user_id int, year int, month int, page int, limit int, filter string) ([]map[string]interface{}, int, int, int, *int, *int, error) {
     // Call the repository to get the data along with pagination details
-    transactions, totalRecords, currentPage, totalPages, nextPage, prevPage, err := service.transaksirepository.GetTransaksiByDate(umkmID, year, month, page, limit, filter)
+    transactions, totalRecords, currentPage, totalPages, nextPage, prevPage, err := service.transaksirepository.GetTransaksiByDate(user_id, umkmID, year, month, page, limit, filter)
     if err != nil {
         return nil, 0, 0, 0, nil, nil, fmt.Errorf("failed to retrieve transactions: %w", err)
     }

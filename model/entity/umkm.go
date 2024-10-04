@@ -301,6 +301,7 @@ type UmkmActive struct{
 	Id uuid.UUID `json:"id"`
 	Nama string `json:"nama"`
 	Gambar domain.JSONB `json:"gambar"`
+	Deskripsi string 	`json:"deskripsi"`
 	Active int 	`json:"active"`
 }
 
@@ -309,6 +310,7 @@ func ToUmkmEntityActive(umkm domain.UMKM) UmkmActive {
 		Id:           umkm.IdUmkm,
 		Nama:         umkm.Name,
 		Gambar:       umkm.Images, // Pastikan ini adalah field gambar UMKM yang bena
+		Deskripsi: umkm.Deskripsi,
 		Active: umkm.Active,
 	}
 }

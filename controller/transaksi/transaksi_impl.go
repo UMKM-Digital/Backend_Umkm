@@ -128,17 +128,14 @@ func (controller *TransaksiControllerImpl) GetTransaksiFilterList(c echo.Context
 
 
 func (controller *TransaksiControllerImpl) GetTransaksiByYear(c echo.Context) error {
-    umkmIDStr := c.Param("umkm_id")
     pageParam := c.QueryParam("page")
     limitParam := c.QueryParam("limit")
     filter := c.QueryParam("filter")
 
-    // Parse UUID untuk UMKM ID
-    umkmID, err := uuid.Parse(umkmIDStr)
+    userId, err := helper.GetAuthId(c)
     if err != nil {
-        return c.JSON(http.StatusBadRequest, map[string]interface{}{
-            "status":  false,
-            "message": "Invalid UMKM ID",
+        return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+            "message": "Unauthorized",
         })
     }
 
@@ -162,7 +159,7 @@ func (controller *TransaksiControllerImpl) GetTransaksiByYear(c echo.Context) er
     }
 
     // Panggil service untuk mendapatkan transaksi dengan pagination
-    transactions, totalRecords, currentPage, totalPages, nextPage, prevPage, err := controller.transaksiservice.GetTransaksiByYear(umkmID.String(), page, limit, filter)
+    transactions, totalRecords, currentPage, totalPages, nextPage, prevPage, err := controller.transaksiservice.GetTransaksiByYear(userId, page, limit, filter)
     if err != nil {
         return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
     }
@@ -183,93 +180,256 @@ func (controller *TransaksiControllerImpl) GetTransaksiByYear(c echo.Context) er
 }
 
 
-func (controller *TransaksiControllerImpl) GetTransaksiByMonth(c echo.Context) error {
-    umkmIDStr := c.Param("umkm_id")
-    yearParam := c.QueryParam("year")
-    pageParam := c.QueryParam("page")
-    limitParam := c.QueryParam("limit")
-    filter := c.QueryParam("filter")
+// func (controller *TransaksiControllerImpl) GetTransaksiByMonth(c echo.Context) error {
+//     umkmIDStr := c.QueryParam("umkm_id")
+//     yearParam := c.QueryParam("year")
+//     pageParam := c.QueryParam("page")
+//     limitParam := c.QueryParam("limit")
+//     filter := c.QueryParam("filter")
 
-    // Parse UUID for UMKM ID
-    umkmID, err := uuid.Parse(umkmIDStr)
-    if err != nil {
-        return c.JSON(http.StatusBadRequest, map[string]interface{}{
-            "status":  false,
-            "message": "Invalid UMKM ID",
-        })
-    }
+//     // Parse UUID for UMKM ID
+//     umkmID, err := uuid.Parse(umkmIDStr)
+//     if err != nil {
+//         return c.JSON(http.StatusBadRequest, map[string]interface{}{
+//             "status":  false,
+//             "message": "Invalid UMKM ID",
+//         })
+//     }
 
-    // Parse year
-    year, err := strconv.Atoi(yearParam)
-    if err != nil || year <= 0 {
-        return c.JSON(http.StatusBadRequest, map[string]interface{}{
-            "status":  false,
-            "message": "Invalid year parameter",
-        })
-    }
+//     // Parse year
+//     year, err := strconv.Atoi(yearParam)
+//     if err != nil || year <= 0 {
+//         return c.JSON(http.StatusBadRequest, map[string]interface{}{
+//             "status":  false,
+//             "message": "Invalid year parameter",
+//         })
+//     }
 
-    // Parse page and limit
-    page, err := strconv.Atoi(pageParam)
-    if err != nil || page <= 0 {
-        page = 1  // Default to page 1 if invalid page parameter
-    }
+//     // Parse page and limit
+//     page, err := strconv.Atoi(pageParam)
+//     if err != nil || page <= 0 {
+//         page = 1  // Default to page 1 if invalid page parameter
+//     }
 
-    var limit int
-    if limitParam == "all" {
-        limit = -1
-    } else {
-        limit, err = strconv.Atoi(limitParam)
-        if err != nil || limit <= 0 {
-            return c.JSON(http.StatusBadRequest, map[string]interface{}{
-                "status":  false,
-                "message": "Invalid limit parameter",
+//     var limit int
+//     if limitParam == "all" {
+//         limit = -1
+//     } else {
+//         limit, err = strconv.Atoi(limitParam)
+//         if err != nil || limit <= 0 {
+//             return c.JSON(http.StatusBadRequest, map[string]interface{}{
+//                 "status":  false,
+//                 "message": "Invalid limit parameter",
+//             })
+//         }
+//     }
+
+//     // Call service to get transactions and pagination data
+//     transactions, totalRecords, currentPage, totalPages, nextPage, prevPage, err := controller.transaksiservice.GetTransaksiByMonth(umkmID, year, page, limit, filter)
+//     if err != nil {
+//         return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
+//     }
+
+//     // Prepare pagination data
+//     pagination := model.Pagination{
+//         CurrentPage:  currentPage,
+//         NextPage:     nextPage,
+//         PrevPage:     prevPage,
+//         TotalPages:   totalPages,
+//         TotalRecords: totalRecords,
+//     }
+
+//     // Create response with pagination and transaction data
+//     response := model.ResponseToClientpagi(http.StatusOK, "true", "Berhasil menampilkan transaksi berdasarkan bulan", pagination, transactions)
+
+//     return c.JSON(http.StatusOK, response)
+// }
+
+    func (controller *TransaksiControllerImpl) GetTransaksiByMonth(c echo.Context) error {
+        userId, err := helper.GetAuthId(c)
+        if err != nil {
+            return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+                "message": "Unauthorized",
             })
         }
+
+        umkmIDStr := c.QueryParam("umkm_id")
+        yearParam := c.QueryParam("year")
+        pageParam := c.QueryParam("page")
+        limitParam := c.QueryParam("limit")
+        filter := c.QueryParam("filter")
+
+        var umkmID uuid.UUID
+        // Jika umkm_id tidak disediakan, ambil semua UMKM yang dimiliki oleh user
+        if umkmIDStr != "" {
+            // Parse UUID untuk UMKM ID
+            var err error
+            umkmID, err = uuid.Parse(umkmIDStr)
+            if err != nil {
+                return c.JSON(http.StatusBadRequest, map[string]interface{}{
+                    "status":  false,
+                    "message": "Invalid UMKM ID",
+                })
+            }
+        }
+
+        // Parse tahun
+        year, err := strconv.Atoi(yearParam)
+        if err != nil && yearParam != "" {
+            return c.JSON(http.StatusBadRequest, map[string]interface{}{
+                "status":  false,
+                "message": "Invalid year parameter",
+            })
+        }
+
+        // Parse page dan limit
+        page, err := strconv.Atoi(pageParam)
+        if err != nil || page <= 0 {
+            page = 1  // Default ke halaman 1 jika parameter halaman tidak valid
+        }
+
+        var limit int
+        if limitParam == "all" {
+            limit = -1
+        } else {
+            limit, err = strconv.Atoi(limitParam)
+            if err != nil || limit <= 0 {
+                return c.JSON(http.StatusBadRequest, map[string]interface{}{
+                    "status":  false,
+                    "message": "Invalid limit parameter",
+                })
+            }
+        }
+
+        // Panggil service untuk mendapatkan transaksi dan data pagination
+        transactions, totalRecords, currentPage, totalPages, nextPage, prevPage, err := controller.transaksiservice.GetTransaksiByMonth(umkmID, userId, year, page, limit, filter)
+        if err != nil {
+            return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
+        }
+
+        // Siapkan data pagination
+        pagination := model.Pagination{
+            CurrentPage:  currentPage,
+            NextPage:     nextPage,
+            PrevPage:     prevPage,
+            TotalPages:   totalPages,
+            TotalRecords: totalRecords,
+        }
+
+        // Buat respons dengan pagination dan data transaksi
+        response := model.ResponseToClientpagi(http.StatusOK, "true", "Berhasil menampilkan transaksi berdasarkan bulan", pagination, transactions)
+
+        return c.JSON(http.StatusOK, response)
     }
 
-    // Call service to get transactions and pagination data
-    transactions, totalRecords, currentPage, totalPages, nextPage, prevPage, err := controller.transaksiservice.GetTransaksiByMonth(umkmID.String(), year, page, limit, filter)
-    if err != nil {
-        return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
-    }
-
-    // Prepare pagination data
-    pagination := model.Pagination{
-        CurrentPage:  currentPage,
-        NextPage:     nextPage,
-        PrevPage:     prevPage,
-        TotalPages:   totalPages,
-        TotalRecords: totalRecords,
-    }
-
-    // Create response with pagination and transaction data
-    response := model.ResponseToClientpagi(http.StatusOK, "true", "Berhasil menampilkan transaksi berdasarkan bulan", pagination, transactions)
-
-    return c.JSON(http.StatusOK, response)
-}
 
 
+
+// func (controller *TransaksiControllerImpl) GetTransaksiByDate(c echo.Context) error {
+//     umkmIDStr := c.QueryParam("umkm_id")
+//     yearParam := c.QueryParam("year")
+//     monthParam := c.QueryParam("month")
+//     pageParam := c.QueryParam("page")
+//     limitParam := c.QueryParam("limit")
+//     filter := c.QueryParam("filter")
+
+//     // Parse UUID for UMKM ID
+//     umkmID, err := uuid.Parse(umkmIDStr)
+//     if err != nil {
+//         return c.JSON(http.StatusBadRequest, map[string]interface{}{
+//             "status":  false,
+//             "message": "Invalid UMKM ID",
+//         })
+//     }
+
+//     // Parse year and month
+//     year, err := strconv.Atoi(yearParam)
+//     if err != nil || year <= 0 {
+//         return c.JSON(http.StatusBadRequest, map[string]interface{}{
+//             "status":  false,
+//             "message": "Invalid year parameter",
+//         })
+//     }
+
+//     month, err := strconv.Atoi(monthParam)
+//     if err != nil || month <= 0 || month > 12 {
+//         return c.JSON(http.StatusBadRequest, map[string]interface{}{
+//             "status":  false,
+//             "message": "Invalid month parameter",
+//         })
+//     }
+
+//     // Parse page and limit
+//     page, err := strconv.Atoi(pageParam)
+//     if err != nil || page <= 0 {
+//         page = 1  // Default to page 1 if invalid
+//     }
+
+//     var limit int
+//     if limitParam == "all" {
+//         limit = -1
+//     } else {
+//         limit, err = strconv.Atoi(limitParam)
+//         if err != nil || limit <= 0 {
+//             return c.JSON(http.StatusBadRequest, map[string]interface{}{
+//                 "status":  false,
+//                 "message": "Invalid limit parameter",
+//             })
+//         }
+//     }
+
+//     // Call service to get transaksi list and pagination data
+//     transactions, totalRecords, currentPage, totalPages, nextPage, prevPage, err := controller.transaksiservice.GetTransaksiByDate(umkmID, year, month, page, limit, filter)
+//     if err != nil {
+//         return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
+//     }
+
+//     // Prepare pagination data
+//     pagination := model.Pagination{
+//         CurrentPage:  currentPage,
+//         NextPage:     nextPage,
+//         PrevPage:     prevPage,
+//         TotalPages:   totalPages,
+//         TotalRecords: totalRecords,
+//     }
+
+//     // Create response
+//     response := model.ResponseToClientpagi(http.StatusOK, "true", "Berhasil menampilkan transaksi berdasarkan tanggal", pagination, transactions)
+
+//     return c.JSON(http.StatusOK, response)
+// }
 
 func (controller *TransaksiControllerImpl) GetTransaksiByDate(c echo.Context) error {
-    umkmIDStr := c.Param("umkm_id")
+    userId, err := helper.GetAuthId(c)
+    if err != nil {
+        return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+            "message": "Unauthorized",
+        })
+    }
+
+    umkmIDStr := c.QueryParam("umkm_id")
     yearParam := c.QueryParam("year")
     monthParam := c.QueryParam("month")
     pageParam := c.QueryParam("page")
     limitParam := c.QueryParam("limit")
     filter := c.QueryParam("filter")
 
-    // Parse UUID for UMKM ID
-    umkmID, err := uuid.Parse(umkmIDStr)
-    if err != nil {
-        return c.JSON(http.StatusBadRequest, map[string]interface{}{
-            "status":  false,
-            "message": "Invalid UMKM ID",
-        })
+    var umkmID uuid.UUID
+    // Jika umkm_id tidak disediakan, ambil semua UMKM yang dimiliki oleh user
+    if umkmIDStr != "" {
+        var err error
+        umkmID, err = uuid.Parse(umkmIDStr)
+        if err != nil {
+            return c.JSON(http.StatusBadRequest, map[string]interface{}{
+                "status":  false,
+                "message": "Invalid UMKM ID",
+            })
+        }
     }
 
-    // Parse year and month
+    // Parse year dan month
     year, err := strconv.Atoi(yearParam)
-    if err != nil || year <= 0 {
+    if err != nil && yearParam != "" {
         return c.JSON(http.StatusBadRequest, map[string]interface{}{
             "status":  false,
             "message": "Invalid year parameter",
@@ -277,17 +437,17 @@ func (controller *TransaksiControllerImpl) GetTransaksiByDate(c echo.Context) er
     }
 
     month, err := strconv.Atoi(monthParam)
-    if err != nil || month <= 0 || month > 12 {
+    if err != nil && monthParam != "" {
         return c.JSON(http.StatusBadRequest, map[string]interface{}{
             "status":  false,
             "message": "Invalid month parameter",
         })
     }
 
-    // Parse page and limit
+    // Parse page dan limit
     page, err := strconv.Atoi(pageParam)
     if err != nil || page <= 0 {
-        page = 1  // Default to page 1 if invalid
+        page = 1 // Default ke halaman 1 jika parameter halaman tidak valid
     }
 
     var limit int
@@ -303,13 +463,13 @@ func (controller *TransaksiControllerImpl) GetTransaksiByDate(c echo.Context) er
         }
     }
 
-    // Call service to get transaksi list and pagination data
-    transactions, totalRecords, currentPage, totalPages, nextPage, prevPage, err := controller.transaksiservice.GetTransaksiByDate(umkmID, year, month, page, limit, filter)
+    // Panggil service untuk mendapatkan transaksi dan data pagination
+    transactions, totalRecords, currentPage, totalPages, nextPage, prevPage, err := controller.transaksiservice.GetTransaksiByDate( umkmID, userId, year, month, page, limit, filter)
     if err != nil {
         return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
     }
 
-    // Prepare pagination data
+    // Siapkan data pagination
     pagination := model.Pagination{
         CurrentPage:  currentPage,
         NextPage:     nextPage,
@@ -318,7 +478,7 @@ func (controller *TransaksiControllerImpl) GetTransaksiByDate(c echo.Context) er
         TotalRecords: totalRecords,
     }
 
-    // Create response
+    // Buat respons dengan pagination dan data transaksi
     response := model.ResponseToClientpagi(http.StatusOK, "true", "Berhasil menampilkan transaksi berdasarkan tanggal", pagination, transactions)
 
     return c.JSON(http.StatusOK, response)
