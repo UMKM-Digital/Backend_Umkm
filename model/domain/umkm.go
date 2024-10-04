@@ -24,6 +24,7 @@ type UMKM struct {
     // UpdatedAt            time.Time `gorm:"column:updated_at"`
     CreatedAt            time.Time `gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt            time.Time `gorm:"column:updated_at;autoUpdateTime"`
+    Active                 int `gorm:"column:active"`
     HakAkses []HakAkses  `gorm:"foreignKey:UmkmId;references:IdUmkm"`
     Produk               []Produk  `gorm:"foreignkey:UmkmId"`
     Transaksi            []Transaksi `gorm:"foreignkey:UmkmId"`

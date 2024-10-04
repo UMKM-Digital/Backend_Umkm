@@ -110,6 +110,7 @@ func (service *UmkmServiceImpl) CreateUmkm(umkm web.UmkmRequest, userID int, fil
 		NoKontak:            umkm.No_Kontak,
 		Lokasi:              umkm.Lokasi,
 		Maps:                Maps,
+		Active: 0,
 		Deskripsi: umkm.Deskripsi,
 	}
 
@@ -624,3 +625,54 @@ for _, dokumen := range dokumenList {
 		return nil
 	}
 	
+	//list Top Umkm Back
+	func (service *UmkmServiceImpl) GetUmkmActive() ([]entity.UmkmActive, error) {
+		GetUmkmActiveList, err := service.umkmrepository.ListUmkmActiceBack()
+		if err != nil {
+			return nil, err
+		}
+		return entity.ToUmkmListEntitiesActive(GetUmkmActiveList), nil
+	}
+
+	//update active
+	func (service *UmkmServiceImpl) UpdateUmkmActive(request web.UpdateActiveUmkm, Id uuid.UUID) (map[string]interface{}, error) {
+  
+		getTestimoniUmkmActive, err := service.umkmrepository.GetUmkmID(Id)
+		if err != nil {
+			return nil, err
+		}
+	
+	   
+		if request.Active == getTestimoniUmkmActive.Active {
+		   
+			response := map[string]interface{}{
+				"active": getTestimoniUmkmActive.Active,
+			}
+			return response, nil
+		}
+	
+	   
+		errUpdate := service.umkmrepository.UpdateActiveId(Id, request.Active)
+		if errUpdate != nil {
+			return nil, errUpdate
+		}
+	
+	  
+		response := map[string]interface{}{
+			"active": request.Active,
+		}
+		return response, nil
+	}
+
+
+	func (service *UmkmServiceImpl) GetTestimonialActive() ([]entity.UmkmActive, error) {
+		GetTestimonialList, err := service.umkmrepository.GetUmkmActive(1)
+		if err != nil {
+			return nil, err
+		}
+		if len(GetTestimonialList) == 0 {
+			log.Println("No umkm found with active = 1")
+			return nil, nil
+		}
+		return entity.ToUmkmListEntitiesActive(GetTestimonialList), nil
+	}

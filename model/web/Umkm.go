@@ -28,3 +28,7 @@ type Updateumkm struct{
 	Maps                  json.RawMessage `json:"maps"`
 	Gambar                json.RawMessage `json:"gambar"`
 }
+
+type UpdateActiveUmkm struct{
+	Active int `json:"active"`
+}

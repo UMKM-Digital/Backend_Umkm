@@ -20,4 +20,7 @@ type Umkm interface {
 	// GetUmkmDetailList(id uuid.UUID)([]entity.UmkmDetailEntity, error)
 	GetUmkmDetailList(id uuid.UUID, limit int, page int)([]entity.UmkmDetailEntity,int, int, int, *int, *int, error)
 	Delete(id uuid.UUID) error
+	GetUmkmActive() ([]entity.UmkmActive, error)
+	UpdateUmkmActive(request web.UpdateActiveUmkm, Id uuid.UUID) (map[string]interface{}, error)
+	GetTestimonialActive() ([]entity.UmkmActive, error) 
 }

@@ -294,3 +294,29 @@ func ToUmkmEntitiesDetailList(umkmList []domain.UMKM) []UmkmDetailEntity {
 	}
 	return umkmListEntities
 }
+
+
+//list buat rashit
+type UmkmActive struct{
+	Id uuid.UUID `json:"id"`
+	Nama string `json:"nama"`
+	Gambar domain.JSONB `json:"gambar"`
+	Active int 	`json:"active"`
+}
+
+func ToUmkmEntityActive(umkm domain.UMKM) UmkmActive {
+	return UmkmActive{
+		Id:           umkm.IdUmkm,
+		Nama:         umkm.Name,
+		Gambar:       umkm.Images, // Pastikan ini adalah field gambar UMKM yang bena
+		Active: umkm.Active,
+	}
+}
+
+func ToUmkmListEntitiesActive(umkmList []domain.UMKM) []UmkmActive {
+	var umkmListEntitiesActive []UmkmActive
+	for _, umkm := range umkmList {
+		umkmListEntitiesActive = append(umkmListEntitiesActive, ToUmkmEntityActive(umkm))
+	}
+	return umkmListEntitiesActive
+}

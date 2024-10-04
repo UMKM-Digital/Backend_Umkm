@@ -347,3 +347,42 @@ func (controller *UmkmControllerImpl) DeleteUmkmId(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "Delete Produk Success", nil))
 }
+
+//list acative umkm BackEnd
+func (controller *UmkmControllerImpl) ListActveBack(c echo.Context) error{
+	getSlider, errGetSlider := controller.umkmservice.GetUmkmActive()
+
+	if errGetSlider != nil {
+		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, errGetSlider.Error(), nil))
+	}
+
+	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success", getSlider))
+}
+
+
+//updateactive
+
+func (conntroller *UmkmControllerImpl) UpdateSldierActive(c echo.Context) error {
+    slider := new(web.UpdateActiveUmkm)
+    id, _ := uuid.Parse(c.Param("id"))
+
+    if err := c.Bind(slider); err != nil {
+        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, err.Error(), nil))
+    }
+
+    sliderUpdate, errsliderUpdate := conntroller.umkmservice.UpdateUmkmActive(*slider, id)
+
+    if errsliderUpdate != nil {
+        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, errsliderUpdate.Error(), nil))
+    }
+
+    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "data berhasil diupdate", sliderUpdate))
+}
+
+func (controller *UmkmControllerImpl) GetUmkmActive(c echo.Context) error {
+    getUmkm, errGetUmkm := controller.umkmservice.GetTestimonialActive()
+    if errGetUmkm != nil {
+        return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, errGetUmkm.Error(), nil))
+    }
+    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success", getUmkm))
+}
