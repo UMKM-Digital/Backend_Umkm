@@ -237,6 +237,7 @@ type TopProduk struct{
 	IdUmkm uuid.UUID `json:"id_umkm"`
 	NamaUmkm string `json:"nama_umkm"`
 	Active int `json:"active"`
+	Harga int `json:"harga"`
 }
 
 func ToProdukTop(produk domain.Produk) TopProduk{
@@ -247,6 +248,7 @@ func ToProdukTop(produk domain.Produk) TopProduk{
 		Active: produk.Active,
 		IdUmkm: produk.Umkm.IdUmkm,
 		NamaUmkm: produk.Umkm.Name,
+		Harga: produk.Harga,
 	}
 }
 
