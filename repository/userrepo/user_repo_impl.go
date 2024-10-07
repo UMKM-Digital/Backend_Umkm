@@ -110,3 +110,24 @@ func (repo *AuthrepositoryImpl) UpdatePassword(userId int, newPassword string) e
 
     return nil
 }
+
+
+//login goole
+func (repo *AuthrepositoryImpl) FindOrCreateUserByGoogleID(googleID string, email string) (*domain.Users, error) {
+    var user domain.Users
+    if err := repo.db.Where("id = ?", googleID).First(&user).Error; err != nil {
+        if errors.Is(err, gorm.ErrRecordNotFound) {
+            // Jika user tidak ditemukan, buat user baru
+            newUser := domain.Users{
+                GoogleId: googleID,
+                Email:    email,
+            }
+            if err := repo.db.Create(&newUser).Error; err != nil {
+                return nil, err
+            }
+            return &newUser, nil
+        }
+        return nil, err
+    }
+    return &user, nil
+}

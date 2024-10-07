@@ -13,5 +13,6 @@ type AuthUserRepo interface {
 	FindUserByPhoneRegister(phone string)(*domain.Users, error)
 	CekInPassword(userId int) (*domain.Users, error)
 	UpdatePassword(userId int, newPassword string) error
+	FindOrCreateUserByGoogleID(googleID string, email string) (*domain.Users, error)
 }
 	

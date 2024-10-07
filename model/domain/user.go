@@ -10,6 +10,7 @@ type Users struct {
 	Role       string    `gorm:"column:role"`
 	No_Phone   string    `gorm:"column:no_phone"`
 	Picture    string    `gorm:"column:picture"`
+    GoogleId string         `gorm:"column:"google_id"`
    CreatedAt            time.Time `gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt            time.Time `gorm:"column:updated_at;autoUpdateTime"`
     HakAkses   []HakAkses `gorm:"foreignKey:user_id"`

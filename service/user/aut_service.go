@@ -1,8 +1,11 @@
 package userservice
 
 import (
+	"umkm/model/domain"
 	"umkm/model/entity"
 	"umkm/model/web"
+
+	"google.golang.org/api/oauth2/v2"
 )
 
 type AuthUserService interface {
@@ -15,5 +18,7 @@ type AuthUserService interface {
 	SendOtpRegister(phone string) (map[string]interface{}, error)
 	VerifyOTPRegister(otp_code string, phone_number string)(map[string]interface{}, error)
 	CekInRequest(authID int, password string) (map[string]interface{}, error) 
-	ChangePassword(authID int, oldPassword string, newPassword string) error 
+	ChangePassword(authID int, oldPassword string, newPassword string) error
+	VerifyGoogleToken(token string) (*oauth2.Tokeninfo, error) 
+	LoginWithGoogle(token string) (*domain.Users, string, error) 
 }

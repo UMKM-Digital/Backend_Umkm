@@ -243,12 +243,20 @@ func (repo *ProdukRepoImpl) GetProduk(ProdukId uuid.UUID, filters string, limit 
 	
 	//update active proudk
 
-	func(repo *ProdukRepoImpl) UpdateTopProduk(idproduk uuid.UUID, active int) error{
-		if err := repo.db.Model(&domain.Produk{}).Where("id = ?", idproduk).Update("active", active).Error; err != nil {
-			return errors.New("failed to update testimonial active status")
+	func(repo *ProdukRepoImpl) UpdateTopProduk(idproduk uuid.UUID, active int) error {
+		result := repo.db.Model(&domain.Produk{}).Where("id = ?", idproduk).Update("active", active)
+	
+		// Periksa apakah ada baris yang diperbarui
+		if result.Error != nil {
+			return errors.New("failed to update produk active status")
 		}
-		return errors.New("failed to update produk active status")
+		if result.RowsAffected == 0 {
+			return errors.New("no rows affected, produk may not exist")
+		}
+		
+		return nil
 	}
+	
 
 	func (repo *ProdukRepoImpl) GetProdukActive(active int)([]domain.Produk, error) {
 		var produk []domain.Produk

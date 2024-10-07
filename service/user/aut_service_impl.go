@@ -13,6 +13,12 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
+
+	
+	"context"
+    "net/http"
+    "google.golang.org/api/oauth2/v2"
+    "google.golang.org/api/option"
 )
 
 type AuthServiceImpl struct {
@@ -309,3 +315,50 @@ func (service *AuthServiceImpl) ChangePassword(authID int, oldPassword string, n
     return nil
 }
 
+//login google
+func (service *AuthServiceImpl) VerifyGoogleToken(token string) (*oauth2.Tokeninfo, error) {
+    ctx := context.Background()
+    oauth2Service, err := oauth2.NewService(ctx, option.WithHTTPClient(http.DefaultClient))
+    if err != nil {
+        return nil, err
+    }
+
+    tokenInfo, err := oauth2Service.Tokeninfo().IdToken(token).Do()
+    if err != nil {
+        return nil, err
+    }
+
+    return tokenInfo, nil
+}
+// File: service/auth_service.go
+func (service *AuthServiceImpl) LoginWithGoogle(token string) (*domain.Users, string, error) {
+    // Verifikasi token Google
+    tokenInfo, err := service.VerifyGoogleToken(token)
+    if err != nil {
+        return nil, "", errors.New("invalid google token")
+    }
+
+    // Cari atau buat user berdasarkan googleID
+    user, err := service.authrepository.FindOrCreateUserByGoogleID(tokenInfo.UserId, tokenInfo.Email)
+    if err != nil {
+        return nil, "", err
+    }
+
+    // Buat claims untuk JWT
+    claims := helper.JwtCustomClaims{
+        ID:      strconv.Itoa(user.IdUser),
+        Name:    user.Username,
+        Email:   user.Email,
+        Phone:   user.No_Phone,
+        Picture: user.Picture,
+        Role:    user.Role,
+    }
+
+    // Panggil GenerateAccessToken untuk membuat JWT token
+    jwtToken, jwtErr := service.tokenUseCase.GenerateAccessToken(claims)
+    if jwtErr != nil {
+        return nil, "", jwtErr // Kembalikan error jika pembuatan token gagal
+    }
+
+    return user, jwtToken, nil // Kembalikan user dan token
+}

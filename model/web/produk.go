@@ -31,5 +31,5 @@ type UpdatedProduk struct {
 }
 
 type UpdatePorudkActive struct{
-	Active int    `validate:"required" json:"active"`
+	Active int    `json:"active"`
 }

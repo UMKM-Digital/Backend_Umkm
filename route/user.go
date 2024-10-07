@@ -165,6 +165,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	// authRoute.POST("/logout", userAuthController.Logout, JWTProtection())
 	authRoute.POST("/cekpassword", userAuthController.CekPassword, JWTProtection())
 	authRoute.POST("/updatepassword", userAuthController.ChangePassword, JWTProtection())
+	authRoute.POST("/login-google", userAuthController.LoginWithGoogle) 
 
 	meRoute := g.Group("/me")
 	meRoute.GET("", userAuthController.View, JWTProtection())

@@ -292,3 +292,28 @@ func (controller *UserControllerImpl) ChangePassword(c echo.Context) error {
 
     return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "password changed successfully", nil))
 }
+
+
+// File: controller/user_controller.go
+// File: controller/user_controller_impl.go
+func (controller *UserControllerImpl) LoginWithGoogle(c echo.Context) error {
+    var request struct {
+        GoogleToken string `json:"google_token"`
+    }
+
+    if err := c.Bind(&request); err != nil {
+        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "invalid request", nil))
+    }
+
+    // Verifikasi token Google dan login
+    user, jwtToken, err := controller.userService.LoginWithGoogle(request.GoogleToken)
+    if err != nil {
+        return c.JSON(http.StatusUnauthorized, model.ResponseToClient(http.StatusUnauthorized, false, err.Error(), nil))
+    }
+
+    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "login successful", map[string]interface{}{
+        "user":  user,
+        "token": jwtToken,
+    }))
+}
+

@@ -395,21 +395,21 @@ func (controller *ProdukControllerImpl) GetTopProuduk(c echo.Context) error {
 }
 
 func (controller *ProdukControllerImpl) UpdateTopProduk(c echo.Context) error{
-	testimonal := new(web.UpdatePorudkActive)
+	produk := new(web.UpdatePorudkActive)
     IdUmkm := c.Param("id")
 	id, _ := uuid.Parse(IdUmkm)
 
-	if err := c.Bind(testimonal); err != nil {
+	if err := c.Bind(produk); err != nil {
         return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, err.Error(), nil))
     }
 
-    testimonalUpdate, errTestimonalUpdate := controller.Produk.UpdateProdukActive(*testimonal, id)
+    produkUpdate, errprodukUpdate := controller.Produk.UpdateProdukActive(*produk, id)
 
-    if errTestimonalUpdate != nil {
-        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, errTestimonalUpdate.Error(), nil))
+    if errprodukUpdate != nil {
+        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, errprodukUpdate.Error(), nil))
     }
 
-    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "data berhasil diupdate", testimonalUpdate))
+    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "data berhasil diupdate", produkUpdate))
 }
 
 func (controller *ProdukControllerImpl) GetProdukActive(c echo.Context) error {
@@ -419,3 +419,6 @@ func (controller *ProdukControllerImpl) GetProdukActive(c echo.Context) error {
     }
     return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success", getProduk))
 }
+
+//login google
+
