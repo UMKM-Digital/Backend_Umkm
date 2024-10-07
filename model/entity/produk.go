@@ -227,3 +227,33 @@ func ToProdukIdEntitiesBaru(produkList []domain.Produk) []ProdukTerbaru {
 	}
 	return produkEntities
 }
+
+//top produk
+
+type TopProduk struct{
+	Id uuid.UUID `json:"id"`
+	Nama string   `json:"nama"`
+	Gambar domain.JSONB  `json:"gambar"`
+	IdUmkm uuid.UUID `json:"id_umkm"`
+	NamaUmkm string `json:"nama_umkm"`
+	Active int `json:"active"`
+}
+
+func ToProdukTop(produk domain.Produk) TopProduk{
+	return TopProduk{
+		Id: produk.IdUmkm,
+		Nama: produk.Nama,
+		Gambar: produk.Gamabr,
+		Active: produk.Active,
+		IdUmkm: produk.Umkm.IdUmkm,
+		NamaUmkm: produk.Umkm.Name,
+	}
+}
+
+func ToTopProdukEntities(produkList []domain.Produk) []TopProduk {
+	var produkEntities []TopProduk
+	for _, produk := range produkList {
+		produkEntities = append(produkEntities, ToProdukTop(produk))
+	}
+	return produkEntities
+}

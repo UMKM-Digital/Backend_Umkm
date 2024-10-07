@@ -380,3 +380,42 @@ func(controller *ProdukControllerImpl) GetProdukBaru(c echo.Context) error{
 
 	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "berhasil mengambil id produk", getProduk))
 }
+
+func (controller *ProdukControllerImpl) GetTopProuduk(c echo.Context) error {
+	IdUmkm := c.QueryParam("id")
+	id, _ := uuid.Parse(IdUmkm)
+
+	getTestimoni, errGetTestimoni := controller.Produk.GetTopProduk(id)
+
+	if errGetTestimoni != nil {
+		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, errGetTestimoni.Error(), nil))
+	}
+
+	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success", getTestimoni))
+}
+
+func (controller *ProdukControllerImpl) UpdateTopProduk(c echo.Context) error{
+	testimonal := new(web.UpdatePorudkActive)
+    IdUmkm := c.Param("id")
+	id, _ := uuid.Parse(IdUmkm)
+
+	if err := c.Bind(testimonal); err != nil {
+        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, err.Error(), nil))
+    }
+
+    testimonalUpdate, errTestimonalUpdate := controller.Produk.UpdateProdukActive(*testimonal, id)
+
+    if errTestimonalUpdate != nil {
+        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, errTestimonalUpdate.Error(), nil))
+    }
+
+    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "data berhasil diupdate", testimonalUpdate))
+}
+
+func (controller *ProdukControllerImpl) GetProdukActive(c echo.Context) error {
+    getProduk, errGetProduk := controller.Produk.GetTopProdukActive()
+    if errGetProduk != nil {
+        return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, errGetProduk.Error(), nil))
+    }
+    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success", getProduk))
+}

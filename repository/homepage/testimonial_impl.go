@@ -90,6 +90,6 @@ func (repo *TestimonalRepoImpl) UpdateActiveId(idTestimonial int, active int) er
     if err := repo.db.Model(&domain.Testimonal{}).Where("id = ?", idTestimonial).Update("active", active).Error; err != nil {
         return errors.New("failed to update testimonial active status")
     }
-    return nil
+    return errors.New("failed to update testimonial active status")
 }
 

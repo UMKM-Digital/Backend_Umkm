@@ -30,3 +30,6 @@ type UpdatedProduk struct {
 	  Index       int      `json:"index"`
 }
 
+type UpdatePorudkActive struct{
+	Active int    `validate:"required" json:"active"`
+}

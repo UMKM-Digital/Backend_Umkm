@@ -463,3 +463,55 @@ func(service ProdukServiceImpl) GetProdukBaru(UmkmId uuid.UUID)([]entity.ProdukT
     }
     return entity.ToProdukIdEntitiesBaru(GetTestimonialList), nil
 }
+
+
+//active back produk
+
+func (service *ProdukServiceImpl) GetTopProduk(idUmkm uuid.UUID) ([]entity.TopProduk, error) {
+    // Panggil metode repository dengan parameter idUmkm
+    getTestimonialList, err := service.produkrepository.GetTopProduk(idUmkm)
+    if err != nil {
+        return nil, err
+    }
+    return entity.ToTopProdukEntities(getTestimonialList), nil
+}
+
+func(service *ProdukServiceImpl) UpdateProdukActive(request web.UpdatePorudkActive, Id uuid.UUID) (map[string]interface{}, error) {
+    getProdukById, err := service.produkrepository.FindById(Id)
+    if err != nil {
+        return nil, err
+    }
+
+   
+    if request.Active == getProdukById.Active {
+       
+        response := map[string]interface{}{
+            "active": getProdukById.Active,
+        }
+        return response, nil
+    }
+
+   
+    errUpdate := service.produkrepository.UpdateTopProduk(Id, request.Active)
+    if errUpdate != nil {
+        return nil, errUpdate
+    }
+
+  
+    response := map[string]interface{}{
+        "active": request.Active,
+    }
+    return response, nil
+}
+
+func(service *ProdukServiceImpl) GetTopProdukActive() ([]entity.TopProduk, error) {
+    GetTestimonialList, err := service.produkrepository.GetProdukActive(1)
+    if err != nil {
+        return nil, err
+    }
+    if len(GetTestimonialList) == 0 {
+        log.Println("No testimonials found with active = 1")
+        return nil, nil
+    }
+    return entity.ToTopProdukEntities(GetTestimonialList), nil
+}

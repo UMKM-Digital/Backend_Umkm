@@ -18,4 +18,7 @@ type Produk interface {
 	GetProdukWebId(id uuid.UUID)(entity.ProdukWebIdEntity, error)
 	GetProdukByUser(userId int) ([]entity.ProdukEntityDetailMobile, error)
 	GetProdukBaru(UmkmId uuid.UUID)([]entity.ProdukTerbaru, error)
+	GetTopProduk(idUmkm uuid.UUID) ([]entity.TopProduk, error) 
+	UpdateProdukActive(request web.UpdatePorudkActive, Id uuid.UUID) (map[string]interface{}, error) 
+	GetTopProdukActive() ([]entity.TopProduk, error) 
 }

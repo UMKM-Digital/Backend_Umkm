@@ -223,6 +223,9 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	Produk.GET("/list/:id", userProdukController.GetProdukWebId)
 	Produk.GET("/list/login", userProdukController.GetProdukByLogin, JWTProtection())
 	Produk.GET("/umkm/baru/:id", userProdukController.GetProdukBaru)
+	Produk.GET("/list/activeback", userProdukController.GetTopProuduk)
+	Produk.PUT("/updateactive/:id", userProdukController.UpdateTopProduk)
+	Produk.GET("/active/list", userProdukController.GetProdukActive)
 
 
 	//testimonial

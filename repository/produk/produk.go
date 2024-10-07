@@ -21,4 +21,7 @@ type CreateProduk interface {
 	GetProdukByUmkmId(id uuid.UUID) ([]domain.Produk, error) 
 	GetProdukByUmkmLogin(umkmIds []uuid.UUID) ([]domain.Produk, error)
 	GetProdukBaru(umkmId uuid.UUID)([]domain.Produk, error)
+	GetTopProduk(idUmkm uuid.UUID) ([]domain.Produk, error) 
+	UpdateTopProduk(idproduk uuid.UUID, active int) error
+	GetProdukActive(active int)([]domain.Produk, error)
 }

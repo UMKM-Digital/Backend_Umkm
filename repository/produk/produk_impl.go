@@ -222,3 +222,40 @@ func (repo *ProdukRepoImpl) GetProduk(ProdukId uuid.UUID, filters string, limit 
 		}
 		return produkList, nil
 	}
+
+	//list produk semua
+	func(repo *ProdukRepoImpl) GetTopProduk(idUmkm uuid.UUID) ([]domain.Produk, error) {
+		var produklis []domain.Produk
+		query := repo.db.Preload("Umkm").Order("id ASC")
+	
+		if idUmkm != uuid.Nil {
+			// Filter berdasarkan id_umkm jika parameter diberikan
+			query = query.Where("umkm_id = ?", idUmkm)
+		}
+	
+		err := query.Find(&produklis).Error
+		if err != nil {
+			return nil, err
+		}
+	
+		return produklis, nil
+	}
+	
+	//update active proudk
+
+	func(repo *ProdukRepoImpl) UpdateTopProduk(idproduk uuid.UUID, active int) error{
+		if err := repo.db.Model(&domain.Produk{}).Where("id = ?", idproduk).Update("active", active).Error; err != nil {
+			return errors.New("failed to update testimonial active status")
+		}
+		return errors.New("failed to update produk active status")
+	}
+
+	func (repo *ProdukRepoImpl) GetProdukActive(active int)([]domain.Produk, error) {
+		var produk []domain.Produk
+		err := repo.db.Preload("Umkm").Where("active = ?", active).Find(&produk).Error
+		if err != nil {
+			return nil, err
+		}
+		return produk, nil
+	}
+	
