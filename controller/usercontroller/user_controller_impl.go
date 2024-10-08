@@ -294,26 +294,48 @@ func (controller *UserControllerImpl) ChangePassword(c echo.Context) error {
 }
 
 
-// File: controller/user_controller.go
-// File: controller/user_controller_impl.go
-func (controller *UserControllerImpl) LoginWithGoogle(c echo.Context) error {
+
+// func (controller *UserControllerImpl) LoginWithGoogle(c echo.Context) error {
+//     var request struct {
+//         GoogleToken string `json:"google_token"`
+//     }
+
+//     if err := c.Bind(&request); err != nil {
+//         return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "invalid request", nil))
+//     }
+
+//     // Verifikasi token Google dan login
+//     user, jwtToken, err := controller.userService.LoginWithGoogle(request.GoogleToken)
+//     if err != nil {
+//         return c.JSON(http.StatusUnauthorized, model.ResponseToClient(http.StatusUnauthorized, false, err.Error(), nil))
+//     }
+
+//     return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "login successful", map[string]interface{}{
+//         "user":  user,
+//         "token": jwtToken,
+//     }))
+// }
+
+
+// HandleGoogleLoginOrRegister untuk menangani login atau pendaftaran menggunakan Google
+func (controller *UserControllerImpl) HandleGoogleLoginOrRegister(c echo.Context) error {
     var request struct {
-        GoogleToken string `json:"google_token"`
+        GoogleID string `json:"google_id"` // ID Google pengguna
+        Email    string `json:"email"`     // Email pengguna
+        Username string `json:"username"`  // Nama pengguna
+        Picture   string `json:"picture"`   // URL gambar profil
     }
 
+    // Bind JSON request ke struct
     if err := c.Bind(&request); err != nil {
         return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "invalid request", nil))
     }
 
-    // Verifikasi token Google dan login
-    user, jwtToken, err := controller.userService.LoginWithGoogle(request.GoogleToken)
+    // Panggil HandleGoogleLoginOrRegister untuk mencari atau membuat pengguna
+    userInfo, err := controller.userService.HandleGoogleLoginOrRegister(request.GoogleID, request.Email, request.Username, request.Picture)
     if err != nil {
-        return c.JSON(http.StatusUnauthorized, model.ResponseToClient(http.StatusUnauthorized, false, err.Error(), nil))
+        return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
     }
 
-    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "login successful", map[string]interface{}{
-        "user":  user,
-        "token": jwtToken,
-    }))
+    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "login or registration successful", userInfo))
 }
-

@@ -1,6 +1,7 @@
 package userservice
 
 import (
+	// "encoding/json"
 	"errors"
 	"strconv"
 	"time"
@@ -13,12 +14,7 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
-
-	
-	"context"
-    "net/http"
-    "google.golang.org/api/oauth2/v2"
-    "google.golang.org/api/option"
+  
 )
 
 type AuthServiceImpl struct {
@@ -315,50 +311,173 @@ func (service *AuthServiceImpl) ChangePassword(authID int, oldPassword string, n
     return nil
 }
 
-//login google
-func (service *AuthServiceImpl) VerifyGoogleToken(token string) (*oauth2.Tokeninfo, error) {
-    ctx := context.Background()
-    oauth2Service, err := oauth2.NewService(ctx, option.WithHTTPClient(http.DefaultClient))
-    if err != nil {
-        return nil, err
-    }
+// //login google
+// func (service *AuthServiceImpl) VerifyGoogleToken(token string) (*oauth2.Tokeninfo, error) {
+//     ctx := context.Background()
+//     oauth2Service, err := oauth2.NewService(ctx, option.WithHTTPClient(http.DefaultClient))
+//     if err != nil {
+//         return nil, err
+//     }
 
-    tokenInfo, err := oauth2Service.Tokeninfo().IdToken(token).Do()
-    if err != nil {
-        return nil, err
-    }
+//     tokenInfo, err := oauth2Service.Tokeninfo().IdToken(token).Do()
+//     if err != nil {
+//         return nil, err
+//     }
 
-    return tokenInfo, nil
-}
+//     return tokenInfo, nil
+// }
+// // File: service/auth_service.go
+// func (service *AuthServiceImpl) LoginWithGoogle(token string) (*domain.Users, string, error) {
+//     // Verifikasi token Google
+//     tokenInfo, err := service.VerifyGoogleToken(token)
+//     if err != nil {
+//         return nil, "", errors.New("invalid google token")
+//     }
+
+// 	username := tokenInfo.Email
+
+//     // Cari atau buat user berdasarkan googleID
+//     user, err := service.authrepository.FindOrCreateUserByGoogleID(tokenInfo.UserId, tokenInfo.Email, username)
+//     if err != nil {
+//         return nil, "", err
+//     }
+
+//     // Buat claims untuk JWT
+//     claims := helper.JwtCustomClaims{
+//         ID:      strconv.Itoa(user.IdUser),
+//         Name:    user.Username,
+//         Email:   user.Email,
+//         Phone:   user.No_Phone,
+//         Picture: user.Picture,
+//         Role:    user.Role,
+//     }
+
+//     // Panggil GenerateAccessToken untuk membuat JWT token
+//     jwtToken, jwtErr := service.tokenUseCase.GenerateAccessToken(claims)
+//     if jwtErr != nil {
+//         return nil, "", jwtErr // Kembalikan error jika pembuatan token gagal
+//     }
+
+//     return user, jwtToken, nil // Kembalikan user dan token
+// }
+
+
 // File: service/auth_service.go
-func (service *AuthServiceImpl) LoginWithGoogle(token string) (*domain.Users, string, error) {
-    // Verifikasi token Google
-    tokenInfo, err := service.VerifyGoogleToken(token)
-    if err != nil {
-        return nil, "", errors.New("invalid google token")
-    }
 
-    // Cari atau buat user berdasarkan googleID
-    user, err := service.authrepository.FindOrCreateUserByGoogleID(tokenInfo.UserId, tokenInfo.Email)
-    if err != nil {
-        return nil, "", err
-    }
 
-    // Buat claims untuk JWT
-    claims := helper.JwtCustomClaims{
-        ID:      strconv.Itoa(user.IdUser),
-        Name:    user.Username,
-        Email:   user.Email,
-        Phone:   user.No_Phone,
-        Picture: user.Picture,
-        Role:    user.Role,
-    }
+//
+// File: service/auth_service.go
 
-    // Panggil GenerateAccessToken untuk membuat JWT token
-    jwtToken, jwtErr := service.tokenUseCase.GenerateAccessToken(claims)
-    if jwtErr != nil {
-        return nil, "", jwtErr // Kembalikan error jika pembuatan token gagal
-    }
 
-    return user, jwtToken, nil // Kembalikan user dan token
+
+// // VerifyGoogleToken untuk memverifikasi token dan mendapatkan tokenInfo
+// func (service *AuthServiceImpl) VerifyGoogleToken(idToken string) (map[string]interface{}, error) {
+//     ctx := context.Background()
+
+//     // Use idtoken.Validate to validate the Google ID token
+//     tokenPayload, err := idtoken.Validate(ctx, idToken, "552769390995-9oggvci6d86aelv4ri7vlirrp08vti52.apps.googleusercontent.com") // Replace with your Google client ID
+//     if err != nil {
+//         return nil, fmt.Errorf("invalid google token: %w", err)
+//     }
+
+//     return tokenPayload.Claims, nil
+// }
+
+
+// // Mendapatkan informasi pengguna dari Userinfo API
+// // Mendapatkan informasi pengguna dari Userinfo API
+// // Mendapatkan informasi pengguna dari Userinfo API
+// func (service *AuthServiceImpl) GetUserInfo(accessToken string) (*oauth2.Userinfo, error) {
+//     ctx := context.Background()
+//     oauth2Service, err := oauth2.NewService(ctx, option.WithHTTPClient(http.DefaultClient))
+//     if err != nil {
+//         return nil, err
+//     }
+
+//     // Membuat permintaan untuk mendapatkan informasi pengguna
+//     userInfo, err := oauth2Service.Userinfo.Get().Context(ctx).Do()
+//     if err != nil {
+//         return nil, fmt.Errorf("failed to get user info: %w", err)
+//     }
+
+//     return userInfo, nil // Mengembalikan pointer ke objek Userinfo
+// }
+
+
+
+// // LoginWithGoogle untuk login menggunakan Google
+// // LoginWithGoogle untuk login menggunakan Google
+// func (service *AuthServiceImpl) LoginWithGoogle(token string) (*domain.Users, string, error) {
+//     // Verifikasi token Google dan dapatkan klaim
+//     claims, err := service.VerifyGoogleToken(token)
+//     if err != nil {
+//         return nil, "", fmt.Errorf("failed to verify google token: %w", err)
+//     }
+
+//     // Ekstrak user ID (sub), email, nama, dan phone dari klaim
+//     googleID, _ := claims["sub"].(string)      // 'sub' adalah Google user ID
+//     email, _ := claims["email"].(string)       // Ekstrak email
+//     name, _ := claims["name"].(string)         // Ekstrak nama
+
+//     // Cari atau buat user baru berdasarkan Google ID dan email di database
+//     user, err := service.authrepository.FindOrCreateUserByGoogleID(googleID, email, name)
+//     if err != nil {
+//         return nil, "", err
+//     }
+
+//     // Buat JWT token untuk user
+//     jwtToken, jwtErr := service.tokenUseCase.GenerateAccessToken(helper.JwtCustomClaims{
+//         ID:    strconv.Itoa(user.IdUser),
+//         Name:  user.Username,
+//         Email: user.Email,
+//         Role:  user.Role,
+//     })
+//     if jwtErr != nil {
+//         return nil, "", jwtErr
+//     }
+
+//     return user, jwtToken, nil
+// }
+
+func (service *AuthServiceImpl) HandleGoogleLoginOrRegister(googleID string, email string, username string, picture string) (map[string]interface{}, error) {
+	// Mencari atau membuat pengguna berdasarkan ID Google
+	user, err := service.authrepository.FindOrCreateUserByGoogleID(googleID, email, username, picture)
+	if err != nil {
+		return nil, err
+	}
+
+	// Jika pengguna baru dibuat, kita hash password kosong (opsional)
+	if user.GoogleId != "" {
+		// Hash password menggunakan bcrypt (opsional)
+		passHash, errHash := bcrypt.GenerateFromPassword([]byte("temporaryPassword"), bcrypt.MinCost) // Password sementara
+		if errHash != nil {
+			return nil, errHash
+		}
+		user.Password = string(passHash) // Simpan password yang di-hash
+	}
+
+	// Membuat claims untuk token JWT
+	claims := helper.JwtCustomClaims{
+		ID:      strconv.Itoa(user.IdUser),
+		Name:    user.Username,
+		Email:   user.Email,
+		Phone:   user.No_Phone,
+		Role:    user.Role,
+		Picture: user.Picture,
+	}
+
+	// Menghasilkan token JWT
+	token, tokenErr := service.tokenUseCase.GenerateAccessToken(claims)
+	if tokenErr != nil {
+		return nil, tokenErr
+	}
+
+	// Menghitung waktu kedaluwarsa token
+	expirationTime := time.Now().Add(1 * time.Hour).Format(time.RFC3339)
+
+	// Mengembalikan token dan informasi pengguna
+	return map[string]interface{}{
+		"token":      token,
+		"expires_at": expirationTime, // Sertakan waktu kedaluwarsa yang sebenarnya
+	}, nil
 }
