@@ -339,3 +339,41 @@ func (controller *UserControllerImpl) HandleGoogleLoginOrRegister(c echo.Context
 
     return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "login or registration successful", userInfo))
 }
+
+
+//sendpasswor
+// HandlePassworduser menangani permintaan reset password
+func (controller *UserControllerImpl) HandlePasswordResetRequest(c echo.Context) error {
+	// Buat variabel untuk menangkap request body
+	var user web.ResetPasswordRequest
+
+	// Bind request data ke struct
+	if err := c.Bind(&user); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message": "Invalid request format",
+			"error":   err.Error(),
+		})
+	}
+
+	// Validasi email menggunakan validator
+	if err := c.Validate(user); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message": "Invalid email format",
+			"error":   err.Error(),
+		})
+	}
+
+	// Panggil service untuk mengirimkan link reset password
+	err := controller.userService.SendPasswordResetLink(user.Email)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"message": "Failed to send reset password link",
+			"error":   err.Error(),
+		})
+	}
+
+	// Sukses mengirim email
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "Password reset link has been sent to your email",
+	})
+}

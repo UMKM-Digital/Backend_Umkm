@@ -139,6 +139,7 @@ func (service *TranssaksiServiceImpl) GetTransaksiByYear(id int, page int, limit
         // Buat struktur hasil
         result := map[string]interface{}{
 		    "umkm_id":               transaction["umkm_id"], // tambahkan umkm_id
+			"name":                  transaction["name"],
             "year":                  transaction["year"],
             "jumlah_transaksi":      transaction["jumlah_transaksi"],
             "jml_transaksi_berlaku": transaction["jml_transaksi_berlaku"],
@@ -168,6 +169,7 @@ func (service *TranssaksiServiceImpl) GetTransaksiByMonth(umkmID uuid.UUID, user
         result := map[string]interface{}{
 			"umkm_id":      		 transaction["umkm_id"],
 			"year":					  transaction["year"],
+			"name": 				transaction["name"],
             "month":                 transaction["month"],
             "jumlah_transaksi":      transaction["jumlah_transaksi"],
             "jml_transaksi_berlaku": transaction["jml_transaksi_berlaku"],
@@ -207,6 +209,7 @@ func (service *TranssaksiServiceImpl) GetTransaksiByDate(umkmID uuid.UUID, user_
         // Create the result structure
         result := map[string]interface{}{
 			"umkm_id":              transaction["umkm_id"],
+			"name": 				transaction["name"],
 			"year":              transaction["year"],
 			"month":              transaction["month"],
             "date":                 formattedDate,

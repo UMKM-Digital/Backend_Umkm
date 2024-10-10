@@ -14,5 +14,6 @@ type AuthUserRepo interface {
 	CekInPassword(userId int) (*domain.Users, error)
 	UpdatePassword(userId int, newPassword string) error
 	FindOrCreateUserByGoogleID(googleID string, email string, nama string, picture string) (*domain.Users, error)
+	ChangePassword(email string) (*domain.Users, error)
 }
 	

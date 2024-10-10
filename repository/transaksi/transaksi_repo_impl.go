@@ -213,6 +213,7 @@ func (repo *TransaksirepositoryImpl) GetFilterTransaksiWebTahunByUserID(userID i
 	query := repo.db.Model(&domain.Transaksi{}).
     Select(`
         transaksi.umkm_id, 
+        umkm.name AS name, 
         EXTRACT(YEAR FROM transaksi.tanggal) AS year,
         COUNT(*) AS jumlah_transaksi,
         SUM(CASE WHEN transaksi.status = 1 THEN 1 ELSE 0 END) AS jml_transaksi_berlaku,
@@ -221,8 +222,9 @@ func (repo *TransaksirepositoryImpl) GetFilterTransaksiWebTahunByUserID(userID i
         SUM(CASE WHEN transaksi.status = 0 THEN transaksi.total_jml ELSE 0 END) AS total_batal
     `).
     Joins("JOIN hak_akses ON hak_akses.umkm_id = transaksi.umkm_id").
+    Joins("JOIN umkm ON umkm.id = transaksi.umkm_id").
     Where("hak_akses.user_id = ?", userID).
-    Group("transaksi.umkm_id, EXTRACT(YEAR FROM transaksi.tanggal)").
+    Group("transaksi.umkm_id, umkm.name, EXTRACT(YEAR FROM transaksi.tanggal)").
     Order("EXTRACT(YEAR FROM transaksi.tanggal) ASC").
     Limit(limit).
     Offset(offset)
@@ -330,6 +332,7 @@ func (repo *TransaksirepositoryImpl) GetTransaksiByMonth(userId int, umkmID uuid
     // Query dasar
     query := repo.db.Model(&domain.Transaksi{}).Select(` 
         umkm_id,
+        umkm.name AS name,
         EXTRACT(YEAR FROM tanggal) AS year,
         EXTRACT(MONTH FROM tanggal) AS month,
         COUNT(*) AS jumlah_transaksi,
@@ -337,7 +340,7 @@ func (repo *TransaksirepositoryImpl) GetTransaksiByMonth(userId int, umkmID uuid
         SUM(CASE WHEN status = 0 THEN 1 ELSE 0 END) AS jml_transaksi_batal,
         SUM(CASE WHEN status = 1 THEN total_jml ELSE 0 END) AS total_berlaku,
         SUM(CASE WHEN status = 0 THEN total_jml ELSE 0 END) AS total_batal
-    `)
+    `).Joins("JOIN umkm ON umkm.id = transaksi.umkm_id")
 
     // Jika umkmID tidak kosong, filter berdasarkan umkmID
     if umkmID != (uuid.UUID{}) {
@@ -353,7 +356,7 @@ func (repo *TransaksirepositoryImpl) GetTransaksiByMonth(userId int, umkmID uuid
     }
 
     // Tambahkan limit dan offset
-    query = query.Group("umkm_id, year, month").Order("month ASC").Limit(limit).Offset(offset)
+    query = query.Group("umkm_id, umkm.name, year, month").Order("month ASC").Limit(limit).Offset(offset)
 
     // Tambahkan filter bulan jika diberikan
     if filter != "" {
@@ -546,6 +549,7 @@ func (repo *TransaksirepositoryImpl) GetTransaksiByDate(userId int, umkmID uuid.
     dataQuery := repo.db.Model(&domain.Transaksi{}).
         Select(`
             umkm_id,
+            umkm.name AS name,
             EXTRACT(YEAR FROM tanggal) AS year,
             EXTRACT(MONTH FROM tanggal) AS month,
             DATE(tanggal) as date,
@@ -554,7 +558,7 @@ func (repo *TransaksirepositoryImpl) GetTransaksiByDate(userId int, umkmID uuid.
             SUM(CASE WHEN status = 0 THEN 1 ELSE 0 END) as jml_transaksi_batal,
             SUM(CASE WHEN status = 1 THEN total_jml ELSE 0 END) as total_berlaku,
             SUM(CASE WHEN status = 0 THEN total_jml ELSE 0 END) as total_batal
-        `)
+        `).Joins("JOIN umkm ON umkm.id = transaksi.umkm_id")
 
     // Filter berdasarkan umkmID atau hak akses
     if umkmID != (uuid.UUID{}) {
@@ -571,7 +575,7 @@ func (repo *TransaksirepositoryImpl) GetTransaksiByDate(userId int, umkmID uuid.
         dataQuery = dataQuery.Where("EXTRACT(MONTH FROM tanggal) = ?", month)
     }
 
-    dataQuery = dataQuery.Group("umkm_id, year, month, DATE(tanggal)").
+    dataQuery = dataQuery.Group("umkm_id, umkm.name, year, month, DATE(tanggal)").
         Order("DATE(tanggal)").
         Limit(limit).
         Offset(offset)

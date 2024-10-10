@@ -1,10 +1,9 @@
 package userservice
 
 import (
+	"time"
 	"umkm/model/entity"
 	"umkm/model/web"
-
-
 )
 
 type AuthUserService interface {
@@ -22,4 +21,6 @@ type AuthUserService interface {
 	
 	// LoginWithGoogle(token string) (*domain.Users, string, error) 
 	HandleGoogleLoginOrRegister(googleID string, email string, username string, picture string) (map[string]interface{}, error)
+	SendPasswordResetLink(email string) error
+	sendEmail(recipientEmail, resetLink string, expirationTime time.Time) error
 }

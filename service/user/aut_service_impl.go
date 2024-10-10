@@ -14,7 +14,8 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
-  
+	"fmt"
+	"net/smtp"
 )
 
 type AuthServiceImpl struct {
@@ -480,4 +481,54 @@ func (service *AuthServiceImpl) HandleGoogleLoginOrRegister(googleID string, ema
 		"token":      token,
 		"expires_at": expirationTime, // Sertakan waktu kedaluwarsa yang sebenarnya
 	}, nil
+}
+
+
+// SendPasswordResetLink mengirimkan link reset password ke email yang diberikan
+func (service *AuthServiceImpl) SendPasswordResetLink(email string) error {
+	// Cek apakah email ada di database
+	user, err := service.authrepository.ChangePassword(email)
+	if err != nil {
+		return fmt.Errorf("email not found: %v", err)
+	}
+
+	// Buat token reset password (misalnya JWT atau random string)
+	resetToken := "23214jadkhb" // Ganti dengan fungsi untuk membuat token yang aman
+
+	// Buat link reset password
+	resetLink := fmt.Sprintf("https://yourapp.com/reset-password?token=%s", resetToken)
+
+	// Waktu expired link (misal 1 jam)
+	expirationTime := time.Now().Add(1 * time.Hour)
+
+	// Simpan token dan waktu expired ke database jika diperlukan (opsional)
+
+	// Kirim email dengan SMTP
+	err = service.sendEmail(user.Email, resetLink, expirationTime)
+	if err != nil {
+		return fmt.Errorf("failed to send email: %v", err)
+	}
+
+	return nil
+}
+
+func (service *AuthServiceImpl) sendEmail(recipientEmail, resetLink string, expirationTime time.Time) error {
+	from := "adlisantosanaufal@gmail.com"
+	password := "bnpp toam ocrd yuid"
+
+	to := []string{recipientEmail}
+	smtpHost := "smtp.gmail.com"
+	smtpPort := "587"
+
+	message := []byte(fmt.Sprintf(
+		"Subject: Password Reset Request\n\nClick the following link to reset your password:\n%s\n\nThis link will expire at %s.",
+		resetLink, expirationTime.Format("02 Jan 2006 15:04")))
+
+	auth := smtp.PlainAuth("", from, password, smtpHost)
+	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, from, to, message)
+	if err != nil {
+		return fmt.Errorf("failed to send email: %v", err)
+	}
+
+	return nil
 }

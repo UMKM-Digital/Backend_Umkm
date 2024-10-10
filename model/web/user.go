@@ -40,3 +40,7 @@ type User struct {
 type CekPassword struct{
     Password string `validate:"required" json:"password"`	
 }
+
+type ResetPasswordRequest struct {
+		Email    string `validate:"required,email" json:"email"`
+}
