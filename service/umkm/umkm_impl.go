@@ -289,56 +289,106 @@ func (service *UmkmServiceImpl) UpdateUmkmId(request web.Updateumkm, umkmid uuid
         return nil, err
     }
 
-     // Hapus gambar lama jika ada
-	// Hapus gambar lama jika ada
-// Hapus gambar lama jika ada
-// Hapus gambar lama jika ada
-if images, ok := getUmkmById.Images["urls"].([]interface{}); ok {
-    for _, img := range images {
-        // Cek apakah gambar bertipe string
-        if imgPath, ok := img.(string); ok {
-            oldImagePath := imgPath // Pastikan path gambar tidak mengandung "uploads/" lagi
-            log.Printf("Attempting to remove old image: %s", oldImagePath) // Log path yang ingin dihapus
+// Hapus gambar lama jika ada gambar baru yang diunggah
+if len(files) > 0 {
+    if images, ok := getUmkmById.Images["urls"].([]interface{}); ok {
+        for _, img := range images {
+            // Cek apakah gambar bertipe string
+            if imgPath, ok := img.(string); ok {
+                oldImagePath := imgPath // Pastikan path gambar tidak mengandung "uploads/" lagi
+                log.Printf("Attempting to remove old image: %s", oldImagePath) // Log path yang ingin dihapus
 
-            // Cek apakah file ada sebelum dihapus
-            if _, err := os.Stat(oldImagePath); err == nil {
-                if err := os.Remove(oldImagePath); err != nil {
-                    log.Printf("Failed to remove old image %s: %v", oldImagePath, err)
+                // Cek apakah file ada sebelum dihapus
+                if _, err := os.Stat(oldImagePath); err == nil {
+                    if err := os.Remove(oldImagePath); err != nil {
+                        log.Printf("Failed to remove old image %s: %v", oldImagePath, err)
+                    } else {
+                        log.Printf("Successfully removed old image: %s", oldImagePath)
+                    }
                 } else {
-                    log.Printf("Successfully removed old image: %s", oldImagePath)
+                    log.Printf("Image does not exist: %s", oldImagePath)
                 }
             } else {
-                log.Printf("Image does not exist: %s", oldImagePath)
+                log.Printf("Invalid image type: %v", img)
             }
-        } else {
-            log.Printf("Invalid image type: %v", img)
         }
+    } else {
+        log.Printf("Failed to parse images from UMKM")
     }
-} else {
-    log.Printf("Failed to parse images from UMKM")
 }
+// // Hapus gambar lama jika ada
+// if images, ok := getUmkmById.Images["urls"].([]interface{}); ok {
+//     for _, img := range images {
+//         // Cek apakah gambar bertipe string
+//         if imgPath, ok := img.(string); ok {
+//             oldImagePath := imgPath // Pastikan path gambar tidak mengandung "uploads/" lagi
+//             log.Printf("Attempting to remove old image: %s", oldImagePath) // Log path yang ingin dihapus
 
-
-
+//             // Cek apakah file ada sebelum dihapus
+//             if _, err := os.Stat(oldImagePath); err == nil {
+//                 if err := os.Remove(oldImagePath); err != nil {
+//                     log.Printf("Failed to remove old image %s: %v", oldImagePath, err)
+//                 } else {
+//                     log.Printf("Successfully removed old image: %s", oldImagePath)
+//                 }
+//             } else {
+//                 log.Printf("Image does not exist: %s", oldImagePath)
+//             }
+//         } else {
+//             log.Printf("Invalid image type: %v", img)
+//         }
+//     }
+// } else {
+//     log.Printf("Failed to parse images from UMKM")
+// }
 
     // Simpan gambar baru di folder uploads
 	var imageUrls []string
-	for _, file := range files {
-		// Mendapatkan ekstensi file
-		ext := filepath.Ext(file.Filename)
-		// Menghasilkan nama file acak dengan ekstensi yang sesuai
-		filename := generateRandomFileName(ext)
-		filePath := fmt.Sprintf("uploads/%s", filename)
+	// for _, file := range files {
+	// 	// Mendapatkan ekstensi file
+	// 	ext := filepath.Ext(file.Filename)
+	// 	// Menghasilkan nama file acak dengan ekstensi yang sesuai
+	// 	filename := generateRandomFileName(ext)
+	// 	filePath := fmt.Sprintf("uploads/%s", filename)
 	
-		// Gunakan helper untuk menyimpan file
-		if err := helper.SaveFile(file, filePath); err != nil {
-			return nil, err
-		}
+	// 	// Gunakan helper untuk menyimpan file
+	// 	if err := helper.SaveFile(file, filePath); err != nil {
+	// 		return nil, err
+	// 	}
 	
-		// Tambahkan path gambar baru ke array imageUrls
-		imageUrls = append(imageUrls, filePath)  // Format: uploads/filename.jpg
-	}
+	// 	// Tambahkan path gambar baru ke array imageUrls
+	// 	imageUrls = append(imageUrls, filePath)  // Format: uploads/filename.jpg
+	// }
 	
+
+
+if len(files) > 0 {
+    // Ada file baru yang diunggah
+    for _, file := range files {
+        // Mendapatkan ekstensi file
+        ext := filepath.Ext(file.Filename)
+        // Menghasilkan nama file acak dengan ekstensi yang sesuai
+        filename := generateRandomFileName(ext)
+        filePath := fmt.Sprintf("uploads/%s", filename)
+
+        // Gunakan helper untuk menyimpan file
+        if err := helper.SaveFile(file, filePath); err != nil {
+            return nil, err
+        }
+
+        // Tambahkan path gambar baru ke array imageUrls
+        imageUrls = append(imageUrls, filePath)  // Format: uploads/filename.jpg
+    }
+} else {
+    // Tidak ada file baru yang diunggah, gunakan gambar lama
+    if images, ok := getUmkmById.Images["urls"].([]interface{}); ok {
+        for _, img := range images {
+            if imgPath, ok := img.(string); ok {
+                imageUrls = append(imageUrls, imgPath)
+            }
+        }
+    }
+}
 
  // Mengupdate KategoriUmkmId
 	var kategoriUmkm domain.JSONB
