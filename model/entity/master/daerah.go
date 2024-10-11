@@ -25,7 +25,7 @@ func ToDaerahEntities(daerahList []domain.Provinsi) []DaerahEntity {
 //Kabupaten
 type KabupatenEntity struct {
 	IdProvinsi   string    `json:"id_prov"`
-	IdKabupaten  string `json:"id_Kabupaten"` 
+	IdKabupaten  string `json:"id_kabupaten"` 
 	Name string `json:"name"`
 }
 
