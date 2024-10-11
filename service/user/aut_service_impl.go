@@ -43,11 +43,24 @@ func (service *AuthServiceImpl) RegisterRequest(user web.RegisterRequest) (map[s
 
 	// Membuat object User baru
 	newUser := domain.Users{
-		Username: user.Username,
+		Fullname: user.Fullname,
 		Password: user.Password,
 		Email:    user.Email,
 		Role:     "umkm",
 		No_Phone: user.No_Phone,
+		Nik: user.No_Nik,
+		NoKk: user.No_KK,
+		Nib: user.No_Nib,
+		TanggalLahir: user.TanggalLahir,
+		JenisKelamin: user.JeniKelamin,
+		StatusMenikah: user.StatusMenikah,
+		Alamat: user.Alamat,
+		Provinsi: user.Provinsi,
+		Kabupaten: user.Kabupaten,
+		Kecamatan: user.Kecamatan,
+		Kelurahan: user.Kelurahan,
+		Rt: user.Rt,
+		Rw: user.Rw,
 	}
 
 	// Menyimpan user ke database
