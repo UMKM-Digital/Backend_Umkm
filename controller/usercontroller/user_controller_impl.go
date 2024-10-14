@@ -156,35 +156,43 @@ func (controller *UserControllerImpl) View(c echo.Context) error {
 // verivy otp login
 func (controller *UserControllerImpl) VerifyOTPHandler(c echo.Context) error {
 	// Bind request body to a struct
-	var req struct {
-		Phone string `json:"phone_number"`
-		OTP   string `json:"otp_code"`
+	user := new(web.VerifyOtp)
+
+
+	// if err := c.Bind(&req); err != nil {
+	// 	return c.JSON(http.StatusBadRequest, map[string]interface{}{
+	// 		"status":  false,
+	// 		"message": "Invalid request",
+	// 		"code":    http.StatusBadRequest,
+	// 	})
+	// }
+
+	// // Call the AuthService to verify OTP and phone number
+	// result, err := controller.userService.VerifyOTP(req.Phone, req.OTP)
+	// if err != nil {
+	// 	return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+	// 		"status":  false,
+	// 		"message": "Verification failed",
+	// 		"code":    http.StatusUnauthorized,
+	// 	})
+	// }
+
+	// return c.JSON(http.StatusOK, map[string]interface{}{
+	// 	"status":  true,
+	// 	"message": "Verification successful",
+	// 	"data":    result,
+	// 	"code":    http.StatusOK,
+	// })
+	if err := c.Bind(user); err != nil {
+		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, err.Error(), nil))
 	}
 
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"status":  false,
-			"message": "Invalid request",
-			"code":    http.StatusBadRequest,
-		})
-	}
-
-	// Call the AuthService to verify OTP and phone number
-	result, err := controller.userService.VerifyOTP(req.Phone, req.OTP)
+	otpResponse, err := controller.userService.VerifyOTP(user.Phone, user.OTP)
 	if err != nil {
-		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
-			"status":  false,
-			"message": "Verification failed",
-			"code":    http.StatusUnauthorized,
-		})
+		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"status":  true,
-		"message": "Verification successful",
-		"data":    result,
-		"code":    http.StatusOK,
-	})
+	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "berasil send otp login", otpResponse))
 }
 
 // sendotp register

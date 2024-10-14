@@ -61,3 +61,9 @@ type CekPassword struct{
 type ResetPasswordRequest struct {
 		Email    string `validate:"required,email" json:"email"`
 }
+
+
+type VerifyOtp struct{
+    Phone string `json:"phone_number"`
+	OTP   string `json:"otp_code"`
+}

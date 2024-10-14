@@ -123,6 +123,9 @@ func (service *AuthServiceImpl) LoginRequest(username string, password string) (
 		Picture: user.Picture,
 	}
 
+	isDataComplete := helper.IsUserDataComplete(*user)
+
+    
 	token, tokenErr := service.tokenUseCase.GenerateAccessToken(claims)
 	if tokenErr != nil {
 		return nil, tokenErr
@@ -133,6 +136,7 @@ func (service *AuthServiceImpl) LoginRequest(username string, password string) (
 	return map[string]interface{}{
 		"token":      token,
 		"expires_at": expirationTime, // Sertakan waktu kedaluwarsa yang sebenarnya
+		"data": isDataComplete,
 	}, nil
 }
 
@@ -228,6 +232,8 @@ func (service *AuthServiceImpl) VerifyOTP(phone_number string, otpCode string) (
 		return nil, errors.New("user not found")
 	}
 
+	isDataComplete := helper.IsUserDataComplete(*user)
+
 	// Token
 	claims := helper.JwtCustomClaims{
 		ID:      strconv.Itoa(user.IdUser),
@@ -252,6 +258,7 @@ func (service *AuthServiceImpl) VerifyOTP(phone_number string, otpCode string) (
 		// "user":    user,
 		"token":        token,
 		"expired time": expirationTime,
+		"data": isDataComplete,
 	}, nil
 }
 
@@ -480,6 +487,9 @@ func (service *AuthServiceImpl) HandleGoogleLoginOrRegister(googleID string, ema
 		user.Password = string(passHash) // Simpan password yang di-hash
 	}
 
+	isDataComplete := helper.IsUserDataComplete(*user)
+
+
 	// Membuat claims untuk token JWT
 	claims := helper.JwtCustomClaims{
 		ID:      strconv.Itoa(user.IdUser),
@@ -503,6 +513,7 @@ func (service *AuthServiceImpl) HandleGoogleLoginOrRegister(googleID string, ema
 	return map[string]interface{}{
 		"token":      token,
 		"expires_at": expirationTime, // Sertakan waktu kedaluwarsa yang sebenarnya
+		"data": isDataComplete,
 	}, nil
 }
 
