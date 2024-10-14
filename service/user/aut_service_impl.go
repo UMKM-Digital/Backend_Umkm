@@ -33,67 +33,77 @@ func Newauthservice(authrepository userrepo.AuthUserRepo, token helper.TokenUseC
 }
 
 // register
+// register
 func (service *AuthServiceImpl) RegisterRequest(user web.RegisterRequest) (map[string]interface{}, error) {
-	// Hash password menggunakan bcrypt
-	passHash, errHash := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.MinCost)
-	if errHash != nil {
-		return nil, errHash
-	}
-	user.Password = string(passHash)
+    // Hash password menggunakan bcrypt
+    passHash, errHash := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.MinCost)
+    if errHash != nil {
+        return nil, errHash
+    }
+    user.Password = string(passHash)
 
-	// Membuat object User baru
-	newUser := domain.Users{
-		Fullname: user.Fullname,
-		Password: user.Password,
-		Email:    user.Email,
-		Role:     "umkm",
-		No_Phone: user.No_Phone,
-		Nik: user.No_Nik,
-		NoKk: user.No_KK,
-		Nib: user.No_Nib,
-		TanggalLahir: user.TanggalLahir,
-		JenisKelamin: user.JeniKelamin,
-		StatusMenikah: user.StatusMenikah,
-		Alamat: user.Alamat,
-		Provinsi: user.Provinsi,
-		Kabupaten: user.Kabupaten,
-		Kecamatan: user.Kecamatan,
-		Kelurahan: user.Kelurahan,
-		Rt: user.Rt,
-		Rw: user.Rw,
-	}
+    // Parse TanggalLahir (Date of Birth) tanpa memanggil .String()
+    tanggalLahirParsed, errDate := helper.ParseDateLahir(user.TanggalLahir)
+    if errDate != nil {
+        return nil, errDate
+    }
 
-	// Menyimpan user ke database
-	saveUser, errSaveUser := service.authrepository.RegisterRequest(newUser)
-	if errSaveUser != nil {
-		return nil, errSaveUser
-	}
+    // Membuat object User baru
+    newUser := domain.Users{
+        Fullname:           user.Fullname,
+        Password:           user.Password,
+        Email:              user.Email,
+        Role:               "umkm",
+        No_Phone:           user.No_Phone,
+        Nik:                user.No_Nik,
+        NoKk:               user.No_KK,
+        Nib:                user.No_Nib,
+        TanggalLahir:       tanggalLahirParsed,
+        JenisKelamin:       user.JenisKelamin,
+        PendidikanTerakhir: user.PendidikanTerakhir,
+        StatusMenikah:      user.StatusMenikah,
+        Alamat:             user.Alamat,
+        Provinsi:           user.Provinsi,
+        Kabupaten:          user.Kabupaten,
+        Kecamatan:          user.Kecamatan,
+        Kelurahan:          user.Kelurahan,
+		KodePos: user.KodePos,
+        Rt:                 user.Rt,
+        Rw:                 user.Rw,
+    }
 
-	// Membuat claims untuk token JWT
-	claims := helper.JwtCustomClaims{
-		ID:      strconv.Itoa(saveUser.IdUser), // Menggunakan ID dari saveUser setelah disimpan ke DB
-		Name:    saveUser.Username,
-		Email:   saveUser.Email,
-		Phone:   saveUser.No_Phone,
-		Role:    saveUser.Role,
-		Picture: saveUser.Picture,
-	}
+    // Menyimpan user ke database
+    saveUser, errSaveUser := service.authrepository.RegisterRequest(newUser)
+    if errSaveUser != nil {
+        return nil, errSaveUser
+    }
 
-	// Menghasilkan token JWT
-	token, tokenErr := service.tokenUseCase.GenerateAccessToken(claims)
-	if tokenErr != nil {
-		return nil, tokenErr
-	}
+    // Membuat claims untuk token JWT
+    claims := helper.JwtCustomClaims{
+        ID:      strconv.Itoa(saveUser.IdUser), // Menggunakan ID dari saveUser setelah disimpan ke DB
+        Name:    saveUser.Username,
+        Email:   saveUser.Email,
+        Phone:   saveUser.No_Phone,
+        Role:    saveUser.Role,
+        Picture: saveUser.Picture,
+    }
 
-	// Menghitung waktu kedaluwarsa token
-	expirationTime := time.Now().Add(1 * time.Hour).Format(time.RFC3339)
+    // Menghasilkan token JWT
+    token, tokenErr := service.tokenUseCase.GenerateAccessToken(claims)
+    if tokenErr != nil {
+        return nil, tokenErr
+    }
 
-	// Mengembalikan token dan informasi user
-	return map[string]interface{}{
-		"token":      token,
-		"expires_at": expirationTime, // Sertakan waktu kedaluwarsa yang sebenarnya
-	}, nil
+    // Menghitung waktu kedaluwarsa token
+    expirationTime := time.Now().Add(1 * time.Hour).Format(time.RFC3339)
+
+    // Mengembalikan token dan informasi user
+    return map[string]interface{}{
+        "token":      token,
+        "expires_at": expirationTime, // Sertakan waktu kedaluwarsa yang sebenarnya
+    }, nil
 }
+
 
 func (service *AuthServiceImpl) LoginRequest(username string, password string) (map[string]interface{}, error) {
 	user, getUserErr := service.authrepository.FindUserByUsername(username)

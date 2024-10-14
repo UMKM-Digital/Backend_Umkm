@@ -2,30 +2,34 @@ package web
 
 import (
 	"mime/multipart" // Tambahkan ini
-	"time"
+	
 	// Paket lain yang diperlukan
 )
 
-
 type RegisterRequest struct {
-    Fullname string `validate:"required" json:"fullname"`//o
-	Email    string `validate:"required,email" json:"email"`//0
-	Password string `validate:"required" json:"password"`//0
-    No_Nik string `validate:"required" json:"no_nik"`//00
-	No_Phone string `validate:"required" json:"no_telp"`//
-    No_KK string    `validate:"required" json:"no_kk"`//00
-    No_Nib string `validate:"requireed" json:"no_nib"`//00
-    TanggalLahir time.Time `validate:"requireed" json:"tgl_lahir"`//00
-    JeniKelamin string `validate:"requireed" json:"jenis_kelamin"`//00
-    StatusMenikah string `validate:"requireed" json:"status_menikah"`//00
-    Alamat string `validate:"requireed" json:"alamat"`//0
-    Provinsi string `validate:"requireed" json:"provinsi"`//0
-    Kabupaten string `validate:"requireed" json:"kabupaten"`//0
-    Kecamatan string `validate:"requireed" json:"kecamatan"`//0
-    Kelurahan string `validate:"requireed" json:"kelurahan"`//0
-    Rt string `validate:"requireed" json:"rt"`//0
-    Rw string `validate:"requireed" json:"rw"`//0
+    Fullname string `validate:"required" json:"fullname"` //o
+    Email    string `validate:"required,email" json:"email"` //0
+    Password string `validate:"required" json:"password"` //0
+    No_Nik   string `validate:"required" json:"no_nik"` //00
+    No_Phone string `validate:"required" json:"no_telp"` //
+    No_KK    string `validate:"required" json:"no_kk"` //00
+    No_Nib   string `validate:"required" json:"no_nib"` //00
+    TanggalLahir string `validate:"required" json:"tgl_lahir"` //00
+    JenisKelamin string `validate:"required" json:"jenis_kelamin"` //00
+    StatusMenikah string `validate:"required" json:"status_menikah"` //00
+    Alamat string `validate:"required" json:"alamat"` //0
+    Provinsi string `validate:"required" json:"provinsi"` //0
+    Kabupaten string `validate:"required" json:"kabupaten"` //0
+    Kecamatan string `validate:"required" json:"kecamatan"` //0
+    Kelurahan string `validate:"required" json:"kelurahan"` //0
+    Rt string `validate:"required" json:"rt"` //0
+    Rw string `validate:"required" json:"rw"` //0
+    PendidikanTerakhir string `validate:"required" json:"pendidikan_terakhir"`
+    KodePos string `validate:"required" json:"kode_pos"`
 }
+
+
+
 type LoginRequest struct {
 	Username    string `validate:"required,username" json:"username"`
 	Password string `validate:"required" json:"password"`	

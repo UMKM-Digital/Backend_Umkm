@@ -14,7 +14,7 @@ type Users struct {
     NoKk string         `gorm:"column:no_kk"`
     Nik string         `gorm:"column:nik"`
     Nib string         `gorm:"column:nib"`
-    TanggalLahir time.Time         `gorm:"column:tanggal_lahir"`
+    TanggalLahir time.Time `gorm:"column:tanggal_lahir"`
     JenisKelamin string         `gorm:"column:jenis_kelamin"`
     StatusMenikah string         `gorm:"column:status_menikah"`
     Rt string         `gorm:"column:rt"`
@@ -28,6 +28,7 @@ type Users struct {
     Kecamatan string         `gorm:"column:kecamatan"`
     Ktp JSONB  `gorm:"column:ktp"`
     KartuKeluarga JSONB `gorm:"column:kartu_keluarga"`
+    PendidikanTerakhir string `gorm:"column:pendidikan_terakhir"`
    CreatedAt            time.Time `gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt            time.Time `gorm:"column:updated_at;autoUpdateTime"`
     HakAkses   []HakAkses `gorm:"foreignKey:user_id"`
