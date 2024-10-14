@@ -121,7 +121,7 @@ func (repo *AuthrepositoryImpl) FindOrCreateUserByGoogleID(googleID string, emai
             newUser := domain.Users{
                 GoogleId: googleID,
                 Email:    email,
-				Username: username,
+				Fullname: username,
                 Picture: picture,
                 Role: "umkm",
             }

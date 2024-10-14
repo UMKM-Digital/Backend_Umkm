@@ -483,7 +483,7 @@ func (service *AuthServiceImpl) HandleGoogleLoginOrRegister(googleID string, ema
 	// Membuat claims untuk token JWT
 	claims := helper.JwtCustomClaims{
 		ID:      strconv.Itoa(user.IdUser),
-		Name:    user.Username,
+		Name:    user.Fullname,
 		Email:   user.Email,
 		Phone:   user.No_Phone,
 		Role:    user.Role,
