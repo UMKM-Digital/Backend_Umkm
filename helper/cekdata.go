@@ -31,7 +31,7 @@ func IsUserDataComplete(user domain.Users) bool {
            user.Nik != "" && 
            user.Nib != "" &&
 		   user.Email != "" &&
-		   user.Picture != "" &&
+			user.Picture != "" &&
 		   !user.TanggalLahir.IsZero() && 
 		   user.JenisKelamin != "" &&
 		   user.Rt != "" &&

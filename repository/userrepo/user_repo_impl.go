@@ -74,12 +74,12 @@ func (repo *AuthrepositoryImpl) FindUserByPhoneRegister(phone string) (*domain.U
 
 
 // repository/userrepo/auth_repository.go
-// func (repo *AuthrepositoryImpl) UpdateId(idUser int, user domain.Users) (domain.Users, error) {
-//     if err := repo.db.Model(&domain.Users{}).Where("id = ?", idUser).Updates(user).Error; err != nil {
-//         return domain.Users{}, errors.New("failed to update profile")
-//     }
-//     return user, nil
-// }
+func (repo *AuthrepositoryImpl) UpdateId(idUser int, user domain.Users) (domain.Users, error) {
+    if err := repo.db.Model(&domain.Users{}).Where("id = ?", idUser).Updates(user).Error; err != nil {
+        return domain.Users{}, errors.New("failed to update profile")
+    }
+    return user, nil
+}
 
 //verivy otp
 

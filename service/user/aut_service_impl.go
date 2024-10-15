@@ -2,7 +2,12 @@ package userservice
 
 import (
 	// "encoding/json"
+	"encoding/json"
 	"errors"
+	"math/rand"
+	"mime/multipart"
+	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 	"umkm/helper"
@@ -12,10 +17,11 @@ import (
 	"umkm/model/web"
 	"umkm/repository/userrepo"
 
-	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 	"fmt"
 	"net/smtp"
+
+	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 type AuthServiceImpl struct {
@@ -32,7 +38,44 @@ func Newauthservice(authrepository userrepo.AuthUserRepo, token helper.TokenUseC
 	}
 }
 
-// register
+type KTPDocument struct {
+    ID       int    `json:"id"`
+    Document string `json:"document"`
+}
+
+type KTPData struct {
+    URLs []KTPDocument `json:"urls"`
+}
+
+
+const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+// generateRandomFileName generates a random file name with the format YYYYMMDD_randomString_HHMMSS.ext
+func generateRandomFileName(ext string) string {
+    // Dapatkan tanggal saat ini
+    now := time.Now()
+    // Format tahun, bulan, dan tanggal
+    datePrefix := now.Format("20060102") // Format: YYYYMMDD
+
+    // Buat string acak 10 karakter
+    randomString := generateRandomString(10)
+
+    // Format jam, menit, dan detik
+    timeSuffix := now.Format("150405") // Format: HHMMSS
+
+    // Gabungkan prefix tanggal, angka acak, dan suffix waktu
+    return fmt.Sprintf("%s_%s_%s%s", datePrefix, randomString, timeSuffix, ext)
+}
+
+// generateRandomString generates a random string of specified length
+func generateRandomString(length int) string {
+    bytes := make([]byte, length)
+    for i := range bytes {
+        bytes[i] = letterBytes[rand.Intn(len(letterBytes))]
+    }
+    return string(bytes)
+}
+
 // register
 func (service *AuthServiceImpl) RegisterRequest(user web.RegisterRequest) (map[string]interface{}, error) {
     // Hash password menggunakan bcrypt
@@ -174,47 +217,234 @@ func (service *AuthServiceImpl) ViewMe(userId int) (entity.UserEntity, error) {
 }
 
 // update profile
-// func (service *AuthServiceImpl) Update(userId int, req web.UpdateUserRequest, profilePicturePath string) (helper.ResponseToJson, error) {
-//     user, errUser := service.authrepository.GetByID(userId)
-//     if errUser != nil {
-//         return nil, errUser
-//     }
+func (service *AuthServiceImpl) Update(Id int, req web.UpdateUserRequest, file *multipart.FileHeader, Ktp []*multipart.FileHeader, kkFiles []*multipart.FileHeader) (helper.ResponseToJson, error) {
+    user, errUser := service.authrepository.GetByID(Id)
 
-//     if req.Username != "" {
-//         user.Username = req.Username
-//     }
-//     if req.Email != "" {
-//         user.Email = req.Email
-//     }
-//     if req.No_Phone != "" {
-//         user.No_Phone = req.No_Phone
-//     }
-//     if req.Password != "" {
-//         passHash, errHash := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.MinCost)
-//         if errHash != nil {
-//             return nil, errHash
-//         }
-//         user.Password = string(passHash)
-//     }
-//     if profilePicturePath != "" {
-//         user.Picture = profilePicturePath
-//     }
+    // Parse TanggalLahir (Date of Birth)
+    tanggalLahirParsed, errDate := helper.ParseDateLahir(req.TanggalLahir)
+    if errDate != nil {
+        return nil, errDate
+    }
 
-//     result, errUpdate := service.authrepository.UpdateId(userId, user)
-//     if errUpdate != nil {
-//         return nil, errUpdate
-//     }
+    if errUser != nil {
+        return nil, errUser
+    }
 
-//     data := helper.ResponseToJson{
-//         "id":             result.IdUser,
-//         "username":       result.Username,
-//         "email":          result.Email,
-//         "no_phone":       result.No_Phone,
-//         "profile_picture": result.Picture,
-//     }
+    if req.Fullname != "" {
+        user.Username = req.Fullname
+    }
+    if req.Email != "" {
+        user.Email = req.Email
+    }
+    if req.No_Phone != "" {
+        user.No_Phone = req.No_Phone
+    }
 
-//     return data, nil
-// }
+    // Process new profile picture
+    var Logo string
+    if file != nil {
+        if user.Picture != "" {
+            err := os.Remove(user.Picture)
+            if err != nil {
+                return nil, errors.New("failed to remove old image")
+            }
+        }
+
+        src, err := file.Open()
+        if err != nil {
+            return nil, errors.New("failed to open the uploaded file")
+        }
+        defer src.Close()
+
+        ext := filepath.Ext(file.Filename)
+        randomFileName := generateRandomFileName(ext)
+        Logo = filepath.Join("uploads/potoprofile", randomFileName)
+
+        if err := helper.SaveFile(file, Logo); err != nil {
+            return nil, errors.New("failed to save image")
+        }
+        Logo = filepath.ToSlash(Logo)
+    } else {
+        Logo = user.Picture
+    }
+
+    var oldKTPDocs KTPData
+    if user.Ktp != nil { // Pastikan user.Ktp tidak kosong
+        // Ambil nilai dari user.Ktp
+        ktpValue, err := user.Ktp.Value()
+        if err != nil {
+            return nil, errors.New("gagal mendapatkan nilai KTP")
+        }
+    
+        // Unmarshal ke dalam oldKTPDocs
+        if err := json.Unmarshal(ktpValue.([]byte), &oldKTPDocs); err == nil {
+            // Hapus dokumen KTP lama
+            for _, doc := range oldKTPDocs.URLs {
+                documentPath := doc.Document
+                // Menampilkan path file yang akan dihapus untuk debugging
+                fmt.Println("Menghapus dokumen KTP:", documentPath)
+    
+                // Periksa apakah file ada
+                if _, err := os.Stat(documentPath); err == nil {
+                    // Hapus dokumen KTP lama
+                    err := os.Remove(documentPath)
+                    if err != nil {
+                        // Menampilkan error jika terjadi kesalahan
+                        fmt.Printf("Gagal menghapus dokumen KTP yang lama: %s, error: %v\n", documentPath, err)
+                        return nil, errors.New("gagal menghapus dokumen KTP yang lama")
+                    } else {
+                        fmt.Println("Dokumen KTP berhasil dihapus:", documentPath)
+                    }
+                } else if os.IsNotExist(err) {
+                    fmt.Printf("File tidak ada, tidak dapat dihapus: %s\n", documentPath)
+                } else {
+                    fmt.Printf("Error saat memeriksa file: %s, error: %v\n", documentPath, err)
+                }
+            }
+        } else {
+            fmt.Println("Gagal melakukan unmarshal KTP:", err)
+        }
+    } else {
+        fmt.Println("user.Ktp adalah nil atau kosong")
+    }
+    var oldKKKDocs KTPData
+    if user.Ktp != nil { // Pastikan user.Ktp tidak kosong
+        // Ambil nilai dari user.Ktp
+        ktpValue, err := user.KartuKeluarga.Value()
+        if err != nil {
+            return nil, errors.New("gagal mendapatkan nilai KTP")
+        }
+    
+        // Unmarshal ke dalam oldKKKDocs
+        if err := json.Unmarshal(ktpValue.([]byte), &oldKKKDocs); err == nil {
+            // Hapus dokumen KTP lama
+            for _, doc := range oldKKKDocs.URLs {
+                documentPath := doc.Document
+                // Menampilkan path file yang akan dihapus untuk debugging
+                fmt.Println("Menghapus dokumen KTP:", documentPath)
+    
+                // Periksa apakah file ada
+                if _, err := os.Stat(documentPath); err == nil {
+                    // Hapus dokumen KTP lama
+                    err := os.Remove(documentPath)
+                    if err != nil {
+                        // Menampilkan error jika terjadi kesalahan
+                        fmt.Printf("Gagal menghapus dokumen KTP yang lama: %s, error: %v\n", documentPath, err)
+                        return nil, errors.New("gagal menghapus dokumen KTP yang lama")
+                    } else {
+                        fmt.Println("Dokumen KTP berhasil dihapus:", documentPath)
+                    }
+                } else if os.IsNotExist(err) {
+                    fmt.Printf("File tidak ada, tidak dapat dihapus: %s\n", documentPath)
+                } else {
+                    fmt.Printf("Error saat memeriksa file: %s, error: %v\n", documentPath, err)
+                }
+            }
+        } else {
+            fmt.Println("Gagal melakukan unmarshal KTP:", err)
+        }
+    } else {
+        fmt.Println("user.Ktp adalah nil atau kosong")
+    }
+    
+    
+    
+    // Process KTP and KK files
+    var newKTPDocs, newKKDocs []map[string]interface{}
+
+    // Process KTP files
+    for _, file := range Ktp {
+        if file != nil {
+            ext := filepath.Ext(file.Filename)
+            randomFileName := generateRandomFileName(ext)
+            newDocPath := filepath.Join("uploads/dokpribadi", randomFileName)
+
+            src, err := file.Open()
+            if err != nil {
+                return nil, errors.New("gagal membuka file KTP yang diunggah")
+            }
+            defer src.Close()
+
+            if err := helper.SaveFile(file, newDocPath); err != nil {
+                return nil, errors.New("gagal menyimpan dokumen KTP")
+            }
+
+            newDoc := map[string]interface{}{
+                "id":       len(newKTPDocs) + 1,
+                "document": filepath.ToSlash(newDocPath),
+            }
+            newKTPDocs = append(newKTPDocs, newDoc)
+        }
+    }
+
+    // Process KK files
+    for _, file := range kkFiles {
+        if file != nil {
+            ext := filepath.Ext(file.Filename)
+            randomFileName := generateRandomFileName(ext)
+            newDocPath := filepath.Join("uploads/dokpribadi", randomFileName)
+
+            src, err := file.Open()
+            if err != nil {
+                return nil, errors.New("gagal membuka file KK yang diunggah")
+            }
+            defer src.Close()
+
+            if err := helper.SaveFile(file, newDocPath); err != nil {
+                return nil, errors.New("gagal menyimpan dokumen KK")
+            }
+
+            newDoc := map[string]interface{}{
+                "id":       len(newKKDocs) + 1,
+                "document": filepath.ToSlash(newDocPath),
+            }
+            newKKDocs = append(newKKDocs, newDoc)
+        }
+    }
+
+    // Prepare updated KTP and KK data
+    updatedKTPJSONB := domain.JSONB{"urls": newKTPDocs}
+    updatedKKJSONB := domain.JSONB{"urls": newKKDocs}
+
+    // Create user update data
+    TestimonalRequest := domain.Users{
+        IdUser:          Id,
+        Fullname:        req.Fullname,
+        Email:           req.Email,
+        No_Phone:        req.No_Phone,
+        Nik:             req.No_Nik,
+        NoKk:            req.No_KK,
+        Nib:             req.No_Nib,
+        TanggalLahir:    tanggalLahirParsed,
+        JenisKelamin:    req.JenisKelamin,
+        StatusMenikah:   req.StatusMenikah,
+        Alamat:          req.Alamat,
+        Provinsi:        req.Provinsi,
+        Kabupaten:       req.Kabupaten,
+        Kecamatan:       req.Kecamatan,
+        Kelurahan:       req.Kelurahan,
+        Rt:              req.Rt,
+        Rw:              req.Rw,
+        PendidikanTerakhir: req.PendidikanTerakhir,
+        KodePos:         req.KodePos,
+        Ktp:             updatedKTPJSONB,
+        KartuKeluarga:   updatedKKJSONB,
+        Picture: Logo,
+    }
+
+    result, errUpdate := service.authrepository.UpdateId(Id, TestimonalRequest)
+    if errUpdate != nil {
+        return nil, errUpdate
+    }
+
+    response := map[string]interface{}{
+        "name":   result.Fullname,
+        "email":  result.Email,
+        "phone":  result.No_Phone,
+    }
+    return response, nil
+}
+
 
 //
 
@@ -342,133 +572,6 @@ func (service *AuthServiceImpl) ChangePassword(authID int, oldPassword string, n
     return nil
 }
 
-// //login google
-// func (service *AuthServiceImpl) VerifyGoogleToken(token string) (*oauth2.Tokeninfo, error) {
-//     ctx := context.Background()
-//     oauth2Service, err := oauth2.NewService(ctx, option.WithHTTPClient(http.DefaultClient))
-//     if err != nil {
-//         return nil, err
-//     }
-
-//     tokenInfo, err := oauth2Service.Tokeninfo().IdToken(token).Do()
-//     if err != nil {
-//         return nil, err
-//     }
-
-//     return tokenInfo, nil
-// }
-// // File: service/auth_service.go
-// func (service *AuthServiceImpl) LoginWithGoogle(token string) (*domain.Users, string, error) {
-//     // Verifikasi token Google
-//     tokenInfo, err := service.VerifyGoogleToken(token)
-//     if err != nil {
-//         return nil, "", errors.New("invalid google token")
-//     }
-
-// 	username := tokenInfo.Email
-
-//     // Cari atau buat user berdasarkan googleID
-//     user, err := service.authrepository.FindOrCreateUserByGoogleID(tokenInfo.UserId, tokenInfo.Email, username)
-//     if err != nil {
-//         return nil, "", err
-//     }
-
-//     // Buat claims untuk JWT
-//     claims := helper.JwtCustomClaims{
-//         ID:      strconv.Itoa(user.IdUser),
-//         Name:    user.Username,
-//         Email:   user.Email,
-//         Phone:   user.No_Phone,
-//         Picture: user.Picture,
-//         Role:    user.Role,
-//     }
-
-//     // Panggil GenerateAccessToken untuk membuat JWT token
-//     jwtToken, jwtErr := service.tokenUseCase.GenerateAccessToken(claims)
-//     if jwtErr != nil {
-//         return nil, "", jwtErr // Kembalikan error jika pembuatan token gagal
-//     }
-
-//     return user, jwtToken, nil // Kembalikan user dan token
-// }
-
-
-// File: service/auth_service.go
-
-
-//
-// File: service/auth_service.go
-
-
-
-// // VerifyGoogleToken untuk memverifikasi token dan mendapatkan tokenInfo
-// func (service *AuthServiceImpl) VerifyGoogleToken(idToken string) (map[string]interface{}, error) {
-//     ctx := context.Background()
-
-//     // Use idtoken.Validate to validate the Google ID token
-//     tokenPayload, err := idtoken.Validate(ctx, idToken, "552769390995-9oggvci6d86aelv4ri7vlirrp08vti52.apps.googleusercontent.com") // Replace with your Google client ID
-//     if err != nil {
-//         return nil, fmt.Errorf("invalid google token: %w", err)
-//     }
-
-//     return tokenPayload.Claims, nil
-// }
-
-
-// // Mendapatkan informasi pengguna dari Userinfo API
-// // Mendapatkan informasi pengguna dari Userinfo API
-// // Mendapatkan informasi pengguna dari Userinfo API
-// func (service *AuthServiceImpl) GetUserInfo(accessToken string) (*oauth2.Userinfo, error) {
-//     ctx := context.Background()
-//     oauth2Service, err := oauth2.NewService(ctx, option.WithHTTPClient(http.DefaultClient))
-//     if err != nil {
-//         return nil, err
-//     }
-
-//     // Membuat permintaan untuk mendapatkan informasi pengguna
-//     userInfo, err := oauth2Service.Userinfo.Get().Context(ctx).Do()
-//     if err != nil {
-//         return nil, fmt.Errorf("failed to get user info: %w", err)
-//     }
-
-//     return userInfo, nil // Mengembalikan pointer ke objek Userinfo
-// }
-
-
-
-// // LoginWithGoogle untuk login menggunakan Google
-// // LoginWithGoogle untuk login menggunakan Google
-// func (service *AuthServiceImpl) LoginWithGoogle(token string) (*domain.Users, string, error) {
-//     // Verifikasi token Google dan dapatkan klaim
-//     claims, err := service.VerifyGoogleToken(token)
-//     if err != nil {
-//         return nil, "", fmt.Errorf("failed to verify google token: %w", err)
-//     }
-
-//     // Ekstrak user ID (sub), email, nama, dan phone dari klaim
-//     googleID, _ := claims["sub"].(string)      // 'sub' adalah Google user ID
-//     email, _ := claims["email"].(string)       // Ekstrak email
-//     name, _ := claims["name"].(string)         // Ekstrak nama
-
-//     // Cari atau buat user baru berdasarkan Google ID dan email di database
-//     user, err := service.authrepository.FindOrCreateUserByGoogleID(googleID, email, name)
-//     if err != nil {
-//         return nil, "", err
-//     }
-
-//     // Buat JWT token untuk user
-//     jwtToken, jwtErr := service.tokenUseCase.GenerateAccessToken(helper.JwtCustomClaims{
-//         ID:    strconv.Itoa(user.IdUser),
-//         Name:  user.Username,
-//         Email: user.Email,
-//         Role:  user.Role,
-//     })
-//     if jwtErr != nil {
-//         return nil, "", jwtErr
-//     }
-
-//     return user, jwtToken, nil
-// }
 
 func (service *AuthServiceImpl) HandleGoogleLoginOrRegister(googleID string, email string, username string, picture string) (map[string]interface{}, error) {
 	// Mencari atau membuat pengguna berdasarkan ID Google

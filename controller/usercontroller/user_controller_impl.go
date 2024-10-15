@@ -1,7 +1,10 @@
 package usercontroller
 
 import (
+	"log"
+	"mime/multipart"
 	"net/http"
+
 	// "strings"
 	"umkm/helper"
 	"umkm/model"
@@ -108,50 +111,85 @@ func (controller *UserControllerImpl) View(c echo.Context) error {
 // }
 
 //update
-// controller/usercontroller/user_controller_impl.go
-// func (controller *UserControllerImpl) Update(c echo.Context) error {
-//     userId, _ := helper.GetAuthId(c)
-//     request := new(web.UpdateUserRequest)
+func (controller *UserControllerImpl) Update(c echo.Context) error {
+    // Get the user ID from the JWT token
+    userId, _ := helper.GetAuthId(c)
 
-//     // Bind and validate request
-//     if err := c.Bind(request); err != nil {
-//         return c.JSON(http.StatusBadRequest, helper.ResponseToJsonOtp(http.StatusBadRequest, err.Error(), nil))
-//     }
-//     if err := c.Validate(request); err != nil {
-//         return err
-//     }
+    // Parse form-data values
+    name := c.FormValue("fullname")
+    email := c.FormValue("email")
+    phoneNumber := c.FormValue("phone_number")
+	Password := c.FormValue("password")
+	NoNik    := c.FormValue("no_nik")
+	no_kk    := c.FormValue("no_kk")
+	no_nib    := c.FormValue("no_nib")
+	tanggalLahir    := c.FormValue("tanggal_lahir")
+	jeniskelamin    := c.FormValue("jenis_kelamin")
+	statusmenikah   := c.FormValue("status_menikah")
+	provinsi    := c.FormValue("provinsi")
+	kabupaten    := c.FormValue("kabupaten")
+	kelurahan    := c.FormValue("kelurahan")
+	rt    := c.FormValue("rt")
+	rw    := c.FormValue("rw")
+	pendidikanterakhir    := c.FormValue("pendidikan_terakhir")
+	kodepos    := c.FormValue("kode_pos")
+	kecamatan    := c.FormValue("kecamatan")
+    address := c.FormValue("alamat")
+	potoprofile, err := c.FormFile("potoprofile")
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Failed to get the uploaded file", nil))
+	}
 
-//     // Handle file upload
-//     var profilePicturePath string
-//     if request.Picture != nil {
-//         src, err := request.Picture.Open()
-//         if err != nil {
-//             return err
-//         }
-//         defer src.Close()
+    
+    log.Printf("Form values - Name: %s, Email: %s, PhoneNumber: %s, Address: %s", name, email, phoneNumber, address)
 
-//         // Create a destination file
-//         profilePicturePath = filepath.Join("uploads", request.Picture.Filename)
-//         dst, err := os.Create(profilePicturePath)
-//         if err != nil {
-//             return err
-//         }
-//         defer dst.Close()
+    // Handle file upload for profile picture if present
+    files := []*multipart.FileHeader{}
+    if file, err := c.FormFile("ktp"); err == nil {
+        files = append(files, file)
+    } else if err != http.ErrMissingFile {
+        return c.JSON(http.StatusBadRequest, helper.ResponseToJsonOtp(http.StatusBadRequest, "Failed to get uploaded file", nil))
+    }
 
-//         // Copy the uploaded file to the destination
-//         if _, err = io.Copy(dst, src); err != nil {
-//             return err
-//         }
-//     }
+    fileskk := []*multipart.FileHeader{}
+    if file, err := c.FormFile("kk"); err == nil {
+        fileskk = append(fileskk, file)
+    } else if err != http.ErrMissingFile {
+        return c.JSON(http.StatusBadRequest, helper.ResponseToJsonOtp(http.StatusBadRequest, "Failed to get uploaded file", nil))
+    }
 
-//     // Call the service to update user info
-//     result, err := controller.userService.Update(userId, *request, profilePicturePath)
-//     if err != nil {
-//         return c.JSON(http.StatusBadRequest, helper.ResponseToJsonOtp(http.StatusBadRequest, err.Error(), nil))
-//     }
+    // Create the request object manually
+    request := web.UpdateUserRequest{
+        Fullname:         name,
+        Email:        email,
+        No_Phone:  phoneNumber,
+        Alamat:      address,
+		Password: Password,
+		No_Nik: NoNik,
+		No_KK: no_kk,
+		No_Nib: no_nib,
+		TanggalLahir: tanggalLahir,
+		JenisKelamin: jeniskelamin,
+		StatusMenikah: statusmenikah,
+		Provinsi: provinsi,
+		Kabupaten: kabupaten,
+		Kecamatan: kecamatan,
+		Kelurahan: kelurahan,
+		Rt: rt,
+		Rw: rw,
+		PendidikanTerakhir: pendidikanterakhir,
+		KodePos: kodepos,
+    }
 
-//     return c.JSON(http.StatusOK, helper.ResponseToJsonOtp(http.StatusOK, "Success", result))
-// }
+    // Call the service to update user info
+    result, err := controller.userService.Update(userId, request, potoprofile,files, fileskk)
+    if err != nil {
+        return c.JSON(http.StatusInternalServerError, helper.ResponseToJsonOtp(http.StatusInternalServerError, err.Error(), nil))
+    }
+
+    // Return success response
+    return c.JSON(http.StatusOK, helper.ResponseToJsonOtp(http.StatusOK, "Successfully updated", result))
+}
 
 // verivy otp login
 func (controller *UserControllerImpl) VerifyOTPHandler(c echo.Context) error {

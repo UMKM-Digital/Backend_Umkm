@@ -1,7 +1,9 @@
 package userservice
 
 import (
+	"mime/multipart"
 	"time"
+	"umkm/helper"
 	"umkm/model/entity"
 	"umkm/model/web"
 )
@@ -11,7 +13,7 @@ type AuthUserService interface {
 	LoginRequest(username string, password string) (map[string]interface{}, error)
 	SendOtp(phone string) (map[string]interface{}, error)
 	ViewMe(userId int) (entity.UserEntity, error)
-	// Update(userId int, req web.UpdateUserRequest, profilePicturePath string) (helper.ResponseToJson, error
+	Update(Id int, req web.UpdateUserRequest, file *multipart.FileHeader, Ktp []*multipart.FileHeader, kkFiles []*multipart.FileHeader) (helper.ResponseToJson, error) 
 	VerifyOTP(phone string, otp_code string)(map[string]interface{}, error)
 	SendOtpRegister(phone string) (map[string]interface{}, error)
 	VerifyOTPRegister(otp_code string, phone_number string)(map[string]interface{}, error)
