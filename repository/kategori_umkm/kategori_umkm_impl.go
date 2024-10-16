@@ -115,6 +115,11 @@ func (repo *KategoriRepoUmkmImpl) DeleteKategoriUmkmId(id int) error {
     return nil
 }
 
-
-
-
+func (repo *KategoriRepoUmkmImpl) GetKategoriUmkmBySektor(id int)([]domain.Kategori_Umkm, error){
+	var kategoriumkm []domain.Kategori_Umkm
+	err := repo.db.Where("id_sektor_usaha  = ?", id).Find(&kategoriumkm).Error
+	if err != nil{
+		return nil, err
+	}
+	return kategoriumkm, nil
+}

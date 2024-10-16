@@ -136,12 +136,21 @@ func (repo *AuthrepositoryImpl) FindOrCreateUserByGoogleID(googleID string, emai
 }
 
 //resert Password
-func(repo AuthrepositoryImpl) ChangePassword(email string) (*domain.Users, error){
+func(repo *AuthrepositoryImpl) ChangePassword(email string) (*domain.Users, error){
     user := new(domain.Users)
 
 	if err	:= repo.db.Where("email = ?", email).Take(&user).Error; err != nil{
 		return user, err
 	}
 
+	return user, nil
+}
+
+func(repo *AuthrepositoryImpl) ListUser()([]domain.Users, error){
+    var user []domain.Users
+	err := repo.db.Order("id ASC").Find(&user).Error
+	if err != nil {
+		return nil, err
+	}
 	return user, nil
 }

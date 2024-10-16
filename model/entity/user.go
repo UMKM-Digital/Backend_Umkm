@@ -36,5 +36,47 @@ func ToUserEntity(user domain.Users) UserEntity {
 		Email:   user.Email,
 		Picture: user.Picture,
 		Role: user.Role,
+		NoKk: user.NoKk,
+		NoNik: user.Nik,
+		NoNib: user.Nib,
+		TanggalLahir: user.TanggalLahir,
+		JenisKelamin: user.JenisKelamin,
+		PendidikanTerakhir: user.PendidikanTerakhir,
+		StatusMenikah: user.StatusMenikah,
+		Kecamatan: user.Kecamatan,
+		Kelurahan: user.Kelurahan,
+		KodePos: user.KodePos,
+		Rt: user.Rt,
+		Rw: user.Rw,
+		Alamat: user.Alamat,
+		NoHp: user.No_Phone,
+		Ktp: user.Ktp,
+		Kk: user.KartuKeluarga,
 	}
+}
+
+//untuk list user
+
+type UserEntityList struct {
+	Id        int    `json:"id"`
+	Fullname  string `json:"fullname"`
+	NoPhone string `json:"no_phone"`
+	Role string `json:"role"`
+}
+
+func ToUserEntityList(user domain.Users) UserEntityList {
+	return UserEntityList{
+		Id: user.IdUser,
+	    Fullname: user.Fullname,
+		NoPhone: user.No_Phone,
+		Role: user.Role,
+	}
+}
+
+func ToUserEntitiesList(userList []domain.Users) []UserEntityList {
+	var userListEntities []UserEntityList
+	for _, user := range userList {
+		userListEntities = append(userListEntities, ToUserEntityList(user))
+	}
+	return userListEntities
 }

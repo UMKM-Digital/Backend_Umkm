@@ -23,11 +23,13 @@ type TokenUseCaseImpl struct {
 type JwtCustomClaims struct {
 	ID      string `json:"id"`
 	Name    string `json:"username"`
+	Fullname string `json:"fullname"`
 	Email   string `json:"email"`
 	Phone   string `json:"no_phone"`
 	Picture string `json:"picture"`
 	Role string `json:"role"`
 	Google string `json:"google_id"`
+	NoKk string   `json:"no_kk"`
 	jwt.RegisteredClaims
 }
 

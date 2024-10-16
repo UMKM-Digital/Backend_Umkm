@@ -91,3 +91,12 @@ func (service *KategoriUmkmServiceImpl) UpdateKategori(request web.UpdateCategor
 func (service *KategoriUmkmServiceImpl) DeleteKategoriUmkmId(id int) error {
 	return service.kategorirepository.DeleteKategoriUmkmId(id)
 }
+
+
+func (service *KategoriUmkmServiceImpl) GetSektor(id int) ([]entity.KategoriEntity, error){
+	GetSektorList, err := service.kategorirepository.GetKategoriUmkmBySektor(id)
+	if err != nil {
+		return nil, err
+	}
+	return entity.ToKategoriEntities(GetSektorList), nil
+}

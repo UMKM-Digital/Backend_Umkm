@@ -70,6 +70,13 @@ func (controller *UmkmControllerImpl) Create(c echo.Context) error {
 
     
     fmt.Printf("Form Data: %+v\n", umkm)
+    
+    omsetData := c.FormValue("omset")
+    if omsetData != "" {
+        if err := json.Unmarshal([]byte(omsetData), &umkm.Omset); err != nil {
+            return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid omset data", nil))
+        }
+    }
 
     // Get authenticated user ID
     userID, err := helper.GetAuthId(c)

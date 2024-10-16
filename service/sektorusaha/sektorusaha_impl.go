@@ -43,3 +43,25 @@ func (service *SektorUsahaServiceImpl) 	GetSektorUsaha() ([]entity.SektorUsahaEn
 
 	return KatgeoriEntitie,  nil
 }
+//bentukusaha
+func (service *SektorUsahaServiceImpl) 	GetBentukUsaha() ([]entity.BentukUsahaEntity, error) {
+	getBentukUsahaList, err := service.sektorusaharepo.GetBentukUsaha()
+	if err != nil {
+		return nil, err
+	}
+
+	bentukEntitie := entity.ToBentukUsahaEntities(getBentukUsahaList)
+
+	return bentukEntitie,  nil
+}
+//statustempatusaha
+func (service *SektorUsahaServiceImpl) 	GetStatusTempatUsaha() ([]entity.StatusTempatUsahaEntity, error) {
+	getKategoriProdukList, err := service.sektorusaharepo.GetStatusTempatUsaha()
+	if err != nil {
+		return nil, err
+	}
+
+	KatgeoriEntitie := entity.ToStatusTempatUsahaEntities(getKategoriProdukList)
+
+	return KatgeoriEntitie,  nil
+}

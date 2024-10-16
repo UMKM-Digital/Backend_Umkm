@@ -8,4 +8,5 @@ type CreateCategoryUmkm interface {
 	GetKategoriUmkmId(idKategori int) (domain.Kategori_Umkm, error)
 	UpdateKategoriId(idKategori int, kategori domain.Kategori_Umkm) (domain.Kategori_Umkm, error)
 	DeleteKategoriUmkmId(id int) error
+	GetKategoriUmkmBySektor(id int)([]domain.Kategori_Umkm, error)
 }

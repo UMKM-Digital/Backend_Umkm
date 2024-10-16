@@ -101,4 +101,13 @@ func (controller *KategoriUmkmControllerImpl) DeleteKategoriId(c echo.Context) e
     return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "Penghapusan Kategori umkm berhasil", nil))
 }
 
+func (controller *KategoriUmkmControllerImpl) GetSektorUsaha(c echo.Context) error{
+	id, _ := strconv.Atoi(c.Param("id"))
+	getSlider, errGetSlider := controller.kategoriService.GetSektor(id)
 
+	if errGetSlider != nil {
+		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, errGetSlider.Error(), nil))
+	}
+
+	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success", getSlider))
+}

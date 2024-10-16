@@ -25,6 +25,7 @@ import (
 	dokumenumkmrepo "umkm/repository/dokumenumkm"
 	hakaksesrepo "umkm/repository/hakakses" // Tambahkan import untuk HakAkses repository
 	masterdokumenlegalrepo "umkm/repository/masterdokumenlegal"
+	omsetrepo "umkm/repository/omset"
 	produkrepo "umkm/repository/produk"
 	transaksirepo "umkm/repository/transaksi"
 	umkmrepo "umkm/repository/umkm"
@@ -43,10 +44,11 @@ type UmkmServiceImpl struct {
 	transaksiRepository transaksirepo.TransaksiRepo
 	dokumenrepository dokumenumkmrepo.DokumenUmkmrRepo
 	masterdokumen masterdokumenlegalrepo.MasterDokumenLegal
+	omsetrepo     omsetrepo.OmsetRepo
 	db                 *gorm.DB
 }
 
-func NewUmkmService(umkmrepository umkmrepo.CreateUmkm, hakaksesrepository hakaksesrepo.CreateHakakses, db *gorm.DB, produkRepository produkrepo.CreateProduk,transaksiRepository transaksirepo.TransaksiRepo,dokumenrepository dokumenumkmrepo.DokumenUmkmrRepo, masterdokumen masterdokumenlegalrepo.MasterDokumenLegal) *UmkmServiceImpl {
+func NewUmkmService(umkmrepository umkmrepo.CreateUmkm, hakaksesrepository hakaksesrepo.CreateHakakses, db *gorm.DB, produkRepository produkrepo.CreateProduk,transaksiRepository transaksirepo.TransaksiRepo,dokumenrepository dokumenumkmrepo.DokumenUmkmrRepo, masterdokumen masterdokumenlegalrepo.MasterDokumenLegal, omsetrepo  omsetrepo.OmsetRepo) *UmkmServiceImpl {
 	return &UmkmServiceImpl{
 		umkmrepository:     umkmrepository,
 		hakaksesrepository: hakaksesrepository,
@@ -54,6 +56,7 @@ func NewUmkmService(umkmrepository umkmrepo.CreateUmkm, hakaksesrepository hakak
 		transaksiRepository: transaksiRepository,
 		dokumenrepository: dokumenrepository,
 		masterdokumen: masterdokumen,
+		omsetrepo: omsetrepo,
 		db:                 db,
 	}
 }
@@ -127,6 +130,25 @@ func (service *UmkmServiceImpl) CreateUmkm(umkm web.UmkmRequest, userID int, fil
 	if err := service.hakaksesrepository.CreateHakAkses(&hakAkses); err != nil {
 		return nil, err
 	}
+
+
+    // **Simpan Omset**
+	for _, omsetReq := range umkm.Omset {
+		omset := domain.Omset{
+			Bulan:       omsetReq.Bulan,
+			JumlahOmset: omsetReq.JumlahOmset,
+			UmkmId:      saveUmkm.IdUmkm, // Gunakan UmkmId dari UMKM yang baru dibuat
+		}
+	
+		// Simpan setiap omset dan tangkap kedua nilai kembalian
+		_, err := service.omsetrepo.CreateRequest(omset)
+		if err != nil {
+			return nil, err
+		}
+	
+		// Optional: kamu bisa menggunakan `savedOmset` untuk kebutuhan lain
+	}
+	
 
 	return map[string]interface{}{
 		"name":                  saveUmkm.Name,

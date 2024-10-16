@@ -4,12 +4,14 @@ import "umkm/model/domain"
 
 type KategoriEntity struct {
 	Id   int    `json:"id"`
+	IdSektorUsaha int `json:"id_sektor_usaha"`
 	Name string `json:"name"`
 }
 
 func ToKategoriEntity(kategori domain.Kategori_Umkm) KategoriEntity {
 	return KategoriEntity{
 		Id: kategori.IdKategori,
+		IdSektorUsaha: kategori.IdSektorUsaha,
 		Name: kategori.Name,
 	}
 }

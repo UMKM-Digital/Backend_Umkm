@@ -30,3 +30,21 @@ func (repo *SektorUSahaRepoImpl) GetSektorUsaha() ([]domain.SektorUsaha, error) 
 	}
 	return sektorusaha, nil
 }
+//bentukusaha
+func (repo *SektorUSahaRepoImpl) GetBentukUsaha() ([]domain.BentukUsaha, error) {
+	var bentukusaha []domain.BentukUsaha
+	err := repo.db.Find(&bentukusaha).Error
+	if err != nil {
+		return nil, err
+	}
+	return bentukusaha, nil
+}
+//statustempatusaha
+func (repo *SektorUSahaRepoImpl) GetStatusTempatUsaha() ([]domain.StatusTempatUsaha, error) {
+	var statustempatusaha []domain.StatusTempatUsaha
+	err := repo.db.Find(&statustempatusaha).Error
+	if err != nil {
+		return nil, err
+	}
+	return statustempatusaha, nil
+}

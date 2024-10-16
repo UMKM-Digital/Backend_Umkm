@@ -8,4 +8,6 @@ import (
 type SektorUsaha interface {
 	CreateSektorUsaha(sektorusaha web.CreateSektorUsaha) (map[string]interface{}, error)
 	GetSektorUsaha() ([]entity.SektorUsahaEntity, error)
+	GetStatusTempatUsaha() ([]entity.StatusTempatUsahaEntity, error)
+	GetBentukUsaha() ([]entity.BentukUsahaEntity, error)
 }

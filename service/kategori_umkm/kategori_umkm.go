@@ -11,4 +11,5 @@ type KategoriUmkm interface {
 	GetKategoriUmkmId(id int) (entity.KategoriEntity, error)
 	UpdateKategori(request web.UpdateCategoriUmkm, pathId int) (map[string]interface{}, error)
 	DeleteKategoriUmkmId(id int) error
+	GetSektor(id int) ([]entity.KategoriEntity, error)
 }

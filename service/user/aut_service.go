@@ -25,4 +25,5 @@ type AuthUserService interface {
 	HandleGoogleLoginOrRegister(googleID string, email string, username string, picture string) (map[string]interface{}, error)
 	SendPasswordResetLink(email string) error
 	sendEmail(recipientEmail, resetLink string, expirationTime time.Time) error
+	GetListUser() ([]entity.UserEntityList, error) 
 }

@@ -1,11 +1,13 @@
 package domain
 
 import (
-    "time"
-    "database/sql/driver"
-    "encoding/json"
-    "errors"
-    "github.com/google/uuid"
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
+	"time"
+
+	"github.com/google/uuid"
+	// "github.com/shopspring/decimal"
 )
 
 type UMKM struct {
@@ -20,15 +22,33 @@ type UMKM struct {
     Deskripsi               string    `gorm:"column:deskripsi"`
     Maps                 JSONB     `gorm:"column:maps"`
     Images                 JSONB     `gorm:"column:gambar"` // Menggunakan JSONB untuk menyimpan URL gambar // Menyimpan URL gambar
-    // CreatedAt            time.Time `gorm:"column:created_at"`
-    // UpdatedAt            time.Time `gorm:"column:updated_at"`
     CreatedAt            time.Time `gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt            time.Time `gorm:"column:updated_at;autoUpdateTime"`
+    // SektorUsaha                 string `gorm:"column:sektor_usaha"`//
+    // StatusTempatUsaha                 string `gorm:"column:status_tempat_usaha"`
+    // KodeProv                 string `gorm:"kode_prov:"`
+    // KodeKabupaten                 string `gorm:"kode_kab:"`
+    // KodeKecamatan                 string `gorm:"kode_kec:"`
+    // KodeKelurahan                 string `gorm:"kode_kelurahan:"`
+    // RT string `gorm:"column:rt"`
+    // Rw string `gorm:"column:rw"`
+    // KodePos string `gorm:"column:kode_pos"`
+    // NoNpwd string `gorm:"column:no_npwd"`
+    // BahanBakar string `gorm:"column:bahan_bakar"`
+    // TanggalMulaiUsaha time.Time `gorm:"column:tanggal_mulai_usaha"`
+    // Kapasitas int `gorm:"column:kapasitas"`
+    // TenagaKerjaPria int `gorm:"column:tenaga_kerja_pria"`
+    // TenagaKerjaWanita int `gorm:"column:tenaga_kerja_wanita"`
+    // NominalAset decimal.Decimal `gorm:"column:nominal_aset"`
+    // NominalSendiri decimal.Decimal `gorm:"column:nominal_sendiri"`
+    // EkonomiKreatif bool `gorm:"column:ekonomi_kreatif"`
+    // KriteriaUsaha string `gorm:"column:kriteria_usaha"`
     Active                 int `gorm:"column:active"`
     HakAkses []HakAkses  `gorm:"foreignKey:UmkmId;references:IdUmkm"`
     Produk               []Produk  `gorm:"foreignkey:UmkmId"`
     Transaksi            []Transaksi `gorm:"foreignkey:UmkmId"`
     Dokumen            []UmkmDokumen `gorm:"foreignkey:UmkmId"`
+    Omset               []Omset      `gorm:"foreignkey:UmkmId"`
 }
 
 func (UMKM) TableName() string {

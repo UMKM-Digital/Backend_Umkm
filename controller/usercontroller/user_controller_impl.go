@@ -423,3 +423,14 @@ func (controller *UserControllerImpl) HandlePasswordResetRequest(c echo.Context)
 		"message": "Password reset link has been sent to your email",
 	})
 }
+
+
+func (controller *UserControllerImpl) GetUser(c echo.Context) error {
+	getUser, errGetUser := controller.userService.GetListUser()
+
+	if errGetUser != nil {
+		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, errGetUser.Error(), nil))
+	}
+
+	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success", getUser))
+}

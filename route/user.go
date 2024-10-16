@@ -40,6 +40,7 @@ import (
 	beritarepo "umkm/repository/homepage/berita"
 	brandrepo "umkm/repository/homepage/brandlogo"
 	sliderrepo "umkm/repository/homepage/slider"
+	omsetrepo "umkm/repository/omset"
 	sektorusaharepo "umkm/repository/sektorusaha"
 
 	kategoriprodukrepo "umkm/repository/kategori_produk"
@@ -115,12 +116,15 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userKategoriProdukService := kategoriprodukservice.NewKategoriProdukService(userKategoriProdukRepo)
 	userKategoriProdukController := kategoriprodukcontroller.NewKategeoriProdukController(*userKategoriProdukService)
 
+	useromsetRepo	:= omsetrepo.NewomsetRepositoryImpl(db)
+	
+
 
 	//umkm
 	umkmQueryBuilder := query_builder_umkm.NewUmkmQueryBuilder(db)
 	userUmkmRepo := umkmrepo.NewUmkmRepositoryImpl(db, umkmQueryBuilder)
 	userHakAksesRepo := hakaksesrepo.NewHakAksesRepositoryImpl(db)  
-	userUmkmService := umkmservice.NewUmkmService(userUmkmRepo, userHakAksesRepo, db, userProdukrepo, userTransaksiRepo, userDokumenuMKM, userMasterLegal)
+	userUmkmService := umkmservice.NewUmkmService(userUmkmRepo, userHakAksesRepo, db, userProdukrepo, userTransaksiRepo, userDokumenuMKM, userMasterLegal, useromsetRepo)
 	userUmkmController := umkmcontroller.NewUmkmController(userUmkmService)
  
 
@@ -177,6 +181,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	authRoute.POST("/send_email", userAuthController.HandlePasswordResetRequest) 
 	authRoute.POST("/send_email", userAuthController.HandlePasswordResetRequest) 
 	authRoute.PUT("/edit_profile", userAuthController.Update, JWTProtection()) 
+	authRoute.GET("/list", userAuthController.GetUser) 
 
 	meRoute := g.Group("/me")
 	meRoute.GET("", userAuthController.View, JWTProtection())
@@ -187,6 +192,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	KatUmkmRoute.GET("/:id", userKategoriUmkmController.GetKategoriId, JWTProtection())
 	KatUmkmRoute.PUT("/update/:id", userKategoriUmkmController.UpdateKategoriId, JWTProtection())
 	KatUmkmRoute.DELETE("/delete/:id", userKategoriUmkmController.DeleteKategoriId, JWTProtection())
+	KatUmkmRoute.GET("/sektor/:id", userKategoriUmkmController.GetSektorUsaha)
 
 	//umkm
 	Umkm := g.Group("/umkm")
@@ -298,6 +304,15 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	sektorusaha := g.Group("/sektorusaha")
 	sektorusaha.POST("/create", userSektorUsahaController.Create)
 	sektorusaha.GET("/list", userSektorUsahaController.GetSektorUsaha)
+	
+
+	//
+	bentukusaha := g.Group("/bentukusaha")
+	bentukusaha.GET("/list", userSektorUsahaController.GetBentukUsaha)
+
+	//statustempatusaha
+	statustempatusaha := g.Group("/statustempatusaha")
+	statustempatusaha.GET("/list", userSektorUsahaController.GetStatusTempatUsaha)
 	
 	//daerah
 	daerah := g.Group("/daerah")

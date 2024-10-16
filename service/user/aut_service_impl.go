@@ -125,6 +125,7 @@ func (service *AuthServiceImpl) RegisterRequest(user web.RegisterRequest) (map[s
     claims := helper.JwtCustomClaims{
         ID:      strconv.Itoa(saveUser.IdUser), // Menggunakan ID dari saveUser setelah disimpan ke DB
         Name:    saveUser.Username,
+        Fullname: saveUser.Fullname,
         Email:   saveUser.Email,
         Phone:   saveUser.No_Phone,
         Role:    saveUser.Role,
@@ -159,11 +160,13 @@ func (service *AuthServiceImpl) LoginRequest(username string, password string) (
 
 	claims := helper.JwtCustomClaims{
 		ID:      strconv.Itoa(user.IdUser),
+        Fullname: user.Fullname,
 		Name:    user.Username,
 		Email:   user.Email,
 		Phone:   user.No_Phone,
 		Role:    user.Role,
 		Picture: user.Picture,
+        
 	}
 
 	isDataComplete := helper.IsUserDataComplete(*user)
@@ -468,6 +471,7 @@ func (service *AuthServiceImpl) VerifyOTP(phone_number string, otpCode string) (
 	claims := helper.JwtCustomClaims{
 		ID:      strconv.Itoa(user.IdUser),
 		Name:    user.Username,
+        Fullname: user.Fullname,
 		Email:   user.Email,
 		Phone:   user.No_Phone,
 		Picture: user.Picture,
@@ -668,4 +672,12 @@ func (service *AuthServiceImpl) sendEmail(recipientEmail, resetLink string, expi
 	}
 
 	return nil
+}
+
+func (service *AuthServiceImpl) GetListUser() ([]entity.UserEntityList, error) {
+    GetUserList, err := service.authrepository.ListUser()
+    if err != nil {
+        return nil, err
+    }
+    return entity.ToUserEntitiesList(GetUserList), nil
 }
