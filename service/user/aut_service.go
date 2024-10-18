@@ -26,4 +26,5 @@ type AuthUserService interface {
 	SendPasswordResetLink(email string) error
 	sendEmail(recipientEmail, resetLink string, expirationTime time.Time) error
 	GetListUser() ([]entity.UserEntityList, error) 
+	CountUser() (map[string]interface{}, error) 
 }

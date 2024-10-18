@@ -7,6 +7,7 @@ import (
 	"umkm/app"
 	beritacontroller "umkm/controller/berita"
 	daerahcontoller "umkm/controller/daerah"
+	datacontroller "umkm/controller/data"
 	dokumenumkmcontroller "umkm/controller/dokumenumkm"
 	homepagecontroller "umkm/controller/homepage"
 	aboutuscontroller "umkm/controller/homepage/aboutus"
@@ -33,6 +34,7 @@ import (
 	query_builder_umkm "umkm/query_builder/umkm"
 
 	daerahrepo "umkm/repository/daerah"
+	datarepo "umkm/repository/data"
 	dokumenumkmrepo "umkm/repository/dokumenumkm"
 	hakaksesrepo "umkm/repository/hakakses"
 	testimonialrepo "umkm/repository/homepage"
@@ -51,6 +53,7 @@ import (
 	umkmrepo "umkm/repository/umkm"
 	"umkm/repository/userrepo"
 	daerahservice "umkm/service/daerah"
+	dataservice "umkm/service/data"
 	dokumenumkmservice "umkm/service/dokumenumkm"
 	homepageservice "umkm/service/homepage"
 	aboutusservice "umkm/service/homepage/aboutus"
@@ -165,6 +168,12 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userDaerahService := daerahservice.NewDaerahService(userDaerah)
 	userDaerahController := daerahcontoller.NewDaerahController(userDaerahService)
 
+	//data
+	//data
+dataUmkm := datarepo.NewDataRepositoryImpl(db)
+userDataService := dataservice.NewDataservice(dataUmkm) // Ensure this constructor matches the signature
+userDataController := datacontroller.NewUmkmController(userDataService)
+
 	g := e.Group(prefix)
 
 	authRoute := g.Group("/auth")
@@ -174,7 +183,6 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	authRoute.POST("/verifyOtp", userAuthController.VerifyOTPHandler)
 	authRoute.POST("/sendotp-register", userAuthController.SendOtpRegister)
 	authRoute.POST("/verifyOtpRegister", userAuthController.VerifyOTPHandlerRegister)
-	// authRoute.POST("/logout", userAuthController.Logout, JWTProtection())
 	authRoute.POST("/cekpassword", userAuthController.CekPassword, JWTProtection())
 	authRoute.POST("/updatepassword", userAuthController.ChangePassword, JWTProtection())
 	authRoute.POST("/login-google", userAuthController.HandleGoogleLoginOrRegister) 
@@ -182,6 +190,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	authRoute.POST("/send_email", userAuthController.HandlePasswordResetRequest) 
 	authRoute.PUT("/edit_profile", userAuthController.Update, JWTProtection()) 
 	authRoute.GET("/list", userAuthController.GetUser) 
+	authRoute.GET("/count", userAuthController.GetUserCountByGender) 
 
 	meRoute := g.Group("/me")
 	meRoute.GET("", userAuthController.View, JWTProtection())
@@ -320,6 +329,10 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	daerah.GET("/kabupaten/:id", userDaerahController.GetKabupaten)
 	daerah.GET("/kecamatan/:id", userDaerahController.GetKecamatan)
 	daerah.GET("/kelurahan/:id", userDaerahController.GetKelurahan)
+
+	data := g.Group("/data")
+	data.GET("/list", userDataController.CountData)
+	data.GET("/grafik", userDataController.GrafikKategoriBySektorHandler)
 }
 
 	func JWTProtection() echo.MiddlewareFunc {

@@ -2,6 +2,7 @@ package userrepo
 
 import (
 	"errors"
+	"math"
 
 	"umkm/model/domain"
 
@@ -153,4 +154,238 @@ func(repo *AuthrepositoryImpl) ListUser()([]domain.Users, error){
 		return nil, err
 	}
 	return user, nil
+}
+
+func (repo *AuthrepositoryImpl) CountUserByGenderWithPercentage() (map[string]float64, error) {
+    var countLakiLaki, countPerempuan, totalUsers int64
+
+    // Menghitung total pengguna unik dengan role 'umkm' yang memiliki UMKM dengan status 1
+    err := repo.db.Table("users").
+        Joins("JOIN hak_akses ON users.id = hak_akses.user_id").
+        Where("users.role = ? AND hak_akses.status = ?", "umkm", 1).
+        Group("users.id").
+        Count(&totalUsers).Error
+    if err != nil {
+        return nil, err
+    }
+
+    // Menghitung jumlah laki-laki unik dengan role 'umkm' yang memiliki UMKM dengan status 1
+    err = repo.db.Table("users").
+        Joins("JOIN hak_akses ON users.id = hak_akses.user_id").
+        Where("users.role = ? AND users.jenis_kelamin = ? AND hak_akses.status = ?", "umkm", "Laki-Laki", 1).
+        Group("users.id").
+        Count(&countLakiLaki).Error
+    if err != nil {
+        return nil, err
+    }
+
+    // Menghitung jumlah perempuan unik dengan role 'umkm' yang memiliki UMKM dengan status 1
+    err = repo.db.Table("users").
+        Joins("JOIN hak_akses ON users.id = hak_akses.user_id").
+        Where("users.role = ? AND users.jenis_kelamin = ? AND hak_akses.status = ?", "umkm", "Perempuan", 1).
+        Group("users.id").
+        Count(&countPerempuan).Error
+    if err != nil {
+        return nil, err
+    }
+
+    // Menghitung persentase laki-laki dan perempuan dengan pembulatan 1 desimal
+    percentageLakiLaki := math.Round((float64(countLakiLaki) / float64(totalUsers)) * 100 * 10) / 10
+    percentagePerempuan := math.Round((float64(countPerempuan) / float64(totalUsers)) * 100 * 10) / 10
+
+    // Mengembalikan hasil dalam bentuk map dengan persentase
+    result := map[string]float64{
+        "persentase_laki-laki": percentageLakiLaki,
+        "persentase_perempuan": percentagePerempuan,
+    }
+
+    return result, nil
+}
+
+func (repo *AuthrepositoryImpl) CountUserByStudy() (map[string]int64, error) {
+    var SD, SMP, SMA, SLTA, D3, D4, S2, S3 int64
+
+    // Menghitung jumlah pengguna dengan pendidikan terakhir SD
+    err := repo.db.Table("users").
+        Joins("JOIN hak_akses ON users.id = hak_akses.user_id").
+        Where("users.role = ? AND users.pendidikan_terakhir = ? AND hak_akses.status = ?", "umkm", "SD", 1).
+        Group("users.id"). // Mengelompokkan berdasarkan user.id
+        Count(&SD).Error
+    if err != nil {
+        return nil, err
+    }
+
+    // Menghitung jumlah pengguna dengan pendidikan terakhir SMP
+    err = repo.db.Table("users").
+        Joins("JOIN hak_akses ON users.id = hak_akses.user_id").
+        Where("users.role = ? AND users.pendidikan_terakhir = ? AND hak_akses.status = ?", "umkm", "SMP", 1).
+        Group("users.id"). // Mengelompokkan berdasarkan user.id
+        Count(&SMP).Error
+    if err != nil {
+        return nil, err
+    }
+
+    // Menghitung jumlah pengguna dengan pendidikan terakhir SMA
+    err = repo.db.Table("users").
+        Joins("JOIN hak_akses ON users.id = hak_akses.user_id").
+        Where("users.role = ? AND users.pendidikan_terakhir = ? AND hak_akses.status = ?", "umkm", "SMA/K", 1).
+        Group("users.id"). // Mengelompokkan berdasarkan user.id
+        Count(&SMA).Error
+    if err != nil {
+        return nil, err
+    }
+
+    // Menghitung jumlah pengguna dengan pendidikan terakhir SLTA
+    err = repo.db.Table("users").
+        Joins("JOIN hak_akses ON users.id = hak_akses.user_id").
+        Where("users.role = ? AND users.pendidikan_terakhir = ? AND hak_akses.status = ?", "umkm", "SLTA", 1).
+        Group("users.id"). // Mengelompokkan berdasarkan user.id
+        Count(&SLTA).Error
+    if err != nil {
+        return nil, err
+    }
+
+    // Menghitung jumlah pengguna dengan pendidikan terakhir D3
+    err = repo.db.Table("users").
+        Joins("JOIN hak_akses ON users.id = hak_akses.user_id").
+        Where("users.role = ? AND users.pendidikan_terakhir = ? AND hak_akses.status = ?", "umkm", "D3", 1).
+        Group("users.id"). // Mengelompokkan berdasarkan user.id
+        Count(&D3).Error
+    if err != nil {
+        return nil, err
+    }
+
+    // Menghitung jumlah pengguna dengan pendidikan terakhir D4/S1
+    err = repo.db.Table("users").
+        Joins("JOIN hak_akses ON users.id = hak_akses.user_id").
+        Where("users.role = ? AND (users.pendidikan_terakhir = ? OR users.pendidikan_terakhir = ?) AND hak_akses.status = ?", "umkm", "D4", "S-I", 1).
+        Group("users.id"). // Mengelompokkan berdasarkan user.id
+        Count(&D4).Error
+    if err != nil {
+        return nil, err
+    }
+
+    // Menghitung jumlah pengguna dengan pendidikan terakhir S2
+    err = repo.db.Table("users").
+        Joins("JOIN hak_akses ON users.id = hak_akses.user_id").
+        Where("users.role = ? AND users.pendidikan_terakhir = ? AND hak_akses.status = ?", "umkm", "S-II", 1).
+        Group("users.id"). // Mengelompokkan berdasarkan user.id
+        Count(&S2).Error
+    if err != nil {
+        return nil, err
+    }
+
+    // Menghitung jumlah pengguna dengan pendidikan terakhir S3
+    err = repo.db.Table("users").
+        Joins("JOIN hak_akses ON users.id = hak_akses.user_id").
+        Where("users.role = ? AND users.pendidikan_terakhir = ? AND hak_akses.status = ?", "umkm", "S-III", 1).
+        Group("users.id"). // Mengelompokkan berdasarkan user.id
+        Count(&S3).Error
+    if err != nil {
+        return nil, err
+    }
+
+    // Mengembalikan hasil dalam bentuk map
+    result := map[string]int64{
+        "sd":   SD,
+        "smp":  SMP,
+        "sma":  SMA,
+        "slta": SLTA,
+        "d3":   D3,
+        "d4":   D4,
+        "s2":   S2,
+        "s3":   S3,
+    }
+
+    return result, nil
+}
+
+func (repo *AuthrepositoryImpl) CountUserByAge() (map[string]int64, error) {
+    var age11_20, age21_30, age31_40, age41_50, age51_60, age61_70, age71_80, age81_90 int64
+
+    // Menghitung jumlah pengguna dengan role 'umkm' dan rentang umur 11-20
+    err := repo.db.Table("users").
+        Joins("JOIN hak_akses ON users.id = hak_akses.user_id").
+        Where("role = ? AND date_part('year', age(tanggal_lahir)) BETWEEN ? AND ? AND hak_akses.status = ?", "umkm", 11, 20, 1).
+        Distinct("users.id").Count(&age11_20).Error
+    if err != nil {
+        return nil, err
+    }
+
+    // Menghitung jumlah pengguna dengan rentang umur 21-30
+    err = repo.db.Table("users").
+        Joins("JOIN hak_akses ON users.id = hak_akses.user_id").
+        Where("role = ? AND date_part('year', age(tanggal_lahir)) BETWEEN ? AND ? AND hak_akses.status = ?", "umkm", 21, 30, 1).
+        Distinct("users.id").Count(&age21_30).Error
+    if err != nil {
+        return nil, err
+    }
+
+    // Menghitung jumlah pengguna dengan rentang umur 31-40
+    err = repo.db.Table("users").
+        Joins("JOIN hak_akses ON users.id = hak_akses.user_id").
+        Where("role = ? AND date_part('year', age(tanggal_lahir)) BETWEEN ? AND ? AND hak_akses.status = ?", "umkm", 31, 40, 1).
+        Distinct("users.id").Count(&age31_40).Error
+    if err != nil {
+        return nil, err
+    }
+
+    // Menghitung jumlah pengguna dengan rentang umur 41-50
+    err = repo.db.Table("users").
+        Joins("JOIN hak_akses ON users.id = hak_akses.user_id").
+        Where("role = ? AND date_part('year', age(tanggal_lahir)) BETWEEN ? AND ? AND hak_akses.status = ?", "umkm", 41, 50, 1).
+        Distinct("users.id").Count(&age41_50).Error
+    if err != nil {
+        return nil, err
+    }
+
+    // Menghitung jumlah pengguna dengan rentang umur 51-60
+    err = repo.db.Table("users").
+        Joins("JOIN hak_akses ON users.id = hak_akses.user_id").
+        Where("role = ? AND date_part('year', age(tanggal_lahir)) BETWEEN ? AND ? AND hak_akses.status = ?", "umkm", 51, 60, 1).
+        Distinct("users.id").Count(&age51_60).Error
+    if err != nil {
+        return nil, err
+    }
+
+    // Menghitung jumlah pengguna dengan rentang umur 61-70
+    err = repo.db.Table("users").
+        Joins("JOIN hak_akses ON users.id = hak_akses.user_id").
+        Where("role = ? AND date_part('year', age(tanggal_lahir)) BETWEEN ? AND ? AND hak_akses.status = ?", "umkm", 61, 70, 1).
+        Distinct("users.id").Count(&age61_70).Error
+    if err != nil {
+        return nil, err
+    }
+
+    // Menghitung jumlah pengguna dengan rentang umur 71-80
+    err = repo.db.Table("users").
+        Joins("JOIN hak_akses ON users.id = hak_akses.user_id").
+        Where("role = ? AND date_part('year', age(tanggal_lahir)) BETWEEN ? AND ? AND hak_akses.status = ?", "umkm", 71, 80, 1).
+        Distinct("users.id").Count(&age71_80).Error
+    if err != nil {
+        return nil, err
+    }
+
+    // Menghitung jumlah pengguna dengan rentang umur 81-90
+    err = repo.db.Table("users").
+        Joins("JOIN hak_akses ON users.id = hak_akses.user_id").
+        Where("role = ? AND date_part('year', age(tanggal_lahir)) BETWEEN ? AND ? AND hak_akses.status = ?", "umkm", 81, 90, 1).
+        Distinct("users.id").Count(&age81_90).Error
+    if err != nil {
+        return nil, err
+    }
+
+    // Mengembalikan hasil dalam bentuk map dengan jumlah pengguna berdasarkan rentang umur
+    result := map[string]int64{
+        "age11_20": age11_20,
+        "age21_30": age21_30,
+        "age31_40": age31_40,
+        "age41_50": age41_50,
+        "age51_60": age51_60,
+        "age61_70": age61_70,
+        "age71_80": age71_80,
+        "age81_90": age81_90,
+    }
+
+    return result, nil
 }

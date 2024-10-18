@@ -78,6 +78,16 @@ func (controller *UmkmControllerImpl) Create(c echo.Context) error {
         }
     }
 
+     // Ambil dokumen yang diunggah
+     dokumenFiles := c.Request().MultipartForm.File["dokumen"] // Misalkan Anda juga mengunggah dokumen
+     if dokumenFiles == nil {
+         return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "No document files uploaded", nil))
+     }
+ 
+     umkm.Gambar = json.RawMessage([]byte("[]")) 
+ 
+     fmt.Printf("Form Data: %+v\n", umkm)
+
     // Get authenticated user ID
     userID, err := helper.GetAuthId(c)
     if err != nil {
@@ -85,7 +95,7 @@ func (controller *UmkmControllerImpl) Create(c echo.Context) error {
     }
 
     // Call service to create UMKM
-    result, errSaveKategori := controller.umkmservice.CreateUmkm(*umkm, userID, fileHeaders)
+    result, errSaveKategori := controller.umkmservice.CreateUmkm(*umkm, userID, fileHeaders ,dokumenFiles)
     if errSaveKategori != nil {
         return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, errSaveKategori.Error(), nil))
     }

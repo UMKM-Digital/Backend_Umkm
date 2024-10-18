@@ -66,7 +66,7 @@ func generateRandomFileName(ext string) string {
 	return randomString + ext
 }
 
-func (service *UmkmServiceImpl) CreateUmkm(umkm web.UmkmRequest, userID int, files map[string]*multipart.FileHeader) (map[string]interface{}, error) {
+func (service *UmkmServiceImpl) CreateUmkm(umkm web.UmkmRequest, userID int, files map[string]*multipart.FileHeader, dokumenFiles []*multipart.FileHeader) (map[string]interface{}, error) {
 	kategoriUmkmId, err := helper.RawMessageToJSONB(umkm.Kategori_Umkm_Id)
 	if err != nil {
 		return nil, errors.New("invalid type for Kategori_Umkm_Id")
@@ -148,7 +148,50 @@ func (service *UmkmServiceImpl) CreateUmkm(umkm web.UmkmRequest, userID int, fil
 	
 		// Optional: kamu bisa menggunakan `savedOmset` untuk kebutuhan lain
 	}
-	
+
+	//dokumen
+	  // Mengelola dokumen UMKM
+	// **Simpan Omset**
+	// Kode simpan omset sesuai dengan yang ada di kode kamu
+
+// **Mengelola dan Simpan Dokumen**
+var dokumenList []domain.UmkmDokumen
+uploadDir := "uploads/dokumen"
+if _, err := os.Stat(uploadDir); os.IsNotExist(err) {
+    if err := os.Mkdir(uploadDir, os.ModePerm); err != nil {
+        return nil, errors.New("failed to create directory for documents")
+    }
+}
+
+for _, file := range dokumenFiles {
+    // Buat UUID baru untuk setiap dokumen
+    fileID := uuid.New().String()
+    fileExt := filepath.Ext(file.Filename)
+    savePath := fmt.Sprintf("%s/%s%s", uploadDir, fileID, fileExt)
+
+    // Simpan file dokumen ke direktori
+    if err := helper.SaveFile(file, savePath); err != nil {
+        return nil, errors.New("failed to save document file")
+    }
+
+    // Simpan setiap dokumen sebagai entri baru di database
+    dokumen := domain.UmkmDokumen{
+        DokumenId:    0, // Menggunakan auto-increment, bisa disesuaikan
+        UmkmId:       saveUmkm.IdUmkm, // Gunakan ID UMKM yang baru dibuat
+        DokumenUpload: domain.JSONB{"path": filepath.ToSlash(savePath)},
+    }
+
+    dokumenList = append(dokumenList, dokumen)
+}
+
+// Simpan dokumen ke dalam database secara batch
+for _, dok := range dokumenList {
+    if _, err := service.dokumenrepository.CreateRequest(dok); err != nil { // Mengirimkan dokumen sebagai nilai
+        return nil, err
+    }
+}
+
+
 
 	return map[string]interface{}{
 		"name":                  saveUmkm.Name,
