@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 	"umkm/helper"
 	"umkm/model/domain"
@@ -243,35 +244,79 @@ func (service *AuthServiceImpl) Update(Id int, req web.UpdateUserRequest, file *
         user.No_Phone = req.No_Phone
     }
 
-    // Process new profile picture
     var Logo string
+
     if file != nil {
-        if user.Picture != "" {
+        // Check if the current picture is from Google (URL starting with https://lh3.googleusercontent.com/)
+        if strings.HasPrefix(user.Picture, "https://lh3.googleusercontent.com/") {
+            // Don't remove, just upload the new image
+            src, err := file.Open()
+            if err != nil {
+                return nil, errors.New("failed to open the uploaded file")
+            }
+            defer src.Close()
+    
+            ext := filepath.Ext(file.Filename)
+            randomFileName := generateRandomFileName(ext)
+            Logo = filepath.Join("uploads/potoprofile", randomFileName)
+    
+            if err := helper.SaveFile(file, Logo); err != nil {
+                return nil, errors.New("failed to save image")
+            }
+    
+            // Normalize the file path
+            Logo = filepath.ToSlash(Logo)
+    
+        } else if user.Picture == "" {
+            // If no previous picture exists (user.Picture is empty), upload the new one
+            src, err := file.Open()
+            if err != nil {
+                return nil, errors.New("failed to open the uploaded file")
+            }
+            defer src.Close()
+    
+            ext := filepath.Ext(file.Filename)
+            randomFileName := generateRandomFileName(ext)
+            Logo = filepath.Join("uploads/potoprofile", randomFileName)
+    
+            if err := helper.SaveFile(file, Logo); err != nil {
+                return nil, errors.New("failed to save image")
+            }
+    
+            // Normalize the file path
+            Logo = filepath.ToSlash(Logo)
+    
+        } else if strings.HasPrefix(user.Picture, "uploads/potoprofile") {
+            // If the current picture is in the local folder, remove the old image first
             err := os.Remove(user.Picture)
             if err != nil {
                 return nil, errors.New("failed to remove old image")
             }
+    
+            // Then upload the new image
+            src, err := file.Open()
+            if err != nil {
+                return nil, errors.New("failed to open the uploaded file")
+            }
+            defer src.Close()
+    
+            ext := filepath.Ext(file.Filename)
+            randomFileName := generateRandomFileName(ext)
+            Logo = filepath.Join("uploads/potoprofile", randomFileName)
+    
+            if err := helper.SaveFile(file, Logo); err != nil {
+                return nil, errors.New("failed to save image")
+            }
+    
+            // Normalize the file path
+            Logo = filepath.ToSlash(Logo)
         }
-
-        src, err := file.Open()
-        if err != nil {
-            return nil, errors.New("failed to open the uploaded file")
-        }
-        defer src.Close()
-
-        ext := filepath.Ext(file.Filename)
-        randomFileName := generateRandomFileName(ext)
-        Logo = filepath.Join("uploads/potoprofile", randomFileName)
-
-        if err := helper.SaveFile(file, Logo); err != nil {
-            return nil, errors.New("failed to save image")
-        }
-        Logo = filepath.ToSlash(Logo)
+    
     } else {
+        // If no new file is uploaded, retain the existing picture (either URL or local file)
         Logo = user.Picture
     }
-
-    //
+    
    // KTP
 var oldKTPDocs KTPData
 if user.Ktp != nil { // Pastikan user.Ktp tidak kosong
