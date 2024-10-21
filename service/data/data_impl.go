@@ -116,3 +116,45 @@ func (service *DataServiceImpl) GrafikKategoriBySektor(ctx context.Context, sekt
     return result, nil
 }
 
+
+func (service *DataServiceImpl) TotalUmkmKriteriaUsahaPerBulan(tahun int) (map[string]map[string]int64, error) {
+    return service.datarepository.TotalUmkmKriteriaUsahaPerBulan(tahun)
+}
+
+func(service *DataServiceImpl) TotalUmkmBinaan()(map[string]interface{}, error){
+    dataUmkmBulan, err := service.datarepository.TotalUmkmBulan()
+    if err != nil {
+        return nil, err
+    }
+
+	dataUmkmBulalnLalu, err := service.datarepository.TotalUmkmBulanLalu()
+	if err != nil {
+        return nil, err
+    }
+
+	dataUmkmTahun, err := service.datarepository.TotalUmkmTahun()
+	if err != nil {
+        return nil, err
+    }
+
+	dataUmkmTahunLalu, err := service.datarepository.TotalUmkmTahunLalu()
+	if err != nil {
+        return nil, err
+    }
+
+    dataPersentasuBulan, _ := service.datarepository.PersentasiKenaikanUmkm()
+    dataPersentasuTahun, _ := service.datarepository.PersentasiKenaikanUmkmTahun()
+
+    result := map[string]interface{}{
+        "total_umkm_bulan_ini": dataUmkmBulan,
+		"total_umkm_bulan_lalu": dataUmkmBulalnLalu,
+        "total_umkm_tahun_ini": dataUmkmTahun,
+        "total_umkm_tahun_lalu": dataUmkmTahunLalu,
+        "total_umkm_persentasi_bulan": dataPersentasuBulan,
+        "total_umkm_persentasi_tahun": dataPersentasuTahun,
+    }
+
+    // Menambahkan struktur respons sesuai dengan yang Anda inginkan
+
+    return result, nil
+}

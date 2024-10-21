@@ -318,7 +318,10 @@ func (service *AuthServiceImpl) Update(Id int, req web.UpdateUserRequest, file *
     }
     
    // KTP
+// KTP
 var oldKTPDocs KTPData
+var newKTPDocs []map[string]interface{} // Pastikan ini dideklarasikan di sini
+
 if user.Ktp != nil { // Pastikan user.Ktp tidak kosong
     ktpValue, err := user.Ktp.Value()
     if err != nil {
@@ -327,8 +330,8 @@ if user.Ktp != nil { // Pastikan user.Ktp tidak kosong
 
     // Unmarshal ke dalam oldKTPDocs
     if err := json.Unmarshal(ktpValue.([]byte), &oldKTPDocs); err == nil {
-        if len(Ktp) > 0 { // Jika ada file KTP baru yang diunggah
-            // Hapus dokumen KTP lama
+        // Hapus dokumen KTP lama jika ada file baru yang diunggah
+        if len(Ktp) > 0 {
             for _, doc := range oldKTPDocs.URLs {
                 documentPath := doc.Document
                 fmt.Println("Menghapus dokumen KTP:", documentPath)
@@ -347,58 +350,24 @@ if user.Ktp != nil { // Pastikan user.Ktp tidak kosong
                     fmt.Printf("Error saat memeriksa file: %s, error: %v\n", documentPath, err)
                 }
             }
-        } else {
-            fmt.Println("Tidak ada dokumen KTP baru yang diunggah")
+        } else{
+            for _, doc := range oldKTPDocs.URLs {
+            newDoc := map[string]interface{}{
+                "id":       doc.ID,       // Pastikan ada ID di KTPDocument
+                "document": doc.Document,  // Pastikan ada Document di KTPDocument
+            }
+            newKTPDocs = append(newKTPDocs, newDoc)
         }
+    }
     } else {
         fmt.Println("Gagal melakukan unmarshal KTP:", err)
+        return nil, errors.New("Gagal melakukan unmarshal KTP")
     }
 } else {
     fmt.Println("user.Ktp adalah nil atau kosong")
 }
 
-// KK
-var oldKKDocs KTPData
-if user.KartuKeluarga != nil { // Pastikan user.KartuKeluarga tidak kosong
-    kkValue, err := user.KartuKeluarga.Value()
-    if err != nil {
-        return nil, errors.New("gagal mendapatkan nilai Kartu Keluarga")
-    }
-
-    // Unmarshal ke dalam oldKKDocs
-    if err := json.Unmarshal(kkValue.([]byte), &oldKKDocs); err == nil {
-        if len(kkFiles) > 0 { // Jika ada file KK baru yang diunggah
-            // Hapus dokumen KK lama
-            for _, doc := range oldKKDocs.URLs {
-                documentPath := doc.Document
-                fmt.Println("Menghapus dokumen KK:", documentPath)
-
-                if _, err := os.Stat(documentPath); err == nil {
-                    err := os.Remove(documentPath)
-                    if err != nil {
-                        fmt.Printf("Gagal menghapus dokumen KK yang lama: %s, error: %v\n", documentPath, err)
-                        return nil, errors.New("gagal menghapus dokumen KK yang lama")
-                    } else {
-                        fmt.Println("Dokumen KK berhasil dihapus:", documentPath)
-                    }
-                } else if os.IsNotExist(err) {
-                    fmt.Printf("File tidak ada, tidak dapat dihapus: %s\n", documentPath)
-                } else {
-                    fmt.Printf("Error saat memeriksa file: %s, error: %v\n", documentPath, err)
-                }
-            }
-        } else {
-            fmt.Println("Tidak ada dokumen KK baru yang diunggah")
-        }
-    } else {
-        fmt.Println("Gagal melakukan unmarshal KK:", err)
-    }
-} else {
-    fmt.Println("user.KartuKeluarga adalah nil atau kosong")
-}
-
-// Process KTP files
-var newKTPDocs []map[string]interface{}
+// Proses file KTP baru
 if len(Ktp) > 0 {
     for _, file := range Ktp {
         if file != nil {
@@ -427,8 +396,56 @@ if len(Ktp) > 0 {
     fmt.Println("Tidak ada file KTP yang diunggah")
 }
 
-// Process KK files
-var newKKDocs []map[string]interface{}
+// KK
+var oldKKDocs KTPData
+var newKKDocs []map[string]interface{} // Pastikan ini dideklarasikan di sini
+
+if user.KartuKeluarga != nil { // Pastikan user.KartuKeluarga tidak kosong
+    kkValue, err := user.KartuKeluarga.Value()
+    if err != nil {
+        return nil, errors.New("gagal mendapatkan nilai Kartu Keluarga")
+    }
+
+    // Unmarshal ke dalam oldKKDocs
+    if err := json.Unmarshal(kkValue.([]byte), &oldKKDocs); err == nil {
+        // Hapus dokumen KK lama jika ada file baru yang diunggah
+        if len(kkFiles) > 0 {
+            for _, doc := range oldKKDocs.URLs {
+                documentPath := doc.Document
+                fmt.Println("Menghapus dokumen KK:", documentPath)
+
+                if _, err := os.Stat(documentPath); err == nil {
+                    err := os.Remove(documentPath)
+                    if err != nil {
+                        fmt.Printf("Gagal menghapus dokumen KK yang lama: %s, error: %v\n", documentPath, err)
+                        return nil, errors.New("gagal menghapus dokumen KK yang lama")
+                    } else {
+                        fmt.Println("Dokumen KK berhasil dihapus:", documentPath)
+                    }
+                } else if os.IsNotExist(err) {
+                    fmt.Printf("File tidak ada, tidak dapat dihapus: %s\n", documentPath)
+                } else {
+                    fmt.Printf("Error saat memeriksa file: %s, error: %v\n", documentPath, err)
+                }
+            }
+        } else{
+            for _, doc := range oldKTPDocs.URLs {
+            newDoc := map[string]interface{}{
+                "id":       doc.ID,       // Pastikan ada ID di KTPDocument
+                "document": doc.Document,  // Pastikan ada Document di KTPDocument
+            }
+            newKKDocs = append(newKKDocs, newDoc)
+        }
+        }
+    } else {
+        fmt.Println("Gagal melakukan unmarshal KK:", err)
+        return nil, errors.New("Gagal melakukan unmarshal KK")
+    }
+} else {
+    fmt.Println("user.KartuKeluarga adalah nil atau kosong")
+}
+
+// Proses file KK baru
 if len(kkFiles) > 0 {
     for _, file := range kkFiles {
         if file != nil {
@@ -457,7 +474,7 @@ if len(kkFiles) > 0 {
     fmt.Println("Tidak ada file KK yang diunggah")
 }
 
-// Prepare updated KTP and KK data
+// Siapkan data KTP dan KK yang diperbarui
 updatedKTPJSONB := domain.JSONB{"urls": newKTPDocs}
 updatedKKJSONB := domain.JSONB{"urls": newKKDocs}
 

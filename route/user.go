@@ -333,6 +333,8 @@ userDataController := datacontroller.NewUmkmController(userDataService)
 	data := g.Group("/data")
 	data.GET("/list", userDataController.CountData)
 	data.GET("/grafik", userDataController.GrafikKategoriBySektorHandler)
+	data.GET("/grafikbinaan", userDataController.TotalUmkmKriteriaUsahaPerBulanHandler)
+	data.GET("/umkmlist", userDataController.CountUmkmBulan)
 }
 
 	func JWTProtection() echo.MiddlewareFunc {

@@ -135,28 +135,32 @@ func (controller *UserControllerImpl) Update(c echo.Context) error {
 	kodepos    := c.FormValue("kode_pos")
 	kecamatan    := c.FormValue("kecamatan")
     address := c.FormValue("alamat")
-	potoprofile, err := c.FormFile("potoprofile")
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Failed to get the uploaded file", nil))
-	}
+	var potoprofile *multipart.FileHeader
+    var err error
+
+    // Check for potoprofile file
+    if file, err := c.FormFile("potoprofile"); err == nil {
+        potoprofile = file
+    } else if err != http.ErrMissingFile {
+        return c.JSON(http.StatusBadRequest, helper.ResponseToJsonOtp(http.StatusBadRequest, "Failed to get the uploaded file poto", nil))
+    }
+
 
     
     log.Printf("Form values - Name: %s, Email: %s, PhoneNumber: %s, Address: %s", name, email, phoneNumber, address)
 
     // Handle file upload for profile picture if present
-    files := []*multipart.FileHeader{}
-    if file, err := c.FormFile("ktp"); err == nil {
-        files = append(files, file)
-    } else if err != http.ErrMissingFile {
-        return c.JSON(http.StatusBadRequest, helper.ResponseToJsonOtp(http.StatusBadRequest, "Failed to get uploaded file", nil))
-    }
-
-    fileskk := []*multipart.FileHeader{}
-    if file, err := c.FormFile("kk"); err == nil {
-        fileskk = append(fileskk, file)
-    } else if err != http.ErrMissingFile {
-        return c.JSON(http.StatusBadRequest, helper.ResponseToJsonOtp(http.StatusBadRequest, "Failed to get uploaded file", nil))
-    }
+	var files []*multipart.FileHeader
+	if file, err := c.FormFile("ktp"); err == nil {
+		files = append(files, file)
+	}
+	
+	// Handle file upload for KK
+	var fileskk []*multipart.FileHeader
+	if file, err := c.FormFile("kk"); err == nil {
+		fileskk = append(fileskk, file)
+	}
+	
 
     // Create the request object manually
     request := web.UpdateUserRequest{

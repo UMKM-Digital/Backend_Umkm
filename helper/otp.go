@@ -78,10 +78,13 @@ func SendWhatsAppOTP(db *gorm.DB, phone string, expiresAt time.Time) error {
 		return err
 	}
 
-	_, err = http.Post(url, "application/json", bytes.NewBuffer(jsonData))
+	// Mengirim request ke API
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
-		return err
+		// Mengubah pesan error sesuai permintaan
+		return fmt.Errorf("Metode login WA sedang mengalami gangguan.")
 	}
+	defer resp.Body.Close()
 
 	return nil
 }

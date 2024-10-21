@@ -18,4 +18,11 @@ type DataUserRepo interface {
 	TotalSektorPerdagangan() (int64, error)
 	TotalEkonomiKreatif() (int64, error)
 	GrafikKategoriBySektorUsaha(ctx context.Context, sektorUsahaID int, kecamatan, kelurahan string, tahun int) ([]KategoriCount, error)
+	TotalUmkmKriteriaUsahaPerBulan(tahun int) (map[string]map[string]int64, error) 
+	TotalUmkmBulan()(int64, error)
+	TotalUmkmBulanLalu()(int64, error)
+	TotalUmkmTahun() (int64, error)
+	TotalUmkmTahunLalu() (int64, error) 
+	PersentasiKenaikanUmkm() (float64, error)
+	PersentasiKenaikanUmkmTahun() (float64, error)
 }
