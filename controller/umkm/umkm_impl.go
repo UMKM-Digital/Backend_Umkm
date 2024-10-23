@@ -7,6 +7,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"strconv"
+	"time"
 
 	// "umkm/helper"
 	"umkm/helper"
@@ -17,44 +18,128 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/shopspring/decimal"
 )
 
 type UmkmControllerImpl struct {
-    umkmservice umkmservice.Umkm
+	umkmservice umkmservice.Umkm
 }
 
 func NewUmkmController(umkm umkmservice.Umkm) *UmkmControllerImpl {
-    return &UmkmControllerImpl{
-        umkmservice: umkm,
-       
-    }
+	return &UmkmControllerImpl{
+		umkmservice: umkm,
+	}
 }
 
 func (controller *UmkmControllerImpl) Create(c echo.Context) error {
-    // Bind form data
-    umkm := new(web.UmkmRequest)
-    umkm.Name = c.FormValue("name")
-    umkm.NoNpwp = c.FormValue("no_npwp")
-    umkm.Nama_Penanggung_Jawab = c.FormValue("nama_penanggung_jawab")
-    umkm.No_Kontak = c.FormValue("no_kontak")
-    umkm.Deskripsi = c.FormValue("deskripsi")
-    umkm.Lokasi = c.FormValue("lokasi")
+	// Bind form data
+	umkm := new(web.UmkmRequest)
+	umkm.Name = c.FormValue("name")
+	umkm.NoNpwp = c.FormValue("no_npwp")
+	umkm.Nama_Penanggung_Jawab = c.FormValue("nama_penanggung_jawab")
+	umkm.No_Kontak = c.FormValue("no_kontak")
+	umkm.Deskripsi = c.FormValue("deskripsi")
+	umkm.Lokasi = c.FormValue("lokasi")
+	umkm.KodeProv = c.FormValue("kode_prov")
+	umkm.KodeKabupaten = c.FormValue("kode_kab")
+	umkm.KodeKec = c.FormValue("kode_kec")
+	umkm.KodeKel = c.FormValue("kode_kelurahan")
+	umkm.Rt = c.FormValue("rt")
+	umkm.Rw = c.FormValue("rw")
+	umkm.KodePos = c.FormValue("kode_pos")
+	umkm.NoNpwd = c.FormValue("no_npwd")
+	umkm.BahanBakar = c.FormValue("bahan_bakar")
+	umkm.Kapasitas = c.FormValue("bahan_bakar")
+	umkm.JenisUsaha = c.FormValue("jenis_usaha")
+	umkm.NoNib = c.FormValue("no_nib")
+	umkm.KriteriaUsaha = c.FormValue("kriteria_usaha")
+	umkm.SektorUsaha = c.FormValue("sektor_usaha")
+	umkm.StatusTempatUsaha = c.FormValue("status_tempat_usaha")
+	umkm.BentukUsaha = c.FormValue("bentuk_usaha")
+	ekonomiKreatifStr := c.FormValue("ekonomi_kreatif")
+	ekonomiKreatif, err := strconv.ParseBool(ekonomiKreatifStr)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"message": "Invalid value for ekonomi_kreatif. Must be true or false.",
+		})
+	}
 
-    // Handle JSON fields
-    kategoriUmkmId := c.FormValue("kategori_umkm_id")
-    if kategoriUmkmId != "" {
-        umkm.Kategori_Umkm_Id = json.RawMessage(kategoriUmkmId)
-    }
+	umkm.EkonomiKreatif = ekonomiKreatif
 
-    informasiJamBuka := c.FormValue("informasi_jambuka")
-    if informasiJamBuka != "" {
-        umkm.Informasi_JamBuka = json.RawMessage(informasiJamBuka)
-    }
+	nominalsendiristr := c.FormValue("nominal_sendiri")
+	nominalsendiri, err := strconv.ParseFloat(nominalsendiristr, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"message": "Invalid value for nominal_sendiri. Must be a decimal number.",
+		})
+	}
 
-    maps := c.FormValue("maps")
-    if maps != "" {
-        umkm.Maps = json.RawMessage(maps)
+	// Convert float64 to decimal.Decimal
+	nominalsendiriDecimal := decimal.NewFromFloat(nominalsendiri)
+
+	// Assign to umkm.NominalSendiri
+	umkm.NominalSendiri = nominalsendiriDecimal
+
+	nominalasetstr := c.FormValue("nominal_aset")
+	nominalaset, err := strconv.ParseFloat(nominalasetstr, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"message": "Invalid value for nominal_sendiri. Must be a decimal number.",
+		})
+	}
+
+	// Convert float64 to decimal.Decimal
+	nominalasetDecimal := decimal.NewFromFloat(nominalaset)
+
+	// Assign to umkm.NominalSendiri
+	umkm.NominalAset = nominalasetDecimal
+
+	TenagaKerjaPriastr := c.FormValue("tenaga_kerja_pria")
+	tenagaKerjaPria, err := strconv.Atoi(TenagaKerjaPriastr)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"message": "Invalid value for tenaga_kerja_pria. Must be an integer.",
+		})
+	}
+
+	umkm.TenagaKerjaPria = tenagaKerjaPria
+
+	TenagaKerjaWanitastr := c.FormValue("tenaga_kerja_wanita")
+	TenagaKerjaWanita, err := strconv.Atoi(TenagaKerjaWanitastr)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"message": "Invalid value for tenaga_kerja_pria. Must be an integer.",
+		})
+	}
+
+	umkm.TenagaKerjaWanita = TenagaKerjaWanita
+    tanggalMulaiUsahaStr := c.FormValue("tanggal_mulai_usaha")
+    layout := "2006-01-02" // Format tanggal yang diharapkan, misalnya YYYY-MM-DD
+    tanggalMulaiUsaha, err := time.Parse(layout, tanggalMulaiUsahaStr)
+    if err != nil {
+        return c.JSON(http.StatusBadRequest, map[string]string{
+            "message": "Invalid value for tanggal_mulai_usaha. Must be in the format YYYY-MM-DD.",
+        })
     }
+    
+    umkm.TanggalMulaiUsaha = tanggalMulaiUsaha
+    
+
+	// Handle JSON fields
+	kategoriUmkmId := c.FormValue("kategori_umkm_id")
+	if kategoriUmkmId != "" {
+		umkm.Kategori_Umkm_Id = json.RawMessage(kategoriUmkmId)
+	}
+
+	informasiJamBuka := c.FormValue("informasi_jambuka")
+	if informasiJamBuka != "" {
+		umkm.Informasi_JamBuka = json.RawMessage(informasiJamBuka)
+	}
+
+	maps := c.FormValue("maps")
+	if maps != "" {
+		umkm.Maps = json.RawMessage(maps)
+	}
 
 	if err := c.Request().ParseMultipartForm(32 << 20); err != nil {
 		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, "Failed to parse form", nil))
@@ -66,41 +151,69 @@ func (controller *UmkmControllerImpl) Create(c echo.Context) error {
 		fileHeaders[file.Filename] = file
 	}
 
-	umkm.Gambar = json.RawMessage([]byte("[]")) 
+	umkm.Gambar = json.RawMessage([]byte("[]"))
 
-    
-    fmt.Printf("Form Data: %+v\n", umkm)
-    
-    omsetData := c.FormValue("omset")
-    if omsetData != "" {
-        if err := json.Unmarshal([]byte(omsetData), &umkm.Omset); err != nil {
-            return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid omset data", nil))
-        }
-    }
+	fmt.Printf("Form Data: %+v\n", umkm)
 
-     // Ambil dokumen yang diunggah
-     dokumenFiles := c.Request().MultipartForm.File["dokumen"] // Misalkan Anda juga mengunggah dokumen
-     if dokumenFiles == nil {
-         return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "No document files uploaded", nil))
-     }
- 
-     umkm.Gambar = json.RawMessage([]byte("[]")) 
- 
-     fmt.Printf("Form Data: %+v\n", umkm)
+	omsetData := c.FormValue("omset")
+	if omsetData != "" {
+		if err := json.Unmarshal([]byte(omsetData), &umkm.Omset); err != nil {
+			return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid omset data", nil))
+		}
+	}
 
-    // Get authenticated user ID
-    userID, err := helper.GetAuthId(c)
-    if err != nil {
-        return c.JSON(http.StatusUnauthorized, model.ResponseToClient(http.StatusUnauthorized, false, "Failed to get user ID", nil))
-    }
+	// Ambil dokumen yang diunggah
 
-    // Call service to create UMKM
-    result, errSaveKategori := controller.umkmservice.CreateUmkm(*umkm, userID, fileHeaders ,dokumenFiles)
-    if errSaveKategori != nil {
-        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, errSaveKategori.Error(), nil))
-    }
+	// Ambil dokumen IDs dan dokumen uploads
+	// Mengambil dokumen ID dan dokumen file berdasarkan indeks
+	var dokumenIDs []string
+	var dokumenFiles []*multipart.FileHeader
 
-    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "Pembuatan Umkm Berhasil", result))
+	// Ambil dokumen IDs dan dokumen files dari request
+	for i := 0; ; i++ {
+		// Mengambil dokumen ID berdasarkan indeks
+		dokIdKey := fmt.Sprintf("dok_id[%d]", i)
+		if id := c.Request().FormValue(dokIdKey); id != "" {
+			dokumenIDs = append(dokumenIDs, id)
+		} else {
+			break // Berhenti jika tidak ada lagi dokumen ID
+		}
+
+		// Mengambil dokumen file berdasarkan indeks
+		dokUploadKey := fmt.Sprintf("dok_upload[%d]", i)
+		if files := c.Request().MultipartForm.File[dokUploadKey]; len(files) > 0 {
+			dokumenFiles = append(dokumenFiles, files...)
+		} else {
+			break // Berhenti jika tidak ada lagi dokumen file
+		}
+	}
+
+	// Debugging: Print received IDs and files
+	fmt.Println("Dokumen IDs:", dokumenIDs)
+	fmt.Println("Dokumen Files:", dokumenFiles)
+
+	// Validasi dokumenIDs dan dokumenFiles
+	if len(dokumenIDs) == 0 || len(dokumenFiles) == 0 {
+		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "No document files uploaded or IDs provided", nil))
+	}
+
+	umkm.Gambar = json.RawMessage([]byte("[]"))
+
+	fmt.Printf("Form Data: %+v\n", umkm)
+
+	// Get authenticated user ID
+	userID, err := helper.GetAuthId(c)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, model.ResponseToClient(http.StatusUnauthorized, false, "Failed to get user ID", nil))
+	}
+
+	// Call service to create UMKM
+	result, errSaveKategori := controller.umkmservice.CreateUmkm(*umkm, userID, fileHeaders, dokumenFiles, dokumenIDs)
+	if errSaveKategori != nil {
+		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, errSaveKategori.Error(), nil))
+	}
+
+	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "Pembuatan Umkm Berhasil", result))
 }
 
 // //umkm list
@@ -128,48 +241,44 @@ func (controller *UmkmControllerImpl) GetUmkmList(c echo.Context) error {
 		TotalPages:   totalPages,
 		TotalRecords: totalCount,
 	}
-	
+
 	return c.JSON(http.StatusOK, model.ResponseToClientpagi(http.StatusOK, "true", "berhasil", pagination, umkmList))
 }
 
-
-
-
-//filter umkm name
+// filter umkm name
 func (controller *UmkmControllerImpl) GetUmkmFilter(c echo.Context) error {
-        userId, err := helper.GetAuthId(c)
-        if err != nil {
-            return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
-        }
-    
-        filters := map[string]string{"name": c.QueryParam("name")}
-        allowedFilters := []string{"name"}
-    
-        umkmList, err := controller.umkmservice.GetUmkmFilter(c.Request().Context(), userId, filters, allowedFilters)
-        if err != nil {
-            return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
-        }
-    
-        return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success mendapatkan umkm", umkmList))
-    }
-    
-func (controller *UmkmControllerImpl) GetUmkmListWeb(c echo.Context) error{
-    userId, err := helper.GetAuthId(c)
+	userId, err := helper.GetAuthId(c)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
+	}
 
-    if err != nil {
-        return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
-    }
+	filters := map[string]string{"name": c.QueryParam("name")}
+	allowedFilters := []string{"name"}
 
-    umkmList, err := controller.umkmservice.GetUmkmListWeb(c.Request().Context(), userId)
-    if err != nil {
-        return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
-    }
+	umkmList, err := controller.umkmservice.GetUmkmFilter(c.Request().Context(), userId, filters, allowedFilters)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
+	}
 
-    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success melihat list Umkm", umkmList))
+	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success mendapatkan umkm", umkmList))
 }
 
+func (controller *UmkmControllerImpl) GetUmkmListWeb(c echo.Context) error {
+	userId, err := helper.GetAuthId(c)
 
-func (controller *UmkmControllerImpl) GetUmkmId(c echo.Context) error{
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
+	}
+
+	umkmList, err := controller.umkmservice.GetUmkmListWeb(c.Request().Context(), userId)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
+	}
+
+	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success melihat list Umkm", umkmList))
+}
+
+func (controller *UmkmControllerImpl) GetUmkmId(c echo.Context) error {
 	IdUmkm := c.Param("id")
 	id, _ := uuid.Parse(IdUmkm)
 
@@ -183,65 +292,65 @@ func (controller *UmkmControllerImpl) GetUmkmId(c echo.Context) error{
 }
 
 func (controller *UmkmControllerImpl) UpdateUmkm(c echo.Context) error {
-    // Parsing UMKM ID (UUID) dari URL parameter
-    umkmidStr := c.Param("umkm_id")
-    umkmid, err := uuid.Parse(umkmidStr)
-    if err != nil {
-        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid UUID format", nil))
-    }
+	// Parsing UMKM ID (UUID) dari URL parameter
+	umkmidStr := c.Param("umkm_id")
+	umkmid, err := uuid.Parse(umkmidStr)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid UUID format", nil))
+	}
 
-    log.Printf("Parsed UMKM ID: %s successfully", umkmid)
+	log.Printf("Parsed UMKM ID: %s successfully", umkmid)
 
-    // Ambil nilai dari form-data
-    name := c.FormValue("name")
-    noNpwp := c.FormValue("no_npwp")
-    namaPenanggungJawab := c.FormValue("nama_penanggung_jawab")
-    noKontak := c.FormValue("no_kontak")
-    lokasi := c.FormValue("lokasi")
-    kategoriUmkmID := c.FormValue("kategori_umkm_id")
-    informasiJamBuka := c.FormValue("informasi_jam_buka")
-    maps := c.FormValue("maps")
-    deskripsi := c.FormValue("deskripsi")
+	// Ambil nilai dari form-data
+	name := c.FormValue("name")
+	noNpwp := c.FormValue("no_npwp")
+	namaPenanggungJawab := c.FormValue("nama_penanggung_jawab")
+	noKontak := c.FormValue("no_kontak")
+	lokasi := c.FormValue("lokasi")
+	kategoriUmkmID := c.FormValue("kategori_umkm_id")
+	informasiJamBuka := c.FormValue("informasi_jam_buka")
+	maps := c.FormValue("maps")
+	deskripsi := c.FormValue("deskripsi")
 
-    log.Printf("Form values - Name: %s, NoNpwp: %s, KategoriUmkmId: %s, informasijambuka: %s, ", name, noNpwp, kategoriUmkmID, informasiJamBuka)
+	log.Printf("Form values - Name: %s, NoNpwp: %s, KategoriUmkmId: %s, informasijambuka: %s, ", name, noNpwp, kategoriUmkmID, informasiJamBuka)
 
-    // Ambil file dari form-data jika ada
-    files := []*multipart.FileHeader{}
-    if file, err := c.FormFile("gambar"); err == nil {
-        files = append(files, file)
-    } else if err != http.ErrMissingFile {
-        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "failed to get uploaded file", nil))
-    }
+	// Ambil file dari form-data jika ada
+	files := []*multipart.FileHeader{}
+	if file, err := c.FormFile("gambar"); err == nil {
+		files = append(files, file)
+	} else if err != http.ErrMissingFile {
+		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "failed to get uploaded file", nil))
+	}
 
-    // Buat objek request manual
-    request := web.Updateumkm{
-        Name:                name,
-        NoNpwp:              noNpwp,
-        Nama_Penanggung_Jawab: namaPenanggungJawab,
-        No_Kontak:          noKontak,
-        Lokasi:             lokasi,
-        Deskripsi: deskripsi,
-        Kategori_Umkm_Id:   json.RawMessage(kategoriUmkmID),
-        Informasi_JamBuka: json.RawMessage(informasiJamBuka),
-        Maps:               json.RawMessage(maps),
-    }
+	// Buat objek request manual
+	request := web.Updateumkm{
+		Name:                  name,
+		NoNpwp:                noNpwp,
+		Nama_Penanggung_Jawab: namaPenanggungJawab,
+		No_Kontak:             noKontak,
+		Lokasi:                lokasi,
+		Deskripsi:             deskripsi,
+		Kategori_Umkm_Id:      json.RawMessage(kategoriUmkmID),
+		Informasi_JamBuka:     json.RawMessage(informasiJamBuka),
+		Maps:                  json.RawMessage(maps),
+	}
 
-    // Memanggil service untuk update UMKM
-    result, err := controller.umkmservice.UpdateUmkmId(request, umkmid, files)
-    if err != nil {
-        return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
-    }
+	// Memanggil service untuk update UMKM
+	result, err := controller.umkmservice.UpdateUmkmId(request, umkmid, files)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
+	}
 
-    // Response sukses
-    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "berhasil di update", result))
+	// Response sukses
+	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "berhasil di update", result))
 }
 
 func (controller *UmkmControllerImpl) GetUmmkmList(c echo.Context) error {
-    filters, limit, page := helper.ExtractFilter(c.QueryParams())
-    kategoriumkm := c.QueryParam("kategori")
-    sortOrder := c.QueryParam("sort")
-    
-	getUmkm,totalCount, currentPage, totalPages, nextPage, prevPage, errGetUmkmDetail := controller.umkmservice.GetUmkmList(filters, limit, page, kategoriumkm, sortOrder)
+	filters, limit, page := helper.ExtractFilter(c.QueryParams())
+	kategoriumkm := c.QueryParam("kategori")
+	sortOrder := c.QueryParam("sort")
+
+	getUmkm, totalCount, currentPage, totalPages, nextPage, prevPage, errGetUmkmDetail := controller.umkmservice.GetUmkmList(filters, limit, page, kategoriumkm, sortOrder)
 
 	if errGetUmkmDetail != nil {
 		return c.JSON(http.StatusInternalServerError, model.ResponseToClientpagi(http.StatusInternalServerError, "false", errGetUmkmDetail.Error(), model.Pagination{}, nil))
@@ -254,19 +363,18 @@ func (controller *UmkmControllerImpl) GetUmmkmList(c echo.Context) error {
 		TotalPages:   totalPages,
 		TotalRecords: totalCount,
 	}
-	
+
 	return c.JSON(http.StatusOK, model.ResponseToClientpagi(http.StatusOK, "true", "berhasil", pagination, getUmkm))
 }
 
-
 // func (controller *UmkmControllerImpl)  GetUmkmListDetial(c echo.Context) error {
-   
+
 //     IdUmkm := c.Param("id")
 // 	id, _ := uuid.Parse(IdUmkm)
 //      // Ambil parameter limit dan page dari query string
 //      limitStr := c.QueryParam("limit")
 //      pageStr := c.QueryParam("page")
- 
+
 //      limit := 10
 //     page := 1
 
@@ -286,7 +394,6 @@ func (controller *UmkmControllerImpl) GetUmmkmList(c echo.Context) error {
 //     }
 // 	getUmkmDetailList, totalCount, currentPage, totalPages, nextPage, prevPage, errGetUmkmDetailList := controller.umkmservice.GetUmkmDetailList(id, limitStr, pageStr)
 
-    
 // 	pagination := model.Pagination{
 // 		CurrentPage:  currentPage,
 // 		NextPage:     nextPage,
@@ -302,53 +409,51 @@ func (controller *UmkmControllerImpl) GetUmmkmList(c echo.Context) error {
 // 	return c.JSON(http.StatusOK, model.ResponseToClientpagi(http.StatusOK, "true", "success",pagination, getUmkmDetailList))
 // }
 
-
 func (controller *UmkmControllerImpl) GetUmkmListDetial(c echo.Context) error {
-    IdUmkm := c.Param("id")
-    id, _ := uuid.Parse(IdUmkm)
+	IdUmkm := c.Param("id")
+	id, _ := uuid.Parse(IdUmkm)
 
-    // Ambil parameter limit dan page dari query string
-    limitStr := c.QueryParam("limit")
-    pageStr := c.QueryParam("page")
+	// Ambil parameter limit dan page dari query string
+	limitStr := c.QueryParam("limit")
+	pageStr := c.QueryParam("page")
 
-    // Default nilai untuk limit dan page jika tidak disediakan
-    limit := 10
-    page := 1
+	// Default nilai untuk limit dan page jika tidak disediakan
+	limit := 10
+	page := 1
 
-    // Parsing parameter limit jika tersedia
-    if limitStr != "" {
-        parsedLimit, err := strconv.Atoi(limitStr)
-        if err == nil && parsedLimit > 0 {
-            limit = parsedLimit
-        }
-    }
+	// Parsing parameter limit jika tersedia
+	if limitStr != "" {
+		parsedLimit, err := strconv.Atoi(limitStr)
+		if err == nil && parsedLimit > 0 {
+			limit = parsedLimit
+		}
+	}
 
-    // Parsing parameter page jika tersedia
-    if pageStr != "" {
-        parsedPage, err := strconv.Atoi(pageStr)
-        if err == nil && parsedPage > 0 {
-            page = parsedPage
-        }
-    }
+	// Parsing parameter page jika tersedia
+	if pageStr != "" {
+		parsedPage, err := strconv.Atoi(pageStr)
+		if err == nil && parsedPage > 0 {
+			page = parsedPage
+		}
+	}
 
-    // Panggil service untuk mendapatkan detail UMKM dengan pagination
-    getUmkmDetailList, totalCount, currentPage, totalPages, nextPage, prevPage, errGetUmkmDetailList := controller.umkmservice.GetUmkmDetailList(id, limit, page)
+	// Panggil service untuk mendapatkan detail UMKM dengan pagination
+	getUmkmDetailList, totalCount, currentPage, totalPages, nextPage, prevPage, errGetUmkmDetailList := controller.umkmservice.GetUmkmDetailList(id, limit, page)
 
-    pagination := model.Pagination{
-        		CurrentPage:  currentPage,
-        		NextPage:     nextPage,
-        		PrevPage:     prevPage,
-        		TotalPages:   totalPages,
-        		TotalRecords: totalCount,
-        	}
+	pagination := model.Pagination{
+		CurrentPage:  currentPage,
+		NextPage:     nextPage,
+		PrevPage:     prevPage,
+		TotalPages:   totalPages,
+		TotalRecords: totalCount,
+	}
 
-    if errGetUmkmDetailList != nil {
-        return c.JSON(http.StatusInternalServerError, model.ResponseToClientpagi(http.StatusInternalServerError, "false", errGetUmkmDetailList.Error(),model.Pagination{}, nil))
-    }
+	if errGetUmkmDetailList != nil {
+		return c.JSON(http.StatusInternalServerError, model.ResponseToClientpagi(http.StatusInternalServerError, "false", errGetUmkmDetailList.Error(), model.Pagination{}, nil))
+	}
 
-    return c.JSON(http.StatusOK, model.ResponseToClientpagi(http.StatusOK, "true", "success",pagination, getUmkmDetailList))
+	return c.JSON(http.StatusOK, model.ResponseToClientpagi(http.StatusOK, "true", "success", pagination, getUmkmDetailList))
 }
-
 
 func (controller *UmkmControllerImpl) DeleteUmkmId(c echo.Context) error {
 	// Ambil ID dari URL dan konversi ke UUID
@@ -365,8 +470,8 @@ func (controller *UmkmControllerImpl) DeleteUmkmId(c echo.Context) error {
 	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "Delete Produk Success", nil))
 }
 
-//list acative umkm BackEnd
-func (controller *UmkmControllerImpl) ListActveBack(c echo.Context) error{
+// list acative umkm BackEnd
+func (controller *UmkmControllerImpl) ListActveBack(c echo.Context) error {
 	getSlider, errGetSlider := controller.umkmservice.GetUmkmActive()
 
 	if errGetSlider != nil {
@@ -376,30 +481,29 @@ func (controller *UmkmControllerImpl) ListActveBack(c echo.Context) error{
 	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success", getSlider))
 }
 
-
 //updateactive
 
 func (conntroller *UmkmControllerImpl) UpdateSldierActive(c echo.Context) error {
-    slider := new(web.UpdateActiveUmkm)
-    id, _ := uuid.Parse(c.Param("id"))
+	slider := new(web.UpdateActiveUmkm)
+	id, _ := uuid.Parse(c.Param("id"))
 
-    if err := c.Bind(slider); err != nil {
-        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, err.Error(), nil))
-    }
+	if err := c.Bind(slider); err != nil {
+		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, err.Error(), nil))
+	}
 
-    sliderUpdate, errsliderUpdate := conntroller.umkmservice.UpdateUmkmActive(*slider, id)
+	sliderUpdate, errsliderUpdate := conntroller.umkmservice.UpdateUmkmActive(*slider, id)
 
-    if errsliderUpdate != nil {
-        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, errsliderUpdate.Error(), nil))
-    }
+	if errsliderUpdate != nil {
+		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, errsliderUpdate.Error(), nil))
+	}
 
-    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "data berhasil diupdate", sliderUpdate))
+	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "data berhasil diupdate", sliderUpdate))
 }
 
 func (controller *UmkmControllerImpl) GetUmkmActive(c echo.Context) error {
-    getUmkm, errGetUmkm := controller.umkmservice.GetTestimonialActive()
-    if errGetUmkm != nil {
-        return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, errGetUmkm.Error(), nil))
-    }
-    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success", getUmkm))
+	getUmkm, errGetUmkm := controller.umkmservice.GetTestimonialActive()
+	if errGetUmkm != nil {
+		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, errGetUmkm.Error(), nil))
+	}
+	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success", getUmkm))
 }

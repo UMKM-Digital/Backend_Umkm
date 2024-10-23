@@ -215,7 +215,8 @@ CREATE TABLE omset(
     id SERIAL PRIMARY KEY,
     umkm_id UUID NOT NULL,
     jumlah_omset  NUMERIC(15,2) NOT NULL,
-    bulan VARCHAR(255) NOT NULL,
+    bulan VARCHAR(20) NOT NULL,
+    tahun VARCHAR(20) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_hak_akses_umkm FOREIGN KEY (umkm_id) REFERENCES umkm(id)

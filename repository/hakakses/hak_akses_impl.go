@@ -2,6 +2,7 @@ package hakaksesrepo
 
 import (
 	"context"
+	"errors"
 	"umkm/model/domain"
 
 	"github.com/google/uuid"
@@ -44,3 +45,22 @@ func (repo *HakAksesRepoUmkmImpl) GetUmkmIdsByUserId(userId int) ([]uuid.UUID, e
     return umkmIds, nil
 }
 
+func (repo *HakAksesRepoUmkmImpl) GetUmkmId(umkmid uuid.UUID) (domain.HakAkses, error) {
+	var HakAkses domain.HakAkses
+
+	err := repo.db.Find(&HakAkses, "umkm_id = ?", umkmid).Error
+
+	if err != nil {
+		return domain.HakAkses{}, errors.New("umkm tidak ditemukan")
+	}
+
+	return HakAkses, nil
+}
+
+
+func (repo *HakAksesRepoUmkmImpl) AcceptBulkStatus(umkmids []uuid.UUID, hakakses domain.HakAkses) error {
+    if err := repo.db.Model(&domain.HakAkses{}).Where("umkm_id IN (?)", umkmids).Updates(hakakses).Error; err != nil {
+        return errors.New("gagal untuk menyetujui bulk umkm")
+    }
+    return nil
+}

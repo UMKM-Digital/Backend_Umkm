@@ -9,4 +9,6 @@ type Omset struct {
 	Bulan      string          `json:"bulan"`
 	JumlahOmset decimal.Decimal `json:"jumlah_omset"`
 	UmkmId     uuid.UUID       `json:"umkm_id"`
+	Tahun      string			`json:"tahun"`
 }
+

@@ -35,7 +35,7 @@ func (repo *DatarepositoryImpl) CountWaitingVerify() (int64, error) {
 	var totalVerify int64
 
 	// Menambahkan kondisi untuk menghitung hanya yang kolom hak akses bernilai 0
-	err := repo.db.Model(&domain.HakAkses{}).Where("status = ?", 0).Count(&totalVerify).Error
+	err := repo.db.Model(&domain.HakAkses{}).Where("status = ?", domain.Menunggu).Count(&totalVerify).Error
 	
 	if err != nil {
 		return 0, err
@@ -49,7 +49,7 @@ func (repo *DatarepositoryImpl) CountUmkmBina() (int64, error) {
 	var totalVerify int64
 
 	// Menambahkan kondisi untuk menghitung hanya yang kolom hak akses bernilai 0
-	err := repo.db.Model(&domain.HakAkses{}).Where("status = ?", 1).Count(&totalVerify).Error
+	err := repo.db.Model(&domain.HakAkses{}).Where("status = ?", "disetujui").Count(&totalVerify).Error
 	
 	if err != nil {
 		return 0, err
@@ -64,7 +64,7 @@ func (repo *DatarepositoryImpl) CountUmkmTertolak() (int64, error) {
 	var totalVerify int64
 
 	// Menambahkan kondisi untuk menghitung hanya yang kolom hak akses bernilai 0
-	err := repo.db.Model(&domain.HakAkses{}).Where("status = ?", 3).Count(&totalVerify).Error
+	err := repo.db.Model(&domain.HakAkses{}).Where("status = ?", "ditolak").Count(&totalVerify).Error
 	
 	if err != nil {
 		return 0, err
@@ -94,7 +94,7 @@ func (repo *DatarepositoryImpl) TotalMikro() (int64, error) {
 	// Menggabungkan tabel hak_akses dan umkm untuk menghitung UMKM bertipe Mikro
 	err := repo.db.Table("umkm").
 		Joins("JOIN hak_akses ON hak_akses.umkm_id = umkm.id").
-		Where("hak_akses.status = ?", 1).
+		Where("hak_akses.status = ?", "disetujui").
 		Where("umkm.kriteria_usaha = ?", "Mikro").
 		Count(&totalMikro).Error
 	
@@ -111,7 +111,7 @@ func (repo *DatarepositoryImpl) TotalMenengah() (int64, error) {
 	// Menggabungkan tabel hak_akses dan umkm untuk menghitung UMKM bertipe Mikro
 	err := repo.db.Table("umkm").
 		Joins("JOIN hak_akses ON hak_akses.umkm_id = umkm.id").
-		Where("hak_akses.status = ?", 1).
+		Where("hak_akses.status = ?", "disetujui").
 		Where("umkm.kriteria_usaha = ?", "Menengah").
 		Count(&TotalMenengah).Error
 	
@@ -128,7 +128,7 @@ func (repo *DatarepositoryImpl) TotalKecil() (int64, error) {
 	// Menggabungkan tabel hak_akses dan umkm untuk menghitung UMKM bertipe Mikro
 	err := repo.db.Table("umkm").
 		Joins("JOIN hak_akses ON hak_akses.umkm_id = umkm.id").
-		Where("hak_akses.status = ?", 1).
+		Where("hak_akses.status = ?", "disetujui").
 		Where("umkm.kriteria_usaha = ?", "Kecil").
 		Count(&TotalKecil).Error
 	
@@ -145,7 +145,7 @@ func (repo *DatarepositoryImpl) TotalSektorJasa() (int64, error) {
 	// Menggabungkan tabel hak_akses dan umkm untuk menghitung UMKM bertipe Mikro
 	err := repo.db.Table("umkm").
 		Joins("JOIN hak_akses ON hak_akses.umkm_id = umkm.id").
-		Where("hak_akses.status = ?", 1).
+		Where("hak_akses.status = ?", "disetujui").
 		Where("umkm.sektor_usaha = ?", "Jasa").
 		Count(&TotalSektorJasa).Error
 	
@@ -163,7 +163,7 @@ func (repo *DatarepositoryImpl) TotalSektorProduksi() (int64, error) {
 	// Menggabungkan tabel hak_akses dan umkm untuk menghitung UMKM bertipe Mikro
 	err := repo.db.Table("umkm").
 		Joins("JOIN hak_akses ON hak_akses.umkm_id = umkm.id").
-		Where("hak_akses.status = ?", 1).
+		Where("hak_akses.status = ?", "disetujui").
 		Where("umkm.sektor_usaha = ?", "Produksi").
 		Count(&TotalSektorProduksi).Error
 	
@@ -181,7 +181,7 @@ func (repo *DatarepositoryImpl) TotalSektorPerdagangan() (int64, error) {
 	// Menggabungkan tabel hak_akses dan umkm untuk menghitung UMKM bertipe Mikro
 	err := repo.db.Table("umkm").
 		Joins("JOIN hak_akses ON hak_akses.umkm_id = umkm.id").
-		Where("hak_akses.status = ?", 1).
+		Where("hak_akses.status = ?", "disetujui").
 		Where("umkm.sektor_usaha = ?", "Perdagangan").
 		Count(&TotalSektorPerdagangan).Error
 	
@@ -199,7 +199,7 @@ func (repo *DatarepositoryImpl) TotalEkonomiKreatif() (int64, error) {
 	// Menggabungkan tabel hak_akses dan umkm untuk menghitung UMKM yang ekonomi_kreatif = true
 	err := repo.db.Table("umkm").
 		Joins("JOIN hak_akses ON hak_akses.umkm_id = umkm.id").
-		Where("hak_akses.status = ?", 1).
+		Where("hak_akses.status = ?", "disetujui").
 		Where("umkm.ekonomi_kreatif = ?", true). // Mengambil hanya yang bernilai true
 		Count(&totalEkonomiKreatif).Error
 	
@@ -211,6 +211,7 @@ func (repo *DatarepositoryImpl) TotalEkonomiKreatif() (int64, error) {
 }
 
 
+//belum
 type KategoriCount struct {
     IdSektorUsaha int    `json:"id_sektor_usaha"`
     Name          string `json:"name"`
@@ -223,12 +224,13 @@ func (repo *DatarepositoryImpl) GrafikKategoriBySektorUsaha(ctx context.Context,
     }
 
     var results []KategoriCount
-    // Query untuk mengambil semua kategori UMKM dengan filter tahun
+    // Query untuk mengambil semua kategori UMKM dengan filter tahun dan status "disetujui"
     query := repo.db.WithContext(ctx).Table("kategori_umkm").
-        Select("kategori_umkm.id_sektor_usaha, kategori_umkm.name, COALESCE(SUM(CASE WHEN umkm.kode_kec = ? AND umkm.kode_kelurahan = ? AND EXTRACT(YEAR FROM umkm.created_at) = ? THEN 1 ELSE 0 END), 0) AS jumlah_umkm", kecamatan, kelurahan, tahun).
+        Select("kategori_umkm.id_sektor_usaha, kategori_umkm.name, COALESCE(SUM(CASE WHEN umkm.kode_kec = ? AND umkm.kode_kelurahan = ? AND EXTRACT(YEAR FROM umkm.created_at) = ? AND hak_akses.status = 'disetujui' THEN 1 ELSE 0 END), 0) AS jumlah_umkm", kecamatan, kelurahan, tahun).
         Where("kategori_umkm.id_sektor_usaha = ?", sektorUsahaID).
-        Group("kategori_umkm.id_sektor_usaha, kategori_umkm.name").
-        Joins("LEFT JOIN umkm ON kategori_umkm.name = (umkm.kategori_umkm_id->'nama'->>0)")
+        Joins("LEFT JOIN umkm ON kategori_umkm.name = (umkm.kategori_umkm_id->'nama'->>0)").
+        Joins("LEFT JOIN hak_akses ON umkm.id = hak_akses.umkm_id").  // JOIN dengan tabel hak_akses
+        Group("kategori_umkm.id_sektor_usaha, kategori_umkm.name")
 
     err := query.Scan(&results).Error
     if err != nil {
@@ -240,6 +242,8 @@ func (repo *DatarepositoryImpl) GrafikKategoriBySektorUsaha(ctx context.Context,
     log.Printf("Results from the database: %+v", results)
     return results, nil
 }
+
+
 
 func (repo *DatarepositoryImpl) TotalUmkmKriteriaUsahaPerBulan(tahun int) (map[string]map[string]int64, error) {
 	// Membuat map untuk menyimpan total UMKM per kriteria usaha dan per bulan
@@ -265,7 +269,7 @@ func (repo *DatarepositoryImpl) TotalUmkmKriteriaUsahaPerBulan(tahun int) (map[s
 		err := repo.db.Table("umkm").
 			Select("EXTRACT(MONTH FROM umkm.created_at) AS bulan, COUNT(*) AS total").
 			Joins("JOIN hak_akses ON hak_akses.umkm_id = umkm.id").
-			Where("hak_akses.status = ?", 1).
+			Where("hak_akses.status = ?", "disetujui").
 			Where("umkm.kriteria_usaha = ?", kriteria).
 			Where("EXTRACT(YEAR FROM umkm.created_at) = ?", tahun).
 			Group("bulan").
@@ -296,7 +300,7 @@ func (repo *DatarepositoryImpl) TotalUmkmBulan() (int64, error) {
 
     // Hitung total UMKM bulan ini
     err := repo.db.Model(&domain.HakAkses{}).
-        Where("status = ?", 1).
+        Where("status = ?", "disetujui").
         Where("created_at BETWEEN ? AND ?", firstDayOfMonth, firstDayOfNextMonth).
         Count(&TotalUmkmBulan).Error
 
@@ -316,7 +320,7 @@ func (repo *DatarepositoryImpl) TotalUmkmBulanLalu() (int64, error) {
 
     // Hitung total UMKM bulan lalu
     err := repo.db.Model(&domain.HakAkses{}).
-        Where("status = ?", 1).
+        Where("status = ?", "disetujui").
         Where("DATE_TRUNC('month', created_at) = DATE_TRUNC('month', ?::timestamp - INTERVAL '1 month')", currentTime).
         Count(&TotalUmkmBulanLalu).Error
 
@@ -337,7 +341,7 @@ func (repo *DatarepositoryImpl) TotalUmkmTahun() (int64, error) {
 
     // Hitung total UMKM tahun ini
     err := repo.db.Model(&domain.HakAkses{}).
-        Where("status = ?", 1).
+        Where("status = ?", "disetujui").
         Where("created_at BETWEEN ? AND ?", firstDayOfYear, lastDayOfYear).
         Count(&totalUmkmTahun).Error
 
@@ -356,7 +360,7 @@ func (repo *DatarepositoryImpl) TotalUmkmTahunLalu() (int64, error) {
 
     // Hitung total UMKM bulan lalu
     err := repo.db.Model(&domain.HakAkses{}).
-        Where("status = ?", 1).
+        Where("status = ?", "disetujui").
         Where("DATE_TRUNC('year', created_at) = DATE_TRUNC('year', ?::timestamp - INTERVAL '1 year')", currentTime).
         Count(&TotalUmkmBulanLalu).Error
 

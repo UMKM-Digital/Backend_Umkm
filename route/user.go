@@ -9,6 +9,7 @@ import (
 	daerahcontoller "umkm/controller/daerah"
 	datacontroller "umkm/controller/data"
 	dokumenumkmcontroller "umkm/controller/dokumenumkm"
+	hakaksescontroller "umkm/controller/hakakses"
 	homepagecontroller "umkm/controller/homepage"
 	aboutuscontroller "umkm/controller/homepage/aboutus"
 	brandlogo "umkm/controller/homepage/logo"
@@ -55,6 +56,7 @@ import (
 	daerahservice "umkm/service/daerah"
 	dataservice "umkm/service/data"
 	dokumenumkmservice "umkm/service/dokumenumkm"
+	hakaksesservice "umkm/service/hak_akses"
 	homepageservice "umkm/service/homepage"
 	aboutusservice "umkm/service/homepage/aboutus"
 	beritaservice "umkm/service/homepage/berita"
@@ -81,6 +83,11 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	db := app.DBConnection()
 	tokenUseCase := helper.NewTokenUseCase()
 
+
+	userHakAksesRepo := hakaksesrepo.NewHakAksesRepositoryImpl(db)
+	userHakAksesService := hakaksesservice.NewKHakAkesService(userHakAksesRepo)
+	userHakAksesController := hakaksescontroller.NewHakAksesController(userHakAksesService)
+
 	userAuthRepo := userrepo.NewAuthRepositoryImpl(db)
 	userAuthService := userservice.Newauthservice(userAuthRepo, tokenUseCase, db)
 	userAuthController := usercontroller.NewAuthController(userAuthService, tokenUseCase)
@@ -94,7 +101,6 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userMasterLegal := masterdokumenlegalrepo.NewDokumenLegalRepoImpl(db, masterlegalQueryBuilder)
 	userMasterLegalService := masterdokumenlegalservice.NewMasterLegalService(userMasterLegal)
 	userMasterLegalController := masterlegalcontroller.NewKategeoriProdukController(userMasterLegalService)
-
 
 	//userproduk
 	produkQueryBuilder := query_builder_produk.NewProdukQueryBuilder(db)
@@ -126,7 +132,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	//umkm
 	umkmQueryBuilder := query_builder_umkm.NewUmkmQueryBuilder(db)
 	userUmkmRepo := umkmrepo.NewUmkmRepositoryImpl(db, umkmQueryBuilder)
-	userHakAksesRepo := hakaksesrepo.NewHakAksesRepositoryImpl(db)  
+	// userHakAksesRepo := hakaksesrepo.NewHakAksesRepositoryImpl(db)  
 	userUmkmService := umkmservice.NewUmkmService(userUmkmRepo, userHakAksesRepo, db, userProdukrepo, userTransaksiRepo, userDokumenuMKM, userMasterLegal, useromsetRepo)
 	userUmkmController := umkmcontroller.NewUmkmController(userUmkmService)
  
@@ -335,6 +341,11 @@ userDataController := datacontroller.NewUmkmController(userDataService)
 	data.GET("/grafik", userDataController.GrafikKategoriBySektorHandler)
 	data.GET("/grafikbinaan", userDataController.TotalUmkmKriteriaUsahaPerBulanHandler)
 	data.GET("/umkmlist", userDataController.CountUmkmBulan)
+
+
+
+	hakakses := g.Group("/hakakses")
+	hakakses.PUT("/update", userHakAksesController.UpdateHakAksesIds)
 }
 
 	func JWTProtection() echo.MiddlewareFunc {

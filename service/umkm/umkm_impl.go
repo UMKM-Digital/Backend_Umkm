@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"strconv"
 
 	// "database/sql"
 	// "encoding/json"
@@ -60,13 +61,50 @@ func NewUmkmService(umkmrepository umkmrepo.CreateUmkm, hakaksesrepository hakak
 		db:                 db,
 	}
 }
+
+type Dokumen struct {
+    ID        string `json:"id"`
+    NamaFile  string `json:"nama_file"`
+    Path      string `json:"path"`
+}
+
 func generateRandomFileName(ext string) string {
 	rand.Seed(time.Now().UnixNano())
 	randomString := fmt.Sprintf("%d", rand.Intn(1000000))
 	return randomString + ext
 }
 
-func (service *UmkmServiceImpl) CreateUmkm(umkm web.UmkmRequest, userID int, files map[string]*multipart.FileHeader, dokumenFiles []*multipart.FileHeader) (map[string]interface{}, error) {
+const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+// generateRandomFileNameDokumen generates a random file name with the format dokumen_YYYYMMDD_randomString_HHMMSS.ext
+func generateRandomFileNameDokumen(ext string) string {
+    // Dapatkan tanggal saat ini
+    now := time.Now()
+    // Format tahun, bulan, dan tanggal
+    datePrefix := now.Format("20060102") // Format: YYYYMMDD
+
+    // Buat string acak 14 karakter
+    randomString := generateRandomString(16)
+
+    // Format jam, menit, dan detik
+    timeSuffix := now.Format("150405") // Format: HHMMSS
+
+    // Gabungkan prefix "dokumen", tanggal, angka acak, dan suffix waktu
+    return fmt.Sprintf("dokumen_umkm_%s_%s_%s%s", datePrefix, randomString, timeSuffix, ext)
+}
+
+// generateRandomString generates a random string of specified length
+func generateRandomString(length int) string {
+    bytes := make([]byte, length)
+    for i := range bytes {
+        bytes[i] = letterBytes[rand.Intn(len(letterBytes))]
+    }
+    return string(bytes)
+}
+
+
+
+func (service *UmkmServiceImpl) CreateUmkm(umkm web.UmkmRequest, userID int, files map[string]*multipart.FileHeader, dokumenFiles []*multipart.FileHeader, dokumenIDs []string) (map[string]interface{}, error) {
 	kategoriUmkmId, err := helper.RawMessageToJSONB(umkm.Kategori_Umkm_Id)
 	if err != nil {
 		return nil, errors.New("invalid type for Kategori_Umkm_Id")
@@ -115,6 +153,29 @@ func (service *UmkmServiceImpl) CreateUmkm(umkm web.UmkmRequest, userID int, fil
 		Maps:                Maps,
 		Active: 0,
 		Deskripsi: umkm.Deskripsi,
+		Bentukusaha: umkm.BentukUsaha,
+		KodeProv: umkm.KodeProv,
+		KodeKabupaten: umkm.KodeKabupaten,
+		KodeKecamatan: umkm.KodeKec,
+		KodeKelurahan: umkm.KodeKel,
+		KodePos: umkm.KodePos,
+		RT: umkm.Rt,
+		Rw: umkm.Rw,
+		BahanBakar: umkm.BahanBakar,
+		TanggalMulaiUsaha: umkm.TanggalMulaiUsaha,
+		Kapasitas: umkm.Kapasitas,
+		TenagaKerjaPria: umkm.TenagaKerjaPria,
+		TenagaKerjaWanita: umkm.TenagaKerjaWanita,
+		NominalAset: umkm.NominalAset,
+		NominalSendiri: umkm.NominalSendiri,
+		EkonomiKreatif: umkm.EkonomiKreatif,
+		KriteriaUsaha: umkm.KriteriaUsaha,
+		NoNpwd: umkm.NoNpwd,
+		NoNib: umkm.NoNib,
+		SektorUsaha: umkm.SektorUsaha,
+		JenisUsaha: umkm.JenisUsaha,
+		BentukUsaha: umkm.BentukUsaha,
+		StatusTempatUsaha: umkm.StatusTempatUsaha,
 	}
 
 	saveUmkm, errSaveUmkm := service.umkmrepository.CreateRequest(newUmkm)
@@ -125,7 +186,7 @@ func (service *UmkmServiceImpl) CreateUmkm(umkm web.UmkmRequest, userID int, fil
 	hakAkses := domain.HakAkses{
 		UserId: userID,
 		UmkmId: saveUmkm.IdUmkm,
-		Status: 0,
+		Status: domain.StatusEnum("menunggu"),
 	}
 	if err := service.hakaksesrepository.CreateHakAkses(&hakAkses); err != nil {
 		return nil, err
@@ -138,6 +199,7 @@ func (service *UmkmServiceImpl) CreateUmkm(umkm web.UmkmRequest, userID int, fil
 			Bulan:       omsetReq.Bulan,
 			JumlahOmset: omsetReq.JumlahOmset,
 			UmkmId:      saveUmkm.IdUmkm, // Gunakan UmkmId dari UMKM yang baru dibuat
+			Tahun: omsetReq.Tahun,
 		}
 	
 		// Simpan setiap omset dan tangkap kedua nilai kembalian
@@ -149,47 +211,58 @@ func (service *UmkmServiceImpl) CreateUmkm(umkm web.UmkmRequest, userID int, fil
 		// Optional: kamu bisa menggunakan `savedOmset` untuk kebutuhan lain
 	}
 
-	//dokumen
-	  // Mengelola dokumen UMKM
-	// **Simpan Omset**
-	// Kode simpan omset sesuai dengan yang ada di kode kamu
-
+	
 // **Mengelola dan Simpan Dokumen**
-var dokumenList []domain.UmkmDokumen
-uploadDir := "uploads/dokumen"
-if _, err := os.Stat(uploadDir); os.IsNotExist(err) {
-    if err := os.Mkdir(uploadDir, os.ModePerm); err != nil {
-        return nil, errors.New("failed to create directory for documents")
-    }
-}
+  // Mengelola dan Simpan Dokumen
+  var dokumenList []Dokumen
+  uploadDir := "uploads/files"
 
-for _, file := range dokumenFiles {
-    // Buat UUID baru untuk setiap dokumen
-    fileID := uuid.New().String()
-    fileExt := filepath.Ext(file.Filename)
-    savePath := fmt.Sprintf("%s/%s%s", uploadDir, fileID, fileExt)
+  // Create directory if it doesn't exist
+  if _, err := os.Stat(uploadDir); os.IsNotExist(err) {
+	  if err := os.Mkdir(uploadDir, os.ModePerm); err != nil {
+		  return nil, errors.New("failed to create directory for documents")
+	  }
+  }
 
-    // Simpan file dokumen ke direktori
-    if err := helper.SaveFile(file, savePath); err != nil {
-        return nil, errors.New("failed to save document file")
-    }
+  // Loop through uploaded documents
+  for i, file := range dokumenFiles {
+	  fileID := uuid.New().String()
+	  fileName := file.Filename
+	  fileExt := filepath.Ext(fileName)
+	  savePath := fmt.Sprintf("%s/%s%s", uploadDir, fileID, fileExt)
 
-    // Simpan setiap dokumen sebagai entri baru di database
-    dokumen := domain.UmkmDokumen{
-        DokumenId:    0, // Menggunakan auto-increment, bisa disesuaikan
-        UmkmId:       saveUmkm.IdUmkm, // Gunakan ID UMKM yang baru dibuat
-        DokumenUpload: domain.JSONB{"path": filepath.ToSlash(savePath)},
-    }
+	  // Save document file
+	  if err := helper.SaveFile(file, savePath); err != nil {
+		  return nil, fmt.Errorf("failed to save document file %s: %w", fileName, err)
+	  }
 
-    dokumenList = append(dokumenList, dokumen)
-}
+	  // Create document entry
+	  dokumen := Dokumen{
+		  ID:       fileID,
+		  NamaFile: fileName,
+		  Path:     savePath,
+	  }
 
-// Simpan dokumen ke dalam database secara batch
-for _, dok := range dokumenList {
-    if _, err := service.dokumenrepository.CreateRequest(dok); err != nil { // Mengirimkan dokumen sebagai nilai
-        return nil, err
-    }
-}
+	  // Add document to the list
+	  dokumenList = append(dokumenList, dokumen)
+
+	  // Convert dokumen ID to int
+	  dokumenID, err := strconv.Atoi(dokumenIDs[i])
+	  if err != nil {
+		  return nil, fmt.Errorf("failed to convert document ID: %w", err)
+	  }
+
+	  // Save each document to the database
+	  dokumenEntity := domain.UmkmDokumen{
+		  UmkmId:        saveUmkm.IdUmkm,
+		  DokumenId:     dokumenID, // Pastikan ID ini sesuai dengan yang dibutuhkan
+		  DokumenUpload: domain.JSONB{"dokumen_list": dokumenList},
+	  }
+
+	  if _, err := service.dokumenrepository.CreateRequest(dokumenEntity); err != nil {
+		  return nil, err
+	  }
+  }
 
 
 

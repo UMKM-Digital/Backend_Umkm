@@ -12,4 +12,6 @@ type CreateHakakses interface {
 	GetHakAksesByUserId(ctx context.Context, userId int) ([]domain.HakAkses, error)
 	DeleteUmkmId(id uuid.UUID) error
 	GetUmkmIdsByUserId(userId int) ([]uuid.UUID, error)
+	GetUmkmId(umkmid uuid.UUID) (domain.HakAkses, error)
+	AcceptBulkStatus(umkmids []uuid.UUID, hakakses domain.HakAkses) error
 }
