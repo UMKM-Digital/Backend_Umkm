@@ -15,6 +15,6 @@
 		TotalJml        float64  `validate:"required" json:"total_jml"`
 		Keteranagan    string `validate:"required" json:"Keterangan"`
 		Status         int    `validate:"required" json:"status"`
-		NoHp         string    `validate:"required" json:"no_hp"`
+		NoHp         string    `json:"no_hp"`
 		// TiketValidasi  string `validate:"required" json:"tiket_validasi"`
 	}
