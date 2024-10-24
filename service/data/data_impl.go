@@ -158,3 +158,27 @@ func(service *DataServiceImpl) TotalUmkmBinaan()(map[string]interface{}, error){
 
     return result, nil
 }
+
+
+//omzets
+func(service *DataServiceImpl) TotalOmzetBulanIni()(map[string]interface{}, error){
+    totalOmzetUmkm, _ := service.datarepository.TotalOmzetBulanIni()
+    totalOmzetUmkmLalu, _ := service.datarepository.TotalOmzetBulanLalu()
+    totalOmzetUmkmTahun, _ := service.datarepository.TotalomzestTahunIni()
+    totalOmzetUmkmTahunLlau, _ := service.datarepository.TotalOmzetTahunLalu()
+    totalOmzetUmkmPersentasi, _ := service.datarepository.Persentasiomzetbulan()
+    totalOmzetUmkmPersentasiTahun, _ := service.datarepository.Persentasiomzettahun()
+
+    result := map[string]interface{}{
+        "total_omset_bulan_ini": totalOmzetUmkm,
+        "total_omset_bulan_lalu": totalOmzetUmkmLalu,
+        "total_omset_tahun_ini": totalOmzetUmkmTahun,
+        "total_omset_tahun_lalu": totalOmzetUmkmTahunLlau,
+        "total_omset_persen_bulan": totalOmzetUmkmPersentasi,
+        "total_omset_persen_tahun": totalOmzetUmkmPersentasiTahun,
+    }
+
+    // Menambahkan struktur respons sesuai dengan yang Anda inginkan
+
+    return result, nil
+}

@@ -25,4 +25,10 @@ type DataUserRepo interface {
 	TotalUmkmTahunLalu() (int64, error) 
 	PersentasiKenaikanUmkm() (float64, error)
 	PersentasiKenaikanUmkmTahun() (float64, error)
+	TotalOmzetBulanIni() (float64, error)
+	TotalOmzetBulanLalu() (float64, error)
+	TotalomzestTahunIni() (float64, error)
+	TotalOmzetTahunLalu() (float64, error)
+	Persentasiomzetbulan() (float64, error)
+	Persentasiomzettahun() (float64, error)
 }

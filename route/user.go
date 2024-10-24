@@ -341,6 +341,7 @@ userDataController := datacontroller.NewUmkmController(userDataService)
 	data.GET("/grafik", userDataController.GrafikKategoriBySektorHandler)
 	data.GET("/grafikbinaan", userDataController.TotalUmkmKriteriaUsahaPerBulanHandler)
 	data.GET("/umkmlist", userDataController.CountUmkmBulan)
+	data.GET("/omset", userDataController.CountOmzets)
 
 
 

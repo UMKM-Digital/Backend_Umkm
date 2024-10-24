@@ -120,3 +120,16 @@ func (controller *DataControllerImpl) CountUmkmBulan(c echo.Context) error {
     // Mengembalikan respons sukses dengan data yang diperoleh
     return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success", result))
 }
+
+//omset
+func (controller *DataControllerImpl) CountOmzets(c echo.Context) error {
+    // Memanggil service untuk menghitung jumlah pengguna berdasarkan gender
+    result, err := controller.dataservice.TotalOmzetBulanIni()
+    if err != nil {
+        // Mengembalikan respons error jika terjadi kesalahan
+        return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
+    }
+
+    // Mengembalikan respons sukses dengan data yang diperoleh
+    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success", result))
+}

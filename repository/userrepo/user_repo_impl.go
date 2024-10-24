@@ -172,7 +172,7 @@ func (repo *AuthrepositoryImpl) CountUserByGenderWithPercentage() (map[string]fl
     // Menghitung jumlah laki-laki unik dengan role 'umkm' yang memiliki UMKM dengan status 1
     err = repo.db.Table("users").
         Joins("JOIN hak_akses ON users.id = hak_akses.user_id").
-        Where("users.role = ? AND users.jenis_kelamin = ? AND hak_akses.status = ?", "umkm", "Laki-Laki", "disetujui").
+        Where("users.role = ? AND users.jenis_kelamin = ? AND hak_akses.status = ?", "umkm", "Laki-laki", "disetujui").
         Group("users.id").
         Count(&countLakiLaki).Error
     if err != nil {
@@ -189,10 +189,16 @@ func (repo *AuthrepositoryImpl) CountUserByGenderWithPercentage() (map[string]fl
         return nil, err
     }
 
-    // Menghitung persentase laki-laki dan perempuan dengan pembulatan 1 desimal
-    percentageLakiLaki := math.Round((float64(countLakiLaki) / float64(totalUsers)) * 100 * 10) / 10
-    percentagePerempuan := math.Round((float64(countPerempuan) / float64(totalUsers)) * 100 * 10) / 10
-
+    // Menghitung persentase
+    var percentageLakiLaki, percentagePerempuan float64
+    if totalUsers > 0 {
+        percentageLakiLaki = math.Round((float64(countLakiLaki) / float64(totalUsers)) * 100 * 10) / 10
+        percentagePerempuan = math.Round((float64(countPerempuan) / float64(totalUsers)) * 100 * 10) / 10
+    } else {
+        // Jika tidak ada pengguna, set persentase ke 0
+        percentageLakiLaki = 0
+        percentagePerempuan = 0
+    }
     // Mengembalikan hasil dalam bentuk map dengan persentase
     result := map[string]float64{
         "persentase_laki-laki": percentageLakiLaki,

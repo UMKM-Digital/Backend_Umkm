@@ -197,9 +197,8 @@ func (service *UmkmServiceImpl) CreateUmkm(umkm web.UmkmRequest, userID int, fil
 	for _, omsetReq := range umkm.Omset {
 		omset := domain.Omset{
 			Bulan:       omsetReq.Bulan,
-			JumlahOmset: omsetReq.JumlahOmset,
+			Nominal: omsetReq.JumlahOmset,
 			UmkmId:      saveUmkm.IdUmkm, // Gunakan UmkmId dari UMKM yang baru dibuat
-			Tahun: omsetReq.Tahun,
 		}
 	
 		// Simpan setiap omset dan tangkap kedua nilai kembalian

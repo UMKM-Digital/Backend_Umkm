@@ -48,7 +48,6 @@ type UmkmRequest struct {
 }
 
 type OmsetRequest struct {
-	Tahun       string          `json:"tahun"`
 	Bulan       string          `json:"bulan"`
 	JumlahOmset decimal.Decimal `json:"jumlah_omset"`
 }

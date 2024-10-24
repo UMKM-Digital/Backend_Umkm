@@ -2,6 +2,7 @@ package datarepo
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"time"
@@ -397,6 +398,7 @@ func (repo *DatarepositoryImpl) PersentasiKenaikanUmkm() (float64, error) {
 
     return persentasiKenaikan, nil
 }
+
 func (repo *DatarepositoryImpl) PersentasiKenaikanUmkmTahun() (float64, error) {
     // Dapatkan total UMKM bulan ini
     totalTahunIni, err := repo.TotalUmkmTahun()
@@ -406,6 +408,185 @@ func (repo *DatarepositoryImpl) PersentasiKenaikanUmkmTahun() (float64, error) {
 
     // Dapatkan total UMKM bulan lalu
     totalTahunLalu, err := repo.TotalUmkmTahunLalu()
+    if err != nil {
+        return 0, err
+    }
+
+    // Jika total bulan lalu adalah 0, maka kita tidak bisa membagi dengan 0
+    if totalTahunLalu == 0 {
+        if totalTahunIni > 0 {
+            return 100, nil // Jika bulan lalu 0 dan bulan ini ada kenaikan, maka kenaikan 100%
+        }
+        return 0, nil // Jika bulan lalu 0 dan bulan ini juga 0, maka tidak ada kenaikan
+    }
+
+    // Hitung persentasi kenaikan
+    persentasiKenaikan := (float64(totalTahunIni) - float64(totalTahunLalu)) / float64(totalTahunLalu) * 100
+
+    return persentasiKenaikan, nil
+}
+
+
+func (repo *DatarepositoryImpl) TotalOmzetBulanIni() (float64, error) {
+    var TotalOmzetBulan float64
+
+    // Ambil tanggal pertama dan terakhir dari bulan ini
+   // Ambil tanggal awal dan akhir bulan ini
+firstDayOfMonth := time.Date(time.Now().Year(), time.Now().Month(), 1, 0, 0, 0, 0, time.UTC)
+firstDayOfNextMonth := firstDayOfMonth.AddDate(0, 1, 0)
+
+// Format waktu ke string yang sesuai dengan PostgreSQL
+firstDayOfMonthStr := firstDayOfMonth.Format("2006-01-02")
+firstDayOfNextMonthStr := firstDayOfNextMonth.Format("2006-01-02")
+
+    // Hitung total UMKM bulan ini
+	err := repo.db.Table("omzets o").
+    Select("SUM(o.nominal)").
+    Joins("JOIN hak_akses h ON h.umkm_id = o.umkm_id").
+    Where("h.status = ?", "disetujui").
+    Where("o.bulan BETWEEN ? AND ?", firstDayOfMonthStr, firstDayOfNextMonthStr).
+    Scan(&TotalOmzetBulan).Error
+    if err != nil {
+        return 0, err
+    }
+
+    return TotalOmzetBulan, nil
+}
+
+func (repo *DatarepositoryImpl) TotalOmzetBulanLalu() (float64, error) {
+    var TotalUmkmBulanLalu float64
+
+    // Ambil tanggal sekarang
+	currentTime := time.Now()
+
+    // Hitung tanggal awal dan akhir bulan lalu
+    firstDayOfLastMonth := time.Date(currentTime.Year(), currentTime.Month()-1, 1, 0, 0, 0, 0, time.UTC)
+    firstDayOfNextLastMonth := firstDayOfLastMonth.AddDate(0, 1, 0)
+
+    // Format tanggal bulan lalu ke string
+    firstDayOfLastMonthStr := firstDayOfLastMonth.Format("2006-01")
+    firstDayOfNextLastMonthStr := firstDayOfNextLastMonth.Format("2006-01")
+
+    // Hitung total UMKM bulan lalu
+    err := repo.db.Table("omzets o").
+		Select("SUM(o.nominal)").
+        Joins("JOIN hak_akses h ON h.umkm_id = o.umkm_id").
+    Where("h.status = ?", "disetujui").
+	Where("TO_DATE(o.bulan, 'YYYY-MM-DD') BETWEEN TO_DATE(?, 'YYYY-MM') AND TO_DATE(?, 'YYYY-MM')",
+	firstDayOfLastMonthStr, firstDayOfNextLastMonthStr).
+	Scan(&TotalUmkmBulanLalu).Error
+
+    if err != nil {
+        return 0, err
+    }
+
+    return TotalUmkmBulanLalu, nil
+}
+
+
+//omzet tahun lalu
+func (repo *DatarepositoryImpl) TotalomzestTahunIni() (float64, error) {
+    var totalOmzetTahunIni sql.NullFloat64
+
+    // Ambil tanggal pertama dan terakhir dari tahun ini
+    firstDayOfYear := time.Date(time.Now().Year(), time.January, 1, 0, 0, 0, 0, time.UTC)
+    lastDayOfYear := firstDayOfYear.AddDate(1, 0, 0)
+
+    // Format tanggal ke string
+    firstDayOfYearStr := firstDayOfYear.Format("2006-01-02")
+    lastDayOfYearStr := lastDayOfYear.Format("2006-01-02")
+
+    // Hitung total omzet tahun ini
+    err := repo.db.Table("omzets o").
+        Select("SUM(o.nominal)").
+        Joins("JOIN hak_akses h ON h.umkm_id = o.umkm_id").
+        Where("h.status = ?", "disetujui").
+        Where("o.bulan BETWEEN ? AND ?", firstDayOfYearStr, lastDayOfYearStr).
+        Scan(&totalOmzetTahunIni).Error
+
+    if err != nil {
+        return 0, err
+    }
+
+    // Jika total NULL, kembalikan 0
+    if !totalOmzetTahunIni.Valid {
+        return 0, nil
+    }
+
+    return totalOmzetTahunIni.Float64, nil
+}
+
+
+//omzet tahun lalu
+func (repo *DatarepositoryImpl) TotalOmzetTahunLalu() (float64, error) {
+    var totalOmzetTahunLalu sql.NullFloat64
+
+    // Hitung tanggal awal dan akhir tahun lalu
+    firstDayOfLastYear := time.Date(time.Now().Year()-1, time.January, 1, 0, 0, 0, 0, time.UTC)
+    lastDayOfLastYear := firstDayOfLastYear.AddDate(1, 0, 0)
+
+    // Format tanggal ke string
+    firstDayOfLastYearStr := firstDayOfLastYear.Format("2006-01-02")
+    lastDayOfLastYearStr := lastDayOfLastYear.Format("2006-01-02")
+
+    // Hitung total omzet tahun lalu
+    err := repo.db.Table("omzets o").
+        Select("SUM(o.nominal)").
+        Joins("JOIN hak_akses h ON h.umkm_id = o.umkm_id").
+        Where("h.status = ?", "disetujui").
+        Where("o.bulan BETWEEN ? AND ?", firstDayOfLastYearStr, lastDayOfLastYearStr).
+        Scan(&totalOmzetTahunLalu).Error
+
+    if err != nil {
+        return 0, err
+    }
+
+    // Jika total NULL, kembalikan 0
+    if !totalOmzetTahunLalu.Valid {
+        return 0, nil
+    }
+
+    return totalOmzetTahunLalu.Float64, nil
+}
+
+//persentasiomsettahunini
+func (repo *DatarepositoryImpl) Persentasiomzetbulan() (float64, error) {
+    // Dapatkan total UMKM bulan ini
+    totalBulanIni, err := repo.TotalOmzetBulanIni()
+    if err != nil {
+        return 0, err
+    }
+
+    // Dapatkan total UMKM bulan lalu
+    totalBulanLalu, err := repo.TotalOmzetBulanLalu()
+    if err != nil {
+        return 0, err
+    }
+
+    // Jika total bulan lalu adalah 0, maka kita tidak bisa membagi dengan 0
+    if totalBulanLalu == 0 {
+        if totalBulanIni > 0 {
+            return 100, nil // Jika bulan lalu 0 dan bulan ini ada kenaikan, maka kenaikan 100%
+        }
+        return 0, nil // Jika bulan lalu 0 dan bulan ini juga 0, maka tidak ada kenaikan
+    }
+
+    // Hitung persentasi kenaikan
+    persentasiKenaikan := (float64(totalBulanIni) - float64(totalBulanLalu)) / float64(totalBulanLalu) * 100
+
+    return persentasiKenaikan, nil
+}
+
+//tahun
+func (repo *DatarepositoryImpl) Persentasiomzettahun() (float64, error) {
+    // Dapatkan total UMKM bulan ini
+    totalTahunIni, err := repo.TotalomzestTahunIni()
+    if err != nil {
+        return 0, err
+    }
+
+    // Dapatkan total UMKM bulan lalu
+    totalTahunLalu, err := repo.TotalOmzetTahunLalu()
     if err != nil {
         return 0, err
     }
