@@ -12,6 +12,7 @@ const (
     Menunggu   StatusEnum = "menunggu"
     Disetujui  StatusEnum = "disetujui"
     Ditolak    StatusEnum = "ditolak"
+    Diproses   StatusEnum = "diproses"
 )
 
 type HakAkses struct {

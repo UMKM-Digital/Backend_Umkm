@@ -7,6 +7,7 @@ const (
     StatusPending    = "menunggu"
     StatusAccepted   = "disetujui"
     StatusRejected     = "ditolak"
+    StatusProses     = "diproses"
 )
 
 
