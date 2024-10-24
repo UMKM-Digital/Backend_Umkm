@@ -264,7 +264,7 @@ func (repo *AuthrepositoryImpl) CountUserByStudy() (map[string]int64, error) {
     // Menghitung jumlah pengguna dengan pendidikan terakhir D4/S1
     err = repo.db.Table("users").
         Joins("JOIN hak_akses ON users.id = hak_akses.user_id").
-        Where("users.role = ? AND (users.pendidikan_terakhir = ? OR users.pendidikan_terakhir = ?) AND hak_akses.status = ?", "umkm", "D4", "S-I", "disetujui").
+        Where("users.role = ? AND (users.pendidikan_terakhir = ? OR users.pendidikan_terakhir = ?) AND hak_akses.status = ?", "umkm", "D4 / S-I", "disetujui").
         Group("users.id"). // Mengelompokkan berdasarkan user.id
         Count(&D4).Error
     if err != nil {
