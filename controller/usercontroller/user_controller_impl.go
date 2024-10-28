@@ -70,7 +70,7 @@ func (controller *UserControllerImpl) SendOtp(c echo.Context) error {
 
 	otpResponse, err := controller.userService.SendOtp(user.No_Phone)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
+		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, err.Error(), nil))
 	}
 
 	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "berasil send otp login", otpResponse))
@@ -199,39 +199,13 @@ func (controller *UserControllerImpl) Update(c echo.Context) error {
 func (controller *UserControllerImpl) VerifyOTPHandler(c echo.Context) error {
 	// Bind request body to a struct
 	user := new(web.VerifyOtp)
-
-
-	// if err := c.Bind(&req); err != nil {
-	// 	return c.JSON(http.StatusBadRequest, map[string]interface{}{
-	// 		"status":  false,
-	// 		"message": "Invalid request",
-	// 		"code":    http.StatusBadRequest,
-	// 	})
-	// }
-
-	// // Call the AuthService to verify OTP and phone number
-	// result, err := controller.userService.VerifyOTP(req.Phone, req.OTP)
-	// if err != nil {
-	// 	return c.JSON(http.StatusUnauthorized, map[string]interface{}{
-	// 		"status":  false,
-	// 		"message": "Verification failed",
-	// 		"code":    http.StatusUnauthorized,
-	// 	})
-	// }
-
-	// return c.JSON(http.StatusOK, map[string]interface{}{
-	// 	"status":  true,
-	// 	"message": "Verification successful",
-	// 	"data":    result,
-	// 	"code":    http.StatusOK,
-	// })
 	if err := c.Bind(user); err != nil {
 		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, err.Error(), nil))
 	}
 
 	otpResponse, err := controller.userService.VerifyOTP(user.Phone, user.OTP)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
+		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, err.Error(), nil))
 	}
 
 	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "berasil send otp login", otpResponse))

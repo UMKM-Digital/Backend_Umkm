@@ -152,36 +152,3 @@ func VerifyOTP(db *gorm.DB, phoneNumber, otpCode string) (bool, error) {
 
     return true, nil
 }
-
-// func VerifyOTP(db *gorm.DB, otpCode string) (bool, string, error) {
-//     var otp SaveOtp
-//     result := db.Where("otp_code = ?", otpCode).
-//         Order("created_at DESC").
-//         First(&otp)
-
-//     if result.Error != nil {
-//         if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-//             return false, "", fmt.Errorf("OTP tidak ditemukan untuk kode OTP %s", otpCode)
-//         }
-//         return false, "", result.Error
-//     }
-
-//     if otp.Status {
-//         return false, "", fmt.Errorf("OTP sudah digunakan")
-//     }
-
-//     if otpCode != otp.Otp {
-//         return false, "", fmt.Errorf("Kode OTP tidak valid")
-//     }
-
-//     if time.Now().After(otp.ExpiresAt) {
-//         return false, "", fmt.Errorf("OTP sudah kadaluarsa")
-//     }
-
-//     // Update status OTP menjadi digunakan
-//     if err := db.Model(&otp).Where("otp_code = ?", otpCode).Update("status", true).Error; err != nil {
-//         return false, "", err
-//     }
-
-//     return true, otp.PhoneNumber, nil
-// }

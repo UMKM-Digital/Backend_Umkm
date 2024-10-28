@@ -675,10 +675,9 @@ if err != nil {
 return totalTransaksi, nil
 }
 
-
 func (repo *DatarepositoryImpl) TotalOmzetPenggunaPerBulan(id int, tahun int) (map[string]int64, error) {
     var umkmIDs []string
-    var hasilPerBulan = make(map[string]int64)
+    hasilPerBulan := make(map[string]int64)
 
     // Langkah 1: Dapatkan semua umkm_id dari HakAkses yang disetujui untuk user_id tertentu
     err := repo.db.Model(&domain.HakAkses{}).
@@ -689,22 +688,29 @@ func (repo *DatarepositoryImpl) TotalOmzetPenggunaPerBulan(id int, tahun int) (m
         return nil, err
     }
 
+    // Inisialisasi hasilPerBulan dengan 0 untuk setiap bulan dalam format YYYY-MM
+    for month := 1; month <= 12; month++ {
+        // Menggunakan fmt.Sprintf untuk format bulan menjadi YYYY-MM
+        bulan := fmt.Sprintf("%d-%02d", tahun, month)
+        hasilPerBulan[bulan] = 0 // Inisialisasi dengan 0
+    }
+
     if len(umkmIDs) == 0 {
         return hasilPerBulan, nil // Tidak ada UMKM yang disetujui untuk user ini
     }
 
     // Langkah 2: Hitung total omzet per bulan pada tahun tertentu
     type OmzetPerBulan struct {
-        Bulan int   // Untuk menyimpan bulan
-        Total int64 // Total omzet bulan tersebut
+        Bulan       string  // Untuk menyimpan bulan dalam format YYYY-MM
+        Total       int64   // Total omzet bulan tersebut
     }
 
     var omzetPerBulan []OmzetPerBulan
 
     // Query untuk mengambil total omzet per bulan pada tahun yang diberikan
     err = repo.db.Model(&domain.Omset{}).
-        Select("EXTRACT(MONTH FROM bulan) AS bulan, SUM(amount) AS total").
-        Where("umkm_id IN (?) AND EXTRACT(YEAR FROM bulan) = ?", umkmIDs, tahun).
+        Select("TO_CHAR(TO_DATE(bulan, 'YYYY-MM-DD'), 'YYYY-MM') AS bulan, SUM(nominal)::BIGINT AS total").
+        Where("umkm_id IN (?) AND EXTRACT(YEAR FROM TO_DATE(bulan, 'YYYY-MM-DD')) = ?", umkmIDs, tahun).
         Group("bulan").
         Order("bulan").
         Scan(&omzetPerBulan).Error
@@ -713,13 +719,10 @@ func (repo *DatarepositoryImpl) TotalOmzetPenggunaPerBulan(id int, tahun int) (m
         return nil, err
     }
 
-    // Menyimpan hasil per bulan ke dalam map dengan format nama bulan
-    bulanNama := [12]string{"Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"}
+    // Mengisi hasilPerBulan dengan nilai total omzet
     for _, omzet := range omzetPerBulan {
-        hasilPerBulan[bulanNama[omzet.Bulan-1]] = omzet.Total
+        hasilPerBulan[omzet.Bulan] = omzet.Total // Menyimpan total berdasarkan format YYYY-MM
     }
 
     return hasilPerBulan, nil
 }
-
-
