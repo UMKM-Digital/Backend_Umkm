@@ -94,3 +94,42 @@ func (service *OmzetServiceImpl) UpdateOmset(request web.UpdateOmset, pathId int
 
 	return response, nil
 }
+
+
+//total omzet tahunan
+func (service *OmzetServiceImpl) OmsetTahunanService(umkm_id uuid.UUID, tahun string) (float64, error) {
+	// Memanggil repository untuk mendapatkan total nominal tahunan
+	totalNominal, err := service.omsetrepository.OmsetTahunan(umkm_id, tahun)
+	if err != nil {
+		return 0, err
+	}
+
+	return totalNominal, nil
+}
+
+
+type OmsetTahunanResponse struct {
+	TotalTahunan float64            `json:"total_tahunan"`
+	PerBulan     map[string]float64 `json:"per_bulan"`
+}
+
+func (service *OmzetServiceImpl) OmsetTahunanDanBulananService(umkm_id uuid.UUID, tahun string) (OmsetTahunanResponse, error) {
+	// Inisialisasi respons
+	var response OmsetTahunanResponse
+
+	// Dapatkan total omzet tahunan
+	totalTahunan, err := service.omsetrepository.OmsetTahunan(umkm_id, tahun)
+	if err != nil {
+		return OmsetTahunanResponse{}, err
+	}
+	response.TotalTahunan = totalTahunan
+
+	// Dapatkan total omzet per bulan
+	perBulan, err := service.omsetrepository.OmsetBulanan(umkm_id, tahun)
+	if err != nil {
+		return OmsetTahunanResponse{}, err
+	}
+	response.PerBulan = perBulan
+
+	return response, nil
+}

@@ -12,4 +12,5 @@ type OmsetService interface {
 	ListOmsetService(umkm_id uuid.UUID, tahun string)([]entity.OmsetEntity, error)
 	GetOmsetServiceId(id int) (entity.OmsetEntity, error)
 	UpdateOmset(request web.UpdateOmset, pathId int) (map[string]interface{}, error) 
+	OmsetTahunanDanBulananService(umkm_id uuid.UUID, tahun string) (OmsetTahunanResponse, error)
 }

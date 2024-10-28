@@ -363,6 +363,7 @@ userOmsetController := omsetcontroller.NewOmsetController(userOmsetService)
 	omset.GET("/list/:umkm_id", userOmsetController.LisOmsetController, JWTProtection())
 	omset.GET("/:id", userOmsetController.GetOmsetController, JWTProtection())
 	omset.PUT("/update/:id", userOmsetController.UpdateOmset, JWTProtection())
+	omset.GET("/grafik/list/:umkm_id", userOmsetController.ListOmsetGrafik, JWTProtection())
 }
 
 	func JWTProtection() echo.MiddlewareFunc {

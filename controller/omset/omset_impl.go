@@ -102,3 +102,28 @@ func (controller *OmsetControllerImpl) UpdateOmset(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "berhasil memperbarui omset", getOmset))
 }
+
+
+//
+func (controller *OmsetControllerImpl) ListOmsetGrafik(c echo.Context) error {
+	umkmIdParam := c.Param("umkm_id")
+	umkmId, err := uuid.Parse(umkmIdParam)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid umkm_id", nil))
+	}
+
+	tahunParam := c.QueryParam("tahun") // Membaca tahun dari query parameter
+	if tahunParam == "" {
+		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Tahun is required", nil))
+	}
+
+	// Memanggil service untuk mendapatkan omzet tahunan dan bulanan
+	result, err := controller.omsetservice.OmsetTahunanDanBulananService(umkmId, tahunParam)
+	if err != nil {
+		// Mengembalikan respons error jika terjadi kesalahan
+		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
+	}
+
+	// Mengembalikan respons sukses dengan data yang diperoleh
+	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success", result))
+}
