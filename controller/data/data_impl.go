@@ -3,6 +3,7 @@ package datacontroller
 import (
 	"net/http"
 	"strconv"
+	"umkm/helper"
 	"umkm/model"
 	dataservice "umkm/service/data"
 
@@ -131,5 +132,52 @@ func (controller *DataControllerImpl) CountOmzets(c echo.Context) error {
     }
 
     // Mengembalikan respons sukses dengan data yang diperoleh
+    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success", result))
+}
+
+
+func(controller *DataControllerImpl) CountPengggunaUmkm(c echo.Context) error{
+    userId, err := helper.GetAuthId(c)
+
+
+    result, err := controller.dataservice.DataUmkm(userId)
+    if err != nil {
+        // Mengembalikan respons error jika terjadi kesalahan
+        return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
+    }
+
+    // Mengembalikan respons sukses dengan data yang diperoleh
+    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success", result))
+}
+
+func (controller *DataControllerImpl) CountPenggunaOmzet(c echo.Context) error {
+    userId, err := helper.GetAuthId(c)
+    if err != nil {
+        return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+            "message": "User tidak terautentikasi",
+        })
+    }
+
+    tahunParam := c.QueryParam("tahun")
+    if tahunParam == "" {
+        return c.JSON(http.StatusBadRequest, map[string]interface{}{
+            "message": "Tahun tidak boleh kosong",
+        })
+    }
+
+    // Konversi tahunParam dari string ke int
+    tahun, err := strconv.Atoi(tahunParam)
+    if err != nil {
+        return c.JSON(http.StatusBadRequest, map[string]interface{}{
+            "message": "Format tahun tidak valid",
+        })
+    }
+
+    result, err := controller.dataservice.DataOmzetUmkm(userId, tahun)
+    if err != nil {
+        // Mengembalikan respons error jika terjadi kesalahan
+        return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
+    }
+
     return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success", result))
 }

@@ -604,3 +604,122 @@ func (repo *DatarepositoryImpl) Persentasiomzettahun() (float64, error) {
 
     return persentasiKenaikan, nil
 }
+
+//data pengguna
+ func(repo *DatarepositoryImpl) TotalUmkmPengguna(id int)(int64, error){
+    var totalVerify int64
+    err := repo.db.Model(&domain.HakAkses{}).Where("user_id = ? AND status = ?", id, "disetujui").Count(&totalVerify).Error
+
+    if err != nil{
+        return 0, err
+    }
+
+    return totalVerify, nil
+ }
+
+ //data pengguna produk
+ func (repo *DatarepositoryImpl) TotalProdukPengguna(id int) (int64, error) {
+    var totalProduk int64
+    var umkmIDs []string  // Mengubah tipe menjadi []string untuk menampung UUID
+
+    // Langkah 1: Dapatkan semua umkm_id dari HakAkses yang disetujui untuk user_id tertentu
+    err := repo.db.Model(&domain.HakAkses{}).
+        Where("user_id = ? AND status = ?", id, "disetujui").
+        Pluck("umkm_id", &umkmIDs).Error
+
+    if err != nil {
+        return 0, err
+    }
+
+    if len(umkmIDs) == 0 {
+        return 0, nil // Tidak ada UMKM yang disetujui untuk user ini
+    }
+
+    // Langkah 2: Hitung total produk yang dimiliki semua UMKM tersebut
+    err = repo.db.Model(&domain.Produk{}).
+        Where("umkm_id IN (?)", umkmIDs).
+        Count(&totalProduk).Error
+
+    if err != nil {
+        return 0, err
+    }
+
+    return totalProduk, nil
+}
+
+func(repo *DatarepositoryImpl) TotalTransaksi(id int)(int64, error){
+    var totalTransaksi int64
+    var umkmIDs[] string
+
+    err := repo.db.Model(&domain.HakAkses{}).
+    Where("user_id = ? AND status = ?", id, "disetujui").
+    Pluck("umkm_id", &umkmIDs).Error
+
+if err != nil {
+    return 0, err
+}
+
+if len(umkmIDs) == 0 {
+    return 0, nil // Tidak ada UMKM yang disetujui untuk user ini
+}
+
+// Langkah 2: Hitung total produk yang dimiliki semua UMKM tersebut
+err = repo.db.Model(&domain.Transaksi{}).
+    Where("umkm_id IN (?)", umkmIDs).
+    Count(&totalTransaksi).Error
+
+if err != nil {
+    return 0, err
+}
+
+return totalTransaksi, nil
+}
+
+
+func (repo *DatarepositoryImpl) TotalOmzetPenggunaPerBulan(id int, tahun int) (map[string]int64, error) {
+    var umkmIDs []string
+    var hasilPerBulan = make(map[string]int64)
+
+    // Langkah 1: Dapatkan semua umkm_id dari HakAkses yang disetujui untuk user_id tertentu
+    err := repo.db.Model(&domain.HakAkses{}).
+        Where("user_id = ? AND status = ?", id, "disetujui").
+        Pluck("umkm_id", &umkmIDs).Error
+
+    if err != nil {
+        return nil, err
+    }
+
+    if len(umkmIDs) == 0 {
+        return hasilPerBulan, nil // Tidak ada UMKM yang disetujui untuk user ini
+    }
+
+    // Langkah 2: Hitung total omzet per bulan pada tahun tertentu
+    type OmzetPerBulan struct {
+        Bulan int   // Untuk menyimpan bulan
+        Total int64 // Total omzet bulan tersebut
+    }
+
+    var omzetPerBulan []OmzetPerBulan
+
+    // Query untuk mengambil total omzet per bulan pada tahun yang diberikan
+    err = repo.db.Model(&domain.Omset{}).
+        Select("EXTRACT(MONTH FROM bulan) AS bulan, SUM(amount) AS total").
+        Where("umkm_id IN (?) AND EXTRACT(YEAR FROM bulan) = ?", umkmIDs, tahun).
+        Group("bulan").
+        Order("bulan").
+        Scan(&omzetPerBulan).Error
+
+    if err != nil {
+        return nil, err
+    }
+
+    // Menyimpan hasil per bulan ke dalam map dengan format nama bulan
+    bulanNama := [12]string{"Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"}
+    for _, omzet := range omzetPerBulan {
+        hasilPerBulan[bulanNama[omzet.Bulan-1]] = omzet.Total
+    }
+
+    return hasilPerBulan, nil
+}
+
+

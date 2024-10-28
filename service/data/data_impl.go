@@ -3,6 +3,7 @@ package dataservice
 import (
 	"context"
 	"fmt"
+	"strconv"
 	datarepo "umkm/repository/data"
 )
 
@@ -179,6 +180,39 @@ func(service *DataServiceImpl) TotalOmzetBulanIni()(map[string]interface{}, erro
     }
 
     // Menambahkan struktur respons sesuai dengan yang Anda inginkan
+
+    return result, nil
+}
+
+//data di pengguna
+
+func(service *DataServiceImpl) DataUmkm(id int)(map[string]interface{}, error){
+    dataUmkmPengguna, _ := service.datarepository.TotalUmkmPengguna(id)
+    dataProdukPengguna, _ := service.datarepository.TotalProdukPengguna(id)
+    dataTransaksiPengguna, _ := service.datarepository.TotalTransaksi(id)
+
+    result := map[string]interface{}{
+        "total_umkm": dataUmkmPengguna,
+        "total_produk": dataProdukPengguna,
+        "total_transaksi": dataTransaksiPengguna,
+    }
+
+    // Menambahkan struktur respons sesuai dengan yang Anda inginkan
+
+    return result, nil
+}
+
+
+func (service *DataServiceImpl) DataOmzetUmkm(id int, tahun int) (map[string]map[string]int64, error) {
+    // Panggil fungsi di repository untuk mendapatkan data omzet per bulan
+    omzetPerBulan, err := service.datarepository.TotalOmzetPenggunaPerBulan(id, tahun)
+    if err != nil {
+        return nil, err
+    }
+
+    // Bungkus data omzet per bulan ke dalam struktur map[string]map[string]int64
+    result := make(map[string]map[string]int64)
+    result[strconv.Itoa(tahun)] = omzetPerBulan
 
     return result, nil
 }

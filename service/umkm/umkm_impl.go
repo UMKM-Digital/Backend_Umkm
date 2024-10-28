@@ -173,7 +173,7 @@ func (service *UmkmServiceImpl) CreateUmkm(umkm web.UmkmRequest, userID int, fil
 		NoNpwd: umkm.NoNpwd,
 		NoNib: umkm.NoNib,
 		SektorUsaha: umkm.SektorUsaha,
-		JenisUsaha: umkm.JenisUsaha,
+		// JenisUsaha: umkm.JenisUsaha,
 		BentukUsaha: umkm.BentukUsaha,
 		StatusTempatUsaha: umkm.StatusTempatUsaha,
 	}
@@ -570,6 +570,26 @@ if len(files) > 0 {
         Images: map[string]interface{}{
             "urls": imageUrls,  // Format gambar baru yang disimpan
         },
+		SektorUsaha: request.SektorUsaha,
+		KodeProv: request.KodeProv,
+		KodeKecamatan: request.KodeKec,
+		KodeKelurahan: request.KodeKel,
+		RT: request.Rt,
+		Rw: request.Rw,
+		KodePos: request.KodePos,
+		NoNpwd: request.NoNpwd,
+		BahanBakar: request.BahanBakar,
+		TanggalMulaiUsaha: request.TanggalMulaiUsaha,
+		Kapasitas: request.Kapasitas,
+		TenagaKerjaPria: request.TenagaKerjaPria,
+		TenagaKerjaWanita: request.TenagaKerjaWanita,
+		NominalAset: request.NominalAset,
+		NominalSendiri: request.NominalSendiri,
+		EkonomiKreatif: request.EkonomiKreatif,
+		KriteriaUsaha: request.KriteriaUsaha,
+		Bentukusaha: request.BentukUsaha,
+		NoNib: request.NoNib,
+		// JenisUsaha: request.JenisUsaha,
     }
 
     // Update data UMKM di repository

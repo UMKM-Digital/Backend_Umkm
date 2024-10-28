@@ -57,6 +57,8 @@ type DokumenLegal struct {
 	DokumenUpload json.RawMessage `json:"dok_upload"`
 }
 
+
+
 type Updateumkm struct {
 	Name                  string          `json:"name"`
 	NoNpwp                string          `json:"no_npwp"`
@@ -68,6 +70,28 @@ type Updateumkm struct {
 	Deskripsi             string          `json:"deskripsi"`
 	Maps                  json.RawMessage `json:"maps"`
 	Gambar                json.RawMessage `json:"gambar"`
+	SektorUsaha           string          `json:"sekto_usaha"`
+	StatusTempatUsaha     string          `json:"status_tempat_usaha"`//
+	KodeProv              string          `json:"kode_prov"`//
+	KodeKabupaten string `gorm:"column:kode_kabupaten"`//
+	KodeKec               string          `json:"kode_kec"`//
+	KodeKel               string          `json:"kode_kelurahan"`//
+	Rt                    string          `json:"rt"`
+	Rw                    string          `json:"rw"`
+	KodePos               string          `json:"kode_pos"`
+	NoNpwd                string          `json:"no_npwd"`
+	BahanBakar            string          `json:"bahan_bakar"`
+	TanggalMulaiUsaha     time.Time       `json:"tanggal_mulai_usaha"`
+	Kapasitas             string             `json:"kapasitas"`
+	TenagaKerjaPria       int             `json:"tenaga_kerja_pria"`//belum
+	TenagaKerjaWanita     int             `json:"tenaga_kerja_wanita"`//belum
+	NominalAset           decimal.Decimal `json:"nominal_aset"`//belum
+	NominalSendiri        decimal.Decimal `json:"nominal_sendiri"`//belum
+	EkonomiKreatif        bool            `json:"ekonomi_kreatif"`//belum
+	KriteriaUsaha         string          `json:"kriteria_usaha"`
+	BentukUsaha           string          `json:"bentuk_usaha"`
+	NoNib                 string          `json:"no_nib"`
+	// JenisUsaha            string          `json:"jenis_usaha"`
 }
 
 type UpdateActiveUmkm struct {

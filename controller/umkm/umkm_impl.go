@@ -311,6 +311,23 @@ func (controller *UmkmControllerImpl) UpdateUmkm(c echo.Context) error {
 	informasiJamBuka := c.FormValue("informasi_jam_buka")
 	maps := c.FormValue("maps")
 	deskripsi := c.FormValue("deskripsi")
+	sektousaha := c.FormValue("sektor_usaha")
+	tempatusaha := c.FormValue("status_tempat_usaha")
+	kodeprov := c.FormValue("kode_prov")
+	kodekab  := c.FormValue("kode_kab")
+	kodekec  := c.FormValue("kode_kec")
+	kodekel  := c.FormValue("kode_kelurahan")
+	rt      := c.FormValue("rt")
+	rw     := c.FormValue("rw")
+	kodepos := c.FormValue("kode_pos")
+	noNpwd   := c.FormValue("no_npwd")
+	bahanbakar := c.FormValue("bahan_bakar")
+	// tanggalmulaiusaha := c.FormValue("tanggal_mulai_usaha")
+	kapasitas         := c.FormValue("kapasitas")
+	krtiteriausaha := c.FormValue("kriteria_usaha")
+	bentukusaha    := c.FormValue("bentuk_usaha")
+	nonib          := c.FormValue("nonib")
+	// jenisusaha     := c.FormValue("jenis_usaha")
 
 	log.Printf("Form values - Name: %s, NoNpwp: %s, KategoriUmkmId: %s, informasijambuka: %s, ", name, noNpwp, kategoriUmkmID, informasiJamBuka)
 
@@ -321,6 +338,44 @@ func (controller *UmkmControllerImpl) UpdateUmkm(c echo.Context) error {
 	} else if err != http.ErrMissingFile {
 		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "failed to get uploaded file", nil))
 	}
+
+	//
+	ekonomiKreatifStr := c.FormValue("ekonomi_kreatif")
+	ekonomiKreatif, err := strconv.ParseBool(ekonomiKreatifStr)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"message": "Invalid value for ekonomi_kreatif. Must be true or false.",
+		})
+	}
+
+	tenagakerjaPriastr := c.FormValue("tenaga_kerja_pria")
+    tenagakerjapria, err := strconv.Atoi(tenagakerjaPriastr)
+    if err != nil {
+        log.Printf("Error converting tenagakerja: %v", err)
+        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid tenaga kerja wanita", nil))
+    }
+
+	tenagaKerjaWanitastr := c.FormValue("tenaga_kerja_wanita")
+    tenagakerjawanita, err := strconv.Atoi(tenagaKerjaWanitastr)
+    if err != nil {
+        log.Printf("Error converting tenagakerja: %v", err)
+        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid tenaga kerja wanita", nil))
+    }
+
+	// Ambil nilai dari form
+tanggalMulaiUsahaStr := c.FormValue("tanggal_mulai_usaha")
+
+// Tentukan format tanggal yang benar, misalnya "2006-01-02"
+layout := "2006-01-02"
+
+// Konversi string menjadi time.Time dengan urutan parameter yang benar
+tanggalMulaiUsaha, err := time.Parse(layout, tanggalMulaiUsahaStr)
+if err != nil {
+    log.Printf("Error converting tanggal mulai usaha: %v", err)
+    return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid tanggal mulai usaha format, must be in YYYY-MM-DD", nil))
+}
+
+
 
 	// Buat objek request manual
 	request := web.Updateumkm{
@@ -333,6 +388,26 @@ func (controller *UmkmControllerImpl) UpdateUmkm(c echo.Context) error {
 		Kategori_Umkm_Id:      json.RawMessage(kategoriUmkmID),
 		Informasi_JamBuka:     json.RawMessage(informasiJamBuka),
 		Maps:                  json.RawMessage(maps),
+		TenagaKerjaPria: tenagakerjapria,
+		TenagaKerjaWanita: tenagakerjawanita,
+		EkonomiKreatif: ekonomiKreatif,
+		SektorUsaha: sektousaha,
+		StatusTempatUsaha: tempatusaha,
+		KodeProv: kodeprov,
+		KodeKabupaten: kodekab,
+		KodeKec: kodekec,
+		KodeKel: kodekel,
+		KodePos: kodepos,
+		Rt: rt,
+		Rw: rw,
+		NoNpwd: noNpwd,
+		BahanBakar: bahanbakar,
+		TanggalMulaiUsaha: tanggalMulaiUsaha,
+		Kapasitas: kapasitas,
+		KriteriaUsaha: krtiteriausaha,
+		BentukUsaha: bentukusaha,
+		NoNib: nonib,
+		// JenisUsaha: jenisusaha,
 	}
 
 	// Memanggil service untuk update UMKM

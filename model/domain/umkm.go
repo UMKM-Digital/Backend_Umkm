@@ -47,7 +47,7 @@ type UMKM struct {
     KriteriaUsaha string `gorm:"column:kriteria_usaha"`
     NoNib         string `gorm:"column:no_nib"`
     Active                 int `gorm:"column:active"`
-    JenisUsaha string `gorm:"column:jenis_usaha"`
+    // JenisUsaha string `gorm:"column:jenis_usaha"`
     BentukUsaha string `gorm:"column:bentuk_usaha"`
     HakAkses []HakAkses  `gorm:"foreignKey:UmkmId;references:IdUmkm"`
     Produk               []Produk  `gorm:"foreignkey:UmkmId"`

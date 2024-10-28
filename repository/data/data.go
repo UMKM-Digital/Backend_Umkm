@@ -31,4 +31,8 @@ type DataUserRepo interface {
 	TotalOmzetTahunLalu() (float64, error)
 	Persentasiomzetbulan() (float64, error)
 	Persentasiomzettahun() (float64, error)
+	TotalUmkmPengguna(id int)(int64, error)
+	TotalProdukPengguna(id int) (int64, error)
+	TotalTransaksi(id int)(int64, error)
+	TotalOmzetPenggunaPerBulan(id int, tahun int) (map[string]int64, error) 
 }

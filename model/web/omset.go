@@ -11,3 +11,9 @@ type Omset struct {
 	UmkmId     uuid.UUID       `json:"umkm_id"`
 }
 
+
+type UpdateOmset struct {
+	Bulan      string          `json:"bulan"`
+	Nominal decimal.Decimal `json:"nominal"`
+}
+

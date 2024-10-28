@@ -14,6 +14,7 @@ import (
 	aboutuscontroller "umkm/controller/homepage/aboutus"
 	brandlogo "umkm/controller/homepage/logo"
 	slidercontroller "umkm/controller/homepage/slider"
+	omsetcontroller "umkm/controller/omset"
 	sektorusahacontroller "umkm/controller/sektorusaha"
 
 	kategoriprodukcontroller "umkm/controller/kategoriproduk"
@@ -62,6 +63,7 @@ import (
 	beritaservice "umkm/service/homepage/berita"
 	brandlogoservice "umkm/service/homepage/brandlogo"
 	sliderservice "umkm/service/homepage/slider"
+	omsetservice "umkm/service/omset"
 	sektorusahaservice "umkm/service/sektorusaha"
 
 	kategoriprodukservice "umkm/service/kategori_produk"
@@ -179,6 +181,12 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 dataUmkm := datarepo.NewDataRepositoryImpl(db)
 userDataService := dataservice.NewDataservice(dataUmkm) // Ensure this constructor matches the signature
 userDataController := datacontroller.NewUmkmController(userDataService)
+
+
+//omset
+omsetUmkm := omsetrepo.NewomsetRepositoryImpl(db)
+userOmsetService := omsetservice.NewOmsetService(omsetUmkm)
+userOmsetController := omsetcontroller.NewOmsetController(userOmsetService)
 
 	g := e.Group(prefix)
 
@@ -342,11 +350,19 @@ userDataController := datacontroller.NewUmkmController(userDataService)
 	data.GET("/grafikbinaan", userDataController.TotalUmkmKriteriaUsahaPerBulanHandler)
 	data.GET("/umkmlist", userDataController.CountUmkmBulan)
 	data.GET("/omset", userDataController.CountOmzets)
+	data.GET("/umkm", userDataController.CountPengggunaUmkm, JWTProtection())
+	data.GET("/omzet_bulan", userDataController.CountPenggunaOmzet, JWTProtection())
 
 
 
 	hakakses := g.Group("/hakakses")
 	hakakses.PUT("/update", userHakAksesController.UpdateHakAksesIds)
+
+	omset := g.Group("/omset")
+	omset.POST("/create/:umkm_id", userOmsetController.CreateOmsetcontroller, JWTProtection())
+	omset.GET("/list/:umkm_id", userOmsetController.LisOmsetController, JWTProtection())
+	omset.GET("/:id", userOmsetController.GetOmsetController, JWTProtection())
+	omset.PUT("/update/:id", userOmsetController.UpdateOmset, JWTProtection())
 }
 
 	func JWTProtection() echo.MiddlewareFunc {
