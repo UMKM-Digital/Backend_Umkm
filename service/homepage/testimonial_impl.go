@@ -202,30 +202,26 @@ func (service *TestimonalServiceImpl) GetTestimonialActive() ([]entity.Testtimon
 }
 
 func (service *TestimonalServiceImpl) UpdateTestimonialActive(request web.UpdateActive, Id int) (map[string]interface{}, error) {
-  
     getTestimonialById, err := service.testimonalrepository.GetTransaksiByid(Id)
     if err != nil {
         return nil, err
     }
 
-   
     if request.Active == getTestimonialById.Active {
-       
         response := map[string]interface{}{
             "active": getTestimonialById.Active,
         }
         return response, nil
     }
 
-   
     errUpdate := service.testimonalrepository.UpdateActiveId(Id, request.Active)
     if errUpdate != nil {
         return nil, errUpdate
     }
 
-  
     response := map[string]interface{}{
         "active": request.Active,
     }
     return response, nil
 }
+
