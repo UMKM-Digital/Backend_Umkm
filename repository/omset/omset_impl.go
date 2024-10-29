@@ -69,10 +69,10 @@ func (repo *OmmsetRepoImpl) UpdateOmsetId(id int, omset domain.Omset) (domain.Om
 func (repo *OmmsetRepoImpl) OmsetTahunan(umkm_id uuid.UUID, tahun string) (float64, error) {
 	var totalNominal float64
 
-	// Menggunakan SUM untuk menghitung total nominal dengan filter tahun dan umkm_id
+	// Menggunakan COALESCE untuk menghindari NULL pada hasil SUM
 	err := repo.db.Table("omzets").
 		Where("umkm_id = ? AND SUBSTRING(bulan FROM 1 FOR 4) = ?", umkm_id, tahun).
-		Select("SUM(nominal)").
+		Select("COALESCE(SUM(nominal), 0)"). // Mengatasi NULL dengan COALESCE
 		Scan(&totalNominal).Error
 
 	if err != nil {
@@ -81,6 +81,7 @@ func (repo *OmmsetRepoImpl) OmsetTahunan(umkm_id uuid.UUID, tahun string) (float
 
 	return totalNominal, nil
 }
+
 
 
 func (repo *OmmsetRepoImpl) OmsetBulanan(umkm_id uuid.UUID, tahun string) (map[string]float64, error) {
