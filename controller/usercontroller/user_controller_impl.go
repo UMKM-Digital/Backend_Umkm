@@ -414,17 +414,6 @@ func (controller *UserControllerImpl) GetUser(c echo.Context) error {
 }
 
 
-// func (controller *UserControllerImpl) GetUserCountByGender(c echo.Context) error {
-//     result, err := controller.userService.CountUser()
-//     if err != nil {
-//         return c.JSON(http.StatusInternalServerError, map[string]string{
-//             "message": "Error fetching user count",
-//         })
-//     }
-
-//     return c.JSON(http.StatusOK, result)
-// }
-
 func (controller *UserControllerImpl) GetUserCountByGender(c echo.Context) error {
     // Memanggil service untuk menghitung jumlah pengguna berdasarkan gender
     result, err := controller.userService.CountUser()

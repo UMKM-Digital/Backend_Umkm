@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"time"
 	"umkm/model/domain"
 
 	"github.com/google/uuid"
@@ -15,6 +16,7 @@ type UmkmFilterEntity struct {
 	KategoriUmkm domain.JSONB `json:"kategori_umkm_id"`
 	 TotalProduk        int           `json:"total_produk"`
 	 Progres int 	`json:"progres"`
+	 CreatedAt time.Time   `json:"created_at"`
 }
 
 func ToUmkmFilterEntity(umkm domain.UMKM, products []domain.Produk, dokumenList []domain.UmkmDokumen, masterDokumenList []domain.MasterDokumenLegal) UmkmFilterEntity {
@@ -30,6 +32,7 @@ func ToUmkmFilterEntity(umkm domain.UMKM, products []domain.Produk, dokumenList 
 	KategoriUmkm: umkm.KategoriUmkmId,
 	TotalProduk:        totalProduk, // Menambahkan total produk
 	Progres:            progres, 
+	CreatedAt: umkm.CreatedAt,
 	}
 }
 
