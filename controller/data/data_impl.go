@@ -62,26 +62,18 @@ func (controller *DataControllerImpl) GrafikKategoriBySektorHandler(c echo.Conte
     // Panggil service untuk mendapatkan data kategori UMKM berdasarkan sektor
     result, err := controller.dataservice.GrafikKategoriBySektor(c.Request().Context(), sektorUsahaID, kecamatan, kelurahan, tahunint)
     if err != nil {
-        return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-            "code":    http.StatusInternalServerError,
-            "message": "Failed to fetch data",
-            "data":    nil,
-        })
+        return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
     }
 
-    return c.JSON(http.StatusOK, map[string]interface{}{
-        "code":    http.StatusOK,
-        "message": "Success",
-        "data":    result,
-    })
+    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success", result))
 }
 
 
-func (c *DataControllerImpl) TotalUmkmKriteriaUsahaPerBulanHandler(ctx echo.Context) error {
+func (controller *DataControllerImpl) TotalUmkmKriteriaUsahaPerBulanHandler(c echo.Context) error {
     // Ambil parameter tahun dari query string
-    tahunParam := ctx.QueryParam("tahun")
+    tahunParam := c.QueryParam("tahun")
     if tahunParam == "" {
-        return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
+        return c.JSON(http.StatusBadRequest, map[string]interface{}{
             "message": "Tahun tidak boleh kosong",
         })
     }
@@ -89,25 +81,19 @@ func (c *DataControllerImpl) TotalUmkmKriteriaUsahaPerBulanHandler(ctx echo.Cont
     // Konversi parameter tahun menjadi integer
     tahun, err := strconv.Atoi(tahunParam)
     if err != nil {
-        return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
+        return c.JSON(http.StatusBadRequest, map[string]interface{}{
             "message": "Tahun harus berupa angka",
         })
     }
 
     // Panggil service untuk mendapatkan data UMKM
-    result, err := c.dataservice.TotalUmkmKriteriaUsahaPerBulan(tahun)
+    result, err := controller.dataservice.TotalUmkmKriteriaUsahaPerBulan(tahun)
     if err != nil {
-        return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
-            "message": "Gagal mengambil data",
-            "error":   err.Error(),
-        })
+        return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
     }
 
     // Return hasil perhitungan dalam bentuk JSON
-    return ctx.JSON(http.StatusOK, map[string]interface{}{
-        "message": "Berhasil mendapatkan data UMKM",
-        "data":    result,
-    })
+    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success", result))
 }
 
 func (controller *DataControllerImpl) CountUmkmBulan(c echo.Context) error {

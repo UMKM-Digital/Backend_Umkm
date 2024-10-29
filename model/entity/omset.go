@@ -12,6 +12,7 @@ type OmsetEntity struct {
 	UmkmId uuid.UUID `json:"umkm_id"`
 	Bulan string `json:"bulan"`
 	Nominal decimal.Decimal `json:"nominal"`
+	Status string `json:"status"`
 }
 
 func ToOmsetEntityList(omset domain.Omset) OmsetEntity {
@@ -20,6 +21,7 @@ func ToOmsetEntityList(omset domain.Omset) OmsetEntity {
 	    UmkmId: omset.UmkmId,
 		Bulan: omset.Bulan,
 		Nominal: omset.Nominal,
+		Status: "true",
 	}
 }
 
