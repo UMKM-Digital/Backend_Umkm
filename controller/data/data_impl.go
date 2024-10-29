@@ -62,7 +62,7 @@ func (controller *DataControllerImpl) GrafikKategoriBySektorHandler(c echo.Conte
     // Panggil service untuk mendapatkan data kategori UMKM berdasarkan sektor
     result, err := controller.dataservice.GrafikKategoriBySektor(c.Request().Context(), sektorUsahaID, kecamatan, kelurahan, tahunint)
     if err != nil {
-        return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
+         return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
     }
 
     return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success", result))

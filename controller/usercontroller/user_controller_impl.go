@@ -228,7 +228,7 @@ func (controller *UserControllerImpl) SendOtpRegister(c echo.Context) error {
 
 	// Cek apakah nomor telepon sudah terdaftar
 	if otpResponse["message"] == "Phone number already registered" {
-		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, "OTP tidak terkirim", otpResponse))
+		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, "No Handphone sudah terdaftar", otpResponse))
 	}
 
 	// Jika OTP berhasil dikirim, kembalikan status 200
@@ -256,14 +256,14 @@ func (controller *UserControllerImpl) VerifyOTPHandlerRegister(c echo.Context) e
 	if err != nil {
 		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
 			"status":  false,
-			"message": "Verification failed",
+			"message": "Kode OTP tidak sesuai",
 			"code":    http.StatusUnauthorized,
 		})
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"status":  true,
-		"message": "Verification successful",
+		"message": "Kode OTP sesuai",
 		"data":    result,
 		"code":    http.StatusOK,
 	})
