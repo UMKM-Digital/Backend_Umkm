@@ -119,6 +119,9 @@ func (service *AuthServiceImpl) RegisterRequest(user web.RegisterRequest) (map[s
     // Menyimpan user ke database
     saveUser, errSaveUser := service.authrepository.RegisterRequest(newUser)
     if errSaveUser != nil {
+        if strings.Contains(errSaveUser.Error(), "duplicate key value violates unique constraint") && strings.Contains(errSaveUser.Error(), "users_email_key") {
+            return nil, fmt.Errorf("Email %s telah terdaftar sebelumnya pada sistem ini", user.Email)
+        }
         return nil, errSaveUser
     }
 
