@@ -139,11 +139,11 @@ func (controller *UserControllerImpl) Update(c echo.Context) error {
     var err error
 
     // Check for potoprofile file
-    if file, err := c.FormFile("potoprofile"); err == nil {
+     file, err := c.FormFile("potoprofile") 
         potoprofile = file
-    } else if err != http.ErrMissingFile {
-        return c.JSON(http.StatusBadRequest, helper.ResponseToJsonOtp(http.StatusBadRequest, "Failed to get the uploaded file poto", nil))
-    }
+		if err != nil && err != http.ErrMissingFile {
+			return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "failed to get uploaded file", nil))
+		}
 
 
     
