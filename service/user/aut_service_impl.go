@@ -155,11 +155,11 @@ func (service *AuthServiceImpl) RegisterRequest(user web.RegisterRequest) (map[s
 
 func (service *AuthServiceImpl) LoginRequest(username string, password string) (map[string]interface{}, error) {
 	user, getUserErr := service.authrepository.FindUserByUsername(username)
-	if getUserErr != nil {
-		return nil, errors.New("username not found")
-	}
+    if getUserErr != nil {
+        return nil, fmt.Errorf("Username tidak ditemukan")
+    }    
 	if checkPassword := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); checkPassword != nil {
-		return nil, errors.New("incorrect password")
+		return nil, errors.New("Password salah")
 	}
 
 	claims := helper.JwtCustomClaims{
@@ -194,7 +194,7 @@ func (service *AuthServiceImpl) SendOtp(phone string) (map[string]interface{}, e
 	// Temukan pengguna berdasarkan nomor telepon
 	_, err := service.authrepository.FindUserByPhone(phone)
 	if err != nil {
-		return nil, errors.New("No Telepon tidak temukan, daftarkan akun baru")
+		return nil, errors.New("No Telepon tidak temukan.")
 	}
 
 	// Generate OTP
