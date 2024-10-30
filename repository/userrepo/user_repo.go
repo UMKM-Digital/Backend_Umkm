@@ -16,7 +16,7 @@ type AuthUserRepo interface {
 	FindOrCreateUserByGoogleID(googleID string, email string, nama string, picture string) (*domain.Users, error)
 	ChangePassword(email string) (*domain.Users, error)
 	ListUser()([]domain.Users, error)
-	CountUserByGenderWithPercentage() (map[string]float64, error)
+	CountUserByGenderWithPercentage()  (map[string]map[string]float64, error)
 	CountUserByStudy() (map[string]int64, error)
 	CountUserByAge() (map[string]int64, error)
 }

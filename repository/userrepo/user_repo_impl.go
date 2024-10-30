@@ -156,7 +156,7 @@ func(repo *AuthrepositoryImpl) ListUser()([]domain.Users, error){
 	return user, nil
 }
 
-func (repo *AuthrepositoryImpl) CountUserByGenderWithPercentage() (map[string]float64, error) {
+func (repo *AuthrepositoryImpl) CountUserByGenderWithPercentage() (map[string]map[string]float64, error) {
     var countLakiLaki, countPerempuan, totalUsers int64
 
     // Menghitung total pengguna unik dengan role 'umkm' yang memiliki UMKM dengan status 1
@@ -200,9 +200,19 @@ func (repo *AuthrepositoryImpl) CountUserByGenderWithPercentage() (map[string]fl
         percentagePerempuan = 0
     }
     // Mengembalikan hasil dalam bentuk map dengan persentase
-    result := map[string]float64{
-        "persentase_laki-laki": percentageLakiLaki,
-        "persentase_perempuan": percentagePerempuan,
+    result := map[string]map[string]float64{
+        "l": {
+            "total":      float64(countLakiLaki),
+            "persentase": percentageLakiLaki,
+        },
+        "p": {
+            "total":      float64(countPerempuan),
+            "persentase": percentagePerempuan,
+        },
+        // "persentase_laki-laki": percentageLakiLaki,
+        // "persentase_perempuan": percentagePerempuan,
+        // "total_laki_laki": countPerempuan,
+        // "total perempuan" countLakiLaki,
     }
 
     return result, nil
