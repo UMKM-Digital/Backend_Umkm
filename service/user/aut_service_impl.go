@@ -570,31 +570,31 @@ func (service *AuthServiceImpl) VerifyOTP(phone_number string, otpCode string) (
 }
 
 func (service *AuthServiceImpl) SendOtpRegister(phone string) (map[string]interface{}, error) {
-	user, err := service.authrepository.FindUserByPhoneRegister(phone)
-	if phone == "" {
-		return nil, errors.New("No Telepon kosong")
-	}
-	if err != nil {
-		return nil, err
-	}
+    if phone == "" {
+        return nil, errors.New("No Telepon kosong")
+    }
 
-	if user != nil {
-		return map[string]interface{}{
-			"message": "No Telepon telah terdaftar",
-		}, nil
-	}
+    user, err := service.authrepository.FindUserByPhoneRegister(phone)
+    if err != nil {
+        return nil, err
+    }
 
-	expirationTime := time.Now().Add(1 * time.Minute)
+    if user != nil {
+        return nil, errors.New("No Telepon telah terdaftar") // Mengembalikan error jika nomor sudah terdaftar
+    }
 
-	if err := helper.SendWhatsAppOTP(service.db, phone, expirationTime); err != nil {
-		return nil, err
-	}
+    expirationTime := time.Now().Add(1 * time.Minute)
 
-	return map[string]interface{}{
-		"message":    "otp terkirim",
-		"expires_at": expirationTime.Format(time.RFC3339),
-	}, nil
+    if err := helper.SendWhatsAppOTP(service.db, phone, expirationTime); err != nil {
+        return nil, err
+    }
+
+    return map[string]interface{}{
+        "message":    "OTP terkirim",
+        "expires_at": expirationTime.Format(time.RFC3339),
+    }, nil
 }
+
 
 // verify otp register
 func (service *AuthServiceImpl) VerifyOTPRegister(otp_code string, phone_code string) (map[string]interface{}, error) {

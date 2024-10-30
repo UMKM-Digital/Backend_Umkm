@@ -213,26 +213,22 @@ func (controller *UserControllerImpl) VerifyOTPHandler(c echo.Context) error {
 
 // sendotp register
 func (controller *UserControllerImpl) SendOtpRegister(c echo.Context) error {
-	user := new(web.OtpRequest)
+    user := new(web.OtpRequest)
 
-	// Bind request body ke user
-	if err := c.Bind(user); err != nil {
-		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, err.Error(), nil))
-	}
+    if err := c.Bind(user); err != nil {
+        return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, err.Error(), nil))
+    }
 
-	// Panggil service untuk mengirim OTP
-	otpResponse, err := controller.userService.SendOtpRegister(user.No_Phone)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
-	}
+    otpResponse, err := controller.userService.SendOtpRegister(user.No_Phone)
+    if err != nil {
+        // Cek pesan error apakah nomor telepon sudah terdaftar
+        if err.Error() == "No Telepon telah terdaftar" {
+            return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, err.Error(), nil))
+        }
+        return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
+    }
 
-	// Cek apakah nomor telepon sudah terdaftar
-	if otpResponse["message"] == "Phone number already registered" {
-		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, "No Telepon sudah terdaftar", otpResponse))
-	}
-
-	// Jika OTP berhasil dikirim, kembalikan status 200
-	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "OTP terkirim", otpResponse))
+    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "OTP terkirim", otpResponse))
 }
 
 // verify otp register
