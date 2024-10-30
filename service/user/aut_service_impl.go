@@ -194,7 +194,7 @@ func (service *AuthServiceImpl) SendOtp(phone string) (map[string]interface{}, e
 	// Temukan pengguna berdasarkan nomor telepon
 	_, err := service.authrepository.FindUserByPhone(phone)
 	if err != nil {
-		return nil, errors.New("phone number not found")
+		return nil, errors.New("No Telepon tidak temukan, daftarkan akun baru")
 	}
 
 	// Generate OTP
@@ -529,7 +529,7 @@ func (service *AuthServiceImpl) VerifyOTP(phone_number string, otpCode string) (
 	// Verifikasi OTP
 	isValid, err := helper.VerifyOTP(service.db, phone_number, otpCode)
 	if err != nil || !isValid {
-		return nil, errors.New("invalid OTP")
+		return nil, errors.New("OTP tidak sesuai")
 	}
 
 	// Temukan pengguna berdasarkan nomor telepon
@@ -561,7 +561,7 @@ func (service *AuthServiceImpl) VerifyOTP(phone_number string, otpCode string) (
 
 	// OTP berhasil diverifikasi dan password benar
 	return map[string]interface{}{
-		"message": "OTP verified",
+		"message": "Kode OTP sesuai",
 		// "user":    user,
 		"token":        token,
 		"expired time": expirationTime,
@@ -572,7 +572,7 @@ func (service *AuthServiceImpl) VerifyOTP(phone_number string, otpCode string) (
 func (service *AuthServiceImpl) SendOtpRegister(phone string) (map[string]interface{}, error) {
 	user, err := service.authrepository.FindUserByPhoneRegister(phone)
 	if phone == "" {
-		return nil, errors.New("no telepon kosong")
+		return nil, errors.New("No Telepon kosong")
 	}
 	if err != nil {
 		return nil, err
@@ -580,7 +580,7 @@ func (service *AuthServiceImpl) SendOtpRegister(phone string) (map[string]interf
 
 	if user != nil {
 		return map[string]interface{}{
-			"message": "Phone number already registered",
+			"message": "No Telepon telah terdaftar",
 		}, nil
 	}
 
@@ -601,11 +601,11 @@ func (service *AuthServiceImpl) VerifyOTPRegister(otp_code string, phone_code st
 	// Verifikasi OTP
 	isValid, err := helper.VerifyOTP(service.db, otp_code, phone_code)
 	if err != nil || !isValid {
-		return nil, errors.New("invalid OTP")
+		return nil, errors.New("OTP tidak sesuai")
 	}
 
 	return map[string]interface{}{
-		"message": "OTP verified successfully",
+		"message": "Kode OTP sesuai",
 	}, nil
 }
 
