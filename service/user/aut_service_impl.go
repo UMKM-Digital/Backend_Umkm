@@ -79,6 +79,7 @@ func generateRandomString(length int) string {
 
 // register
 func (service *AuthServiceImpl) RegisterRequest(user web.RegisterRequest) (map[string]interface{}, error) {
+
     // Hash password menggunakan bcrypt
     passHash, errHash := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.MinCost)
     if errHash != nil {
@@ -90,6 +91,21 @@ func (service *AuthServiceImpl) RegisterRequest(user web.RegisterRequest) (map[s
     tanggalLahirParsed, errDate := helper.ParseDateLahir(user.TanggalLahir)
     if errDate != nil {
         return nil, errDate
+    }
+
+       // Validasi panjang beberapa field sekaligus
+       fieldsToValidate := []struct {
+        FieldName      string
+        FieldValue     string
+        ExpectedLength int
+    }{
+        {"No NIK", user.No_Nik, 16},
+        {"No NIB", user.No_Nib, 13},
+        {"No KK", user.No_KK, 16},
+    }
+
+    if err := helper.ValidateFieldsLength(fieldsToValidate); err != nil {
+        return nil, err
     }
 
     // Membuat object User baru
@@ -194,7 +210,7 @@ func (service *AuthServiceImpl) SendOtp(phone string) (map[string]interface{}, e
 	// Temukan pengguna berdasarkan nomor telepon
 	_, err := service.authrepository.FindUserByPhone(phone)
 	if err != nil {
-		return nil, errors.New("No Telepon tidak temukan.")
+		return nil, errors.New("No Telepon tidak temukan !.")
 	}
 
 	// Generate OTP
@@ -231,6 +247,19 @@ func (service *AuthServiceImpl) Update(Id int, req web.UpdateUserRequest, file *
     tanggalLahirParsed, errDate := helper.ParseDateLahir(req.TanggalLahir)
     if errDate != nil {
         return nil, errDate
+    }
+    fieldsToValidate := []struct {
+        FieldName      string
+        FieldValue     string
+        ExpectedLength int
+    }{
+        {"No NIK", req.No_Nik, 16},
+        {"No NIB", req.No_Nib, 13},
+        {"No KK", req.No_KK, 16},
+    }
+
+    if err := helper.ValidateFieldsLength(fieldsToValidate); err != nil {
+        return nil, err
     }
 
     if errUser != nil {
@@ -480,7 +509,6 @@ if len(kkFiles) > 0 {
 // Siapkan data KTP dan KK yang diperbarui
 updatedKTPJSONB := domain.JSONB{"urls": newKTPDocs}
 updatedKKJSONB := domain.JSONB{"urls": newKKDocs}
-
 
     // Create user update data
     TestimonalRequest := domain.Users{
