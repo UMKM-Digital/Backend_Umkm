@@ -210,7 +210,7 @@ func (service *AuthServiceImpl) SendOtp(phone string) (map[string]interface{}, e
 	// Temukan pengguna berdasarkan nomor telepon
 	_, err := service.authrepository.FindUserByPhone(phone)
 	if err != nil {
-		return nil, errors.New("No Telepon tidak temukan !.")
+		return nil, errors.New("No Telepon tidak temukan!")
 	}
 
 	// Generate OTP

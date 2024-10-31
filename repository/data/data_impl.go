@@ -436,8 +436,8 @@ firstDayOfMonth := time.Date(time.Now().Year(), time.Now().Month(), 1, 0, 0, 0, 
 firstDayOfNextMonth := firstDayOfMonth.AddDate(0, 1, 0)
 
 // Format waktu ke string yang sesuai dengan PostgreSQL
-firstDayOfMonthStr := firstDayOfMonth.Format("2006-01-02")
-firstDayOfNextMonthStr := firstDayOfNextMonth.Format("2006-01-02")
+firstDayOfMonthStr := firstDayOfMonth.Format("2006-01")
+firstDayOfNextMonthStr := firstDayOfNextMonth.Format("2006-01")
 
     // Hitung total UMKM bulan ini
 	err := repo.db.Table("omzets o").
@@ -457,24 +457,31 @@ func (repo *DatarepositoryImpl) TotalOmzetBulanLalu() (float64, error) {
     var TotalUmkmBulanLalu float64
 
     // Ambil tanggal sekarang
-	currentTime := time.Now()
+    currentTime := time.Now()
 
-    // Hitung tanggal awal dan akhir bulan lalu
-    firstDayOfLastMonth := time.Date(currentTime.Year(), currentTime.Month()-1, 1, 0, 0, 0, 0, time.UTC)
-    firstDayOfNextLastMonth := firstDayOfLastMonth.AddDate(0, 1, 0)
+    // Hitung tahun dan bulan lalu
+    year := currentTime.Year()
+    month := currentTime.Month()
 
-    // Format tanggal bulan lalu ke string
-    firstDayOfLastMonthStr := firstDayOfLastMonth.Format("2006-01")
-    firstDayOfNextLastMonthStr := firstDayOfNextLastMonth.Format("2006-01")
+    // Jika bulan adalah Januari, maka bulan lalu adalah Desember tahun lalu
+    if month == 1 {
+        year -= 1
+        month = 12
+    } else {
+        month -= 1
+    }
+
+    // Format tahun dan bulan ke string
+    lastMonth := fmt.Sprintf("%d-%02d", year, month) // Format menjadi 'YYYY-MM'
+
 
     // Hitung total UMKM bulan lalu
     err := repo.db.Table("omzets o").
-		Select("SUM(o.nominal)").
+        Select("SUM(o.nominal)").
         Joins("JOIN hak_akses h ON h.umkm_id = o.umkm_id").
-    Where("h.status = ?", "disetujui").
-	Where("TO_DATE(o.bulan, 'YYYY-MM-DD') BETWEEN TO_DATE(?, 'YYYY-MM') AND TO_DATE(?, 'YYYY-MM')",
-	firstDayOfLastMonthStr, firstDayOfNextLastMonthStr).
-	Scan(&TotalUmkmBulanLalu).Error
+        Where("h.status = ?", "disetujui").
+        Where("o.bulan = ?", lastMonth).
+        Scan(&TotalUmkmBulanLalu).Error
 
     if err != nil {
         return 0, err
@@ -482,6 +489,7 @@ func (repo *DatarepositoryImpl) TotalOmzetBulanLalu() (float64, error) {
 
     return TotalUmkmBulanLalu, nil
 }
+
 
 
 //omzet tahun lalu
@@ -526,8 +534,8 @@ func (repo *DatarepositoryImpl) TotalOmzetTahunLalu() (float64, error) {
     lastDayOfLastYear := firstDayOfLastYear.AddDate(1, 0, 0)
 
     // Format tanggal ke string
-    firstDayOfLastYearStr := firstDayOfLastYear.Format("2006-01-02")
-    lastDayOfLastYearStr := lastDayOfLastYear.Format("2006-01-02")
+    firstDayOfLastYearStr := firstDayOfLastYear.Format("2006-01")
+    lastDayOfLastYearStr := lastDayOfLastYear.Format("2006-01")
 
     // Hitung total omzet tahun lalu
     err := repo.db.Table("omzets o").
