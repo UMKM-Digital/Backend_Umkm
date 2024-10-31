@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"math"
 	"time"
 	"umkm/model/domain"
 
@@ -582,6 +583,8 @@ func (repo *DatarepositoryImpl) Persentasiomzetbulan() (float64, error) {
     // Hitung persentasi kenaikan
     persentasiKenaikan := (float64(totalBulanIni) - float64(totalBulanLalu)) / float64(totalBulanLalu) * 100
 
+    persentasiKenaikan = math.Round(persentasiKenaikan*100) / 100
+
     return persentasiKenaikan, nil
 }
 
@@ -609,6 +612,9 @@ func (repo *DatarepositoryImpl) Persentasiomzettahun() (float64, error) {
 
     // Hitung persentasi kenaikan
     persentasiKenaikan := (float64(totalTahunIni) - float64(totalTahunLalu)) / float64(totalTahunLalu) * 100
+
+    persentasiKenaikan = math.Round(persentasiKenaikan*100) / 100
+
 
     return persentasiKenaikan, nil
 }
