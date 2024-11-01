@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	// "sync"
 	"time"
 	"umkm/model/domain"
 
@@ -689,11 +690,12 @@ if err != nil {
 return totalTransaksi, nil
 }
 
+
 func (repo *DatarepositoryImpl) TotalOmzetPenggunaPerBulan(id int, tahun int) (map[string]map[string]int64, error) {
     var umkmIDs []string
     hasilPerUMKM := make(map[string]map[string]int64)
 
-    // Langkah 1: Dapatkan semua umkm_id dari HakAkses yang disetujui untuk user_id tertentu
+    // Step 1: Get all umkm_id from approved HakAkses for a specific user_id
     err := repo.db.Model(&domain.HakAkses{}).
         Where("user_id = ? AND status = ?", id, "disetujui").
         Pluck("umkm_id", &umkmIDs).Error
@@ -702,29 +704,29 @@ func (repo *DatarepositoryImpl) TotalOmzetPenggunaPerBulan(id int, tahun int) (m
         return nil, err
     }
 
-    // Inisialisasi hasilPerUMKM dengan 0 untuk setiap UMKM dan bulan dalam format YYYY-MM
+    // Initialize hasilPerUMKM with 0 for each UMKM and month in YYYY-MM format
     for _, umkmID := range umkmIDs {
         hasilPerUMKM[umkmID] = make(map[string]int64)
         for month := 1; month <= 12; month++ {
             bulan := fmt.Sprintf("%d-%02d", tahun, month)
-            hasilPerUMKM[umkmID][bulan] = 0 // Inisialisasi dengan 0
+            hasilPerUMKM[umkmID][bulan] = 0
         }
     }
 
     if len(umkmIDs) == 0 {
-        return hasilPerUMKM, nil // Tidak ada UMKM yang disetujui untuk user ini
+        return hasilPerUMKM, nil
     }
 
-    // Langkah 2: Hitung total omzet per UMKM dan per bulan pada tahun tertentu
+    // Step 2: Calculate total omzet per UMKM and per month for a specific year
     type OmzetPerBulan struct {
-        UmkmID string // ID UMKM
-        Bulan  string // Bulan dalam format YYYY-MM
-        Total  int64  // Total omzet bulan tersebut
+        UmkmID string
+        Bulan  string
+        Total  int64
     }
 
     var omzetPerBulan []OmzetPerBulan
 
-    // Query untuk mengambil total omzet per UMKM dan bulan pada tahun yang diberikan
+    // Query for total omzet per UMKM and month for a given year
     err = repo.db.Model(&domain.Omset{}).
         Select("umkm_id, TO_CHAR(TO_DATE(bulan, 'YYYY-MM-DD'), 'YYYY-MM') AS bulan, SUM(nominal)::BIGINT AS total").
         Where("umkm_id IN (?) AND EXTRACT(YEAR FROM TO_DATE(bulan, 'YYYY-MM-DD')) = ?", umkmIDs, tahun).
@@ -736,11 +738,31 @@ func (repo *DatarepositoryImpl) TotalOmzetPenggunaPerBulan(id int, tahun int) (m
         return nil, err
     }
 
-    // Mengisi hasilPerUMKM dengan nilai total omzet
     for _, omzet := range omzetPerBulan {
         hasilPerUMKM[omzet.UmkmID][omzet.Bulan] = omzet.Total
     }
 
-    return hasilPerUMKM, nil
-}
+    // Step 4: Map each UMKM ID to its name
+    var umkmNames []struct {
+        ID   string
+        Nama string
+    }
+    err = repo.db.Model(&domain.UMKM{}).
+        Where("id IN (?)", umkmIDs).
+        Select("id, name AS nama").
+        Scan(&umkmNames).Error
+    if err != nil {
+        return nil, err
+    }
 
+    // Create hasilPerNama with unique keys for UMKM name and ID
+    hasilPerNama := make(map[string]map[string]int64)
+    for _, umkm := range umkmNames {
+        key := fmt.Sprintf("%s", umkm.Nama) // Make key unique by including ID
+        if data, exists := hasilPerUMKM[umkm.ID]; exists {
+            hasilPerNama[key] = data
+        }
+    }
+
+    return hasilPerNama, nil
+}
