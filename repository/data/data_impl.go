@@ -221,18 +221,43 @@ type KategoriCount struct {
     JumlahUmkm    int    `json:"jumlah_umkm"`
 }
 
-func (repo *DatarepositoryImpl) GrafikKategoriBySektorUsaha(ctx context.Context, sektorUsahaID int, kecamatan, kelurahan string, tahun int) ([]KategoriCount, error) {
+// func (repo *DatarepositoryImpl) GrafikKategoriBySektorUsaha(ctx context.Context, sektorUsahaID int, kecamatan, kelurahan string, tahun int) ([]KategoriCount, error) {
+//     if sektorUsahaID <= 0 {
+//         return nil, gorm.ErrInvalidData
+//     }
+
+//     var results []KategoriCount
+//     // Query untuk mengambil semua kategori UMKM dengan filter tahun dan status "disetujui"
+//     query := repo.db.WithContext(ctx).Table("kategori_umkm").
+//         Select("kategori_umkm.id_sektor_usaha, kategori_umkm.name, COALESCE(SUM(CASE WHEN umkm.kode_kec = ? AND umkm.kode_kelurahan = ? AND EXTRACT(YEAR FROM umkm.created_at) = ? AND hak_akses.status = 'disetujui' THEN 1 ELSE 0 END), 0) AS jumlah_umkm", kecamatan, kelurahan, tahun).
+//         Where("kategori_umkm.id_sektor_usaha = ?", sektorUsahaID).
+//         Joins("LEFT JOIN umkm ON kategori_umkm.name = (umkm.kategori_umkm_id->'nama'->>0)").
+//         Joins("LEFT JOIN hak_akses ON umkm.id = hak_akses.umkm_id").  // JOIN dengan tabel hak_akses
+//         Group("kategori_umkm.id_sektor_usaha, kategori_umkm.name")
+
+//     err := query.Scan(&results).Error
+//     if err != nil {
+//         log.Println("Error executing query:", err)
+//         return nil, err
+//     }
+
+//     // Cek hasil
+//     log.Printf("Results from the database: %+v", results)
+//     return results, nil
+// }
+func (repo *DatarepositoryImpl) GrafikKategoriBySektorUsaha(ctx context.Context, sektorUsahaID int, kodeKecamatan, kodeKelurahan string, tahun int) ([]KategoriCount, error) {
     if sektorUsahaID <= 0 {
         return nil, gorm.ErrInvalidData
     }
 
     var results []KategoriCount
-    // Query untuk mengambil semua kategori UMKM dengan filter tahun dan status "disetujui"
     query := repo.db.WithContext(ctx).Table("kategori_umkm").
-        Select("kategori_umkm.id_sektor_usaha, kategori_umkm.name, COALESCE(SUM(CASE WHEN umkm.kode_kec = ? AND umkm.kode_kelurahan = ? AND EXTRACT(YEAR FROM umkm.created_at) = ? AND hak_akses.status = 'disetujui' THEN 1 ELSE 0 END), 0) AS jumlah_umkm", kecamatan, kelurahan, tahun).
+        Select("kategori_umkm.id_sektor_usaha, kategori_umkm.name, COALESCE(SUM(CASE WHEN master_kec.kode_wilayah = ? AND master_kel.kode_wilayah = ? AND EXTRACT(YEAR FROM umkm.created_at) = ? AND hak_akses.status = 'disetujui' THEN 1 ELSE 0 END), 0) AS jumlah_umkm", kodeKecamatan, kodeKelurahan, tahun).
         Where("kategori_umkm.id_sektor_usaha = ?", sektorUsahaID).
         Joins("LEFT JOIN umkm ON kategori_umkm.name = (umkm.kategori_umkm_id->'nama'->>0)").
-        Joins("LEFT JOIN hak_akses ON umkm.id = hak_akses.umkm_id").  // JOIN dengan tabel hak_akses
+        Joins("LEFT JOIN hak_akses ON umkm.id = hak_akses.umkm_id").
+        Joins("LEFT JOIN master.kode_kec AS master_kec ON umkm.kode_kec = master_kec.nama_wilayah").
+        Joins("LEFT JOIN master.kode_kel AS master_kel ON umkm.kode_kelurahan = master_kel.nama_wilayah").
         Group("kategori_umkm.id_sektor_usaha, kategori_umkm.name")
 
     err := query.Scan(&results).Error
@@ -241,10 +266,10 @@ func (repo *DatarepositoryImpl) GrafikKategoriBySektorUsaha(ctx context.Context,
         return nil, err
     }
 
-    // Cek hasil
     log.Printf("Results from the database: %+v", results)
     return results, nil
 }
+
 
 
 
