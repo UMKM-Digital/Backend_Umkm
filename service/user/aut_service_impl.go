@@ -59,7 +59,7 @@ func generateRandomFileName(ext string) string {
     datePrefix := now.Format("20060102") // Format: YYYYMMDD
 
     // Buat string acak 10 karakter
-    randomString := generateRandomString(10)
+    randomString := generateRandomString(16)
 
     // Format jam, menit, dan detik
     timeSuffix := now.Format("150405") // Format: HHMMSS
@@ -369,7 +369,7 @@ func (service *AuthServiceImpl) Update(Id int, req web.UpdateUserRequest, file *
 
     // Menghasilkan nama file acak untuk file KTP yang diunggah
     ext := filepath.Ext(fileKTP.Filename)
-    randomFileName := generateRandomFileName(ext)
+    randomFileName := generateRandomFileName("Yk" + ext)
     KTPPath = filepath.Join("uploads", "dokpribadi", randomFileName)
 
     // Menyimpan file KTP ke server
@@ -403,7 +403,7 @@ func (service *AuthServiceImpl) Update(Id int, req web.UpdateUserRequest, file *
 
     // Menghasilkan nama file acak untuk file KK yang diunggah
     ext := filepath.Ext(fileKK.Filename)
-    randomFileName := generateRandomFileName(ext)
+    randomFileName := generateRandomFileName("GI" + ext)
     KKPath = filepath.Join("uploads", "dokpribadi", randomFileName)
 
     // Menyimpan file KK ke server
