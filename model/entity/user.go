@@ -25,8 +25,8 @@ type UserEntity struct {
 	Rw string `json:"rw"`
 	Alamat string `json:"alamat"`
 	NoHp string `json:"no_hp"`
-	Ktp domain.JSONB `json:"ktp"`
-	Kk domain.JSONB `json:"kk"`
+	Ktp string `json:"ktp"`
+	Kk string `json:"kk"`
 }
 
 func ToUserEntity(user domain.Users) UserEntity {

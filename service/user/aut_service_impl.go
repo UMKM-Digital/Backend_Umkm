@@ -2,7 +2,7 @@ package userservice
 
 import (
 	// "encoding/json"
-	"encoding/json"
+	// "encoding/json"
 	"errors"
 	"math/rand"
 	"mime/multipart"
@@ -240,7 +240,7 @@ func (service *AuthServiceImpl) ViewMe(userId int) (entity.UserEntity, error) {
 }
 
 // update profile
-func (service *AuthServiceImpl) Update(Id int, req web.UpdateUserRequest, file *multipart.FileHeader, Ktp []*multipart.FileHeader, kkFiles []*multipart.FileHeader) (helper.ResponseToJson, error) {
+func (service *AuthServiceImpl) Update(Id int, req web.UpdateUserRequest, file *multipart.FileHeader, fileKTP *multipart.FileHeader, fileKK *multipart.FileHeader) (helper.ResponseToJson, error) {
     user, errUser := service.authrepository.GetByID(Id)
 
     // Parse TanggalLahir (Date of Birth)
@@ -276,7 +276,7 @@ func (service *AuthServiceImpl) Update(Id int, req web.UpdateUserRequest, file *
         user.No_Phone = req.No_Phone
     }
 
-    var Logo string
+    var Logo, KTPPath, KKPath  string
 
     if file != nil {
         // Check if the current picture is from Google (URL starting with https://lh3.googleusercontent.com/)
@@ -348,167 +348,76 @@ func (service *AuthServiceImpl) Update(Id int, req web.UpdateUserRequest, file *
         // If no new file is uploaded, retain the existing picture (either URL or local file)
         Logo = user.Picture
     }
-    
-   // KTP
-// KTP
-var oldKTPDocs KTPData
-var newKTPDocs []map[string]interface{} // Pastikan ini dideklarasikan di sini
 
-if user.Ktp != nil { // Pastikan user.Ktp tidak kosong
-    ktpValue, err := user.Ktp.Value()
+// Menangani file KTP
+    // Handle KTP file upload
+    if fileKTP != nil {
+        // Hapus file KTP lama jika ada
+    if user.Ktp != "" {
+        err := os.Remove(user.Ktp)
+        if err != nil {
+            return nil, errors.New("failed to remove old KTP file")
+        }
+    }
+
+    // Buka file KTP baru
+    src, err := fileKTP.Open()
     if err != nil {
-        return nil, errors.New("gagal mendapatkan nilai KTP")
+        return nil, errors.New("failed to open the uploaded KTP file")
+    }
+    defer src.Close()
+
+    // Menghasilkan nama file acak untuk file KTP yang diunggah
+    ext := filepath.Ext(fileKTP.Filename)
+    randomFileName := generateRandomFileName(ext)
+    KTPPath = filepath.Join("uploads", "dokpribadi", randomFileName)
+
+    // Menyimpan file KTP ke server
+    if err := helper.SaveFile(fileKTP, KTPPath); err != nil {
+        return nil, errors.New("failed to save KTP file")
     }
 
-    // Unmarshal ke dalam oldKTPDocs
-    if err := json.Unmarshal(ktpValue.([]byte), &oldKTPDocs); err == nil {
-        // Hapus dokumen KTP lama jika ada file baru yang diunggah
-        if len(Ktp) > 0 {
-            for _, doc := range oldKTPDocs.URLs {
-                documentPath := doc.Document
-                fmt.Println("Menghapus dokumen KTP:", documentPath)
-
-                if _, err := os.Stat(documentPath); err == nil {
-                    err := os.Remove(documentPath)
-                    if err != nil {
-                        fmt.Printf("Gagal menghapus dokumen KTP yang lama: %s, error: %v\n", documentPath, err)
-                        return nil, errors.New("gagal menghapus dokumen KTP yang lama")
-                    } else {
-                        fmt.Println("Dokumen KTP berhasil dihapus:", documentPath)
-                    }
-                } else if os.IsNotExist(err) {
-                    fmt.Printf("File tidak ada, tidak dapat dihapus: %s\n", documentPath)
-                } else {
-                    fmt.Printf("Error saat memeriksa file: %s, error: %v\n", documentPath, err)
-                }
-            }
-        } else{
-            for _, doc := range oldKTPDocs.URLs {
-            newDoc := map[string]interface{}{
-                "id":       doc.ID,       // Pastikan ada ID di KTPDocument
-                "document": doc.Document,  // Pastikan ada Document di KTPDocument
-            }
-            newKTPDocs = append(newKTPDocs, newDoc)
-        }
-    }
+    // Mengonversi path untuk menggunakan forward slashes
+    KTPPath = filepath.ToSlash(KTPPath)
     } else {
-        fmt.Println("Gagal melakukan unmarshal KTP:", err)
-        return nil, errors.New("Gagal melakukan unmarshal KTP")
+        // Retain existing KTP path if no new file
+        KTPPath = user.Ktp
     }
-} else {
-    fmt.Println("user.Ktp adalah nil atau kosong")
-}
 
-// Proses file KTP baru
-if len(Ktp) > 0 {
-    for _, file := range Ktp {
-        if file != nil {
-            ext := filepath.Ext(file.Filename)
-            randomFileName := generateRandomFileName(ext)
-            newDocPath := filepath.Join("uploads/dokpribadi", randomFileName)
-
-            src, err := file.Open()
-            if err != nil {
-                return nil, errors.New("gagal membuka file KTP yang diunggah")
-            }
-            defer src.Close()
-
-            if err := helper.SaveFile(file, newDocPath); err != nil {
-                return nil, errors.New("gagal menyimpan dokumen KTP")
-            }
-
-            newDoc := map[string]interface{}{
-                "id":       len(newKTPDocs) + 1,
-                "document": filepath.ToSlash(newDocPath),
-            }
-            newKTPDocs = append(newKTPDocs, newDoc)
+    // Handle KK file upload
+    if fileKK != nil {
+       // Hapus file KK lama jika ada
+    if user.KartuKeluarga != "" {
+        err := os.Remove(user.KartuKeluarga)
+        if err != nil {
+            return nil, errors.New("failed to remove old KK file")
         }
     }
-} else {
-    fmt.Println("Tidak ada file KTP yang diunggah")
-}
 
-// KK
-var oldKKDocs KTPData
-var newKKDocs []map[string]interface{} // Pastikan ini dideklarasikan di sini
-
-if user.KartuKeluarga != nil { // Pastikan user.KartuKeluarga tidak kosong
-    kkValue, err := user.KartuKeluarga.Value()
+    // Buka file KK baru
+    src, err := fileKK.Open()
     if err != nil {
-        return nil, errors.New("gagal mendapatkan nilai Kartu Keluarga")
+        return nil, errors.New("failed to open the uploaded KK file")
+    }
+    defer src.Close()
+
+    // Menghasilkan nama file acak untuk file KK yang diunggah
+    ext := filepath.Ext(fileKK.Filename)
+    randomFileName := generateRandomFileName(ext)
+    KKPath = filepath.Join("uploads", "dokpribadi", randomFileName)
+
+    // Menyimpan file KK ke server
+    if err := helper.SaveFile(fileKK, KKPath); err != nil {
+        return nil, errors.New("failed to save KK file")
     }
 
-    // Unmarshal ke dalam oldKKDocs
-    if err := json.Unmarshal(kkValue.([]byte), &oldKKDocs); err == nil {
-        // Hapus dokumen KK lama jika ada file baru yang diunggah
-        if len(kkFiles) > 0 {
-            for _, doc := range oldKKDocs.URLs {
-                documentPath := doc.Document
-                fmt.Println("Menghapus dokumen KK:", documentPath)
-
-                if _, err := os.Stat(documentPath); err == nil {
-                    err := os.Remove(documentPath)
-                    if err != nil {
-                        fmt.Printf("Gagal menghapus dokumen KK yang lama: %s, error: %v\n", documentPath, err)
-                        return nil, errors.New("gagal menghapus dokumen KK yang lama")
-                    } else {
-                        fmt.Println("Dokumen KK berhasil dihapus:", documentPath)
-                    }
-                } else if os.IsNotExist(err) {
-                    fmt.Printf("File tidak ada, tidak dapat dihapus: %s\n", documentPath)
-                } else {
-                    fmt.Printf("Error saat memeriksa file: %s, error: %v\n", documentPath, err)
-                }
-            }
-        } else{
-            for _, doc := range oldKTPDocs.URLs {
-            newDoc := map[string]interface{}{
-                "id":       doc.ID,       // Pastikan ada ID di KTPDocument
-                "document": doc.Document,  // Pastikan ada Document di KTPDocument
-            }
-            newKKDocs = append(newKKDocs, newDoc)
-        }
-        }
+    // Mengonversi path untuk menggunakan forward slashes
+    KKPath = filepath.ToSlash(KKPath)
     } else {
-        fmt.Println("Gagal melakukan unmarshal KK:", err)
-        return nil, errors.New("Gagal melakukan unmarshal KK")
+        // Retain existing KK path if no new file
+        KKPath = user.KartuKeluarga
     }
-} else {
-    fmt.Println("user.KartuKeluarga adalah nil atau kosong")
-}
 
-// Proses file KK baru
-if len(kkFiles) > 0 {
-    for _, file := range kkFiles {
-        if file != nil {
-            ext := filepath.Ext(file.Filename)
-            randomFileName := generateRandomFileName(ext)
-            newDocPath := filepath.Join("uploads/dokpribadi", randomFileName)
-
-            src, err := file.Open()
-            if err != nil {
-                return nil, errors.New("gagal membuka file KK yang diunggah")
-            }
-            defer src.Close()
-
-            if err := helper.SaveFile(file, newDocPath); err != nil {
-                return nil, errors.New("gagal menyimpan dokumen KK")
-            }
-
-            newDoc := map[string]interface{}{
-                "id":       len(newKKDocs) + 1,
-                "document": filepath.ToSlash(newDocPath),
-            }
-            newKKDocs = append(newKKDocs, newDoc)
-        }
-    }
-} else {
-    fmt.Println("Tidak ada file KK yang diunggah")
-}
-
-// Siapkan data KTP dan KK yang diperbarui
-updatedKTPJSONB := domain.JSONB{"urls": newKTPDocs}
-updatedKKJSONB := domain.JSONB{"urls": newKKDocs}
 
     // Create user update data
     TestimonalRequest := domain.Users{
@@ -531,8 +440,8 @@ updatedKKJSONB := domain.JSONB{"urls": newKKDocs}
         Rw:              req.Rw,
         PendidikanTerakhir: req.PendidikanTerakhir,
         KodePos:         req.KodePos,
-        Ktp:             updatedKTPJSONB,
-        KartuKeluarga:   updatedKKJSONB,
+        Ktp:             KTPPath,
+        KartuKeluarga:   KKPath,
         Picture: Logo,
     }
 

@@ -1,7 +1,5 @@
 package web
 
-import "encoding/json"
-
 type RegisterRequest struct {
 	Fullname           string `validate:"required" json:"fullname"`       //
 	Email              string `validate:"required,email" json:"email"`    //
@@ -50,9 +48,9 @@ type UpdateUserRequest struct {
 	Rw                 string  `validate:"required" json:"rw"`             //0
 	PendidikanTerakhir string  `validate:"required" json:"pendidikan_terakhir"`
 	KodePos            string  `validate:"required" json:"kode_pos"`
-	Picture            string  `validate:"required" json:"picture"`
-	Ktp                json.RawMessage `validate:"required" json:"ktp"`
-    Kk                json.RawMessage `validate:"required" json:"kk"`
+	Picture            string  ` json:"picture"`
+	Ktp                string `json:"ktp"`
+    Kk                string `json:"kk"`
 
 }
 

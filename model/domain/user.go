@@ -26,8 +26,8 @@ type Users struct {
     Kabupaten string         `gorm:"column:kabupaten"`
     Kelurahan string         `gorm:"column:kelurahan"`
     Kecamatan string         `gorm:"column:kecamatan"`
-    Ktp JSONB  `gorm:"column:ktp"`
-    KartuKeluarga JSONB `gorm:"column:kartu_keluarga"`
+    Ktp string  `gorm:"column:ktp"`
+    KartuKeluarga string `gorm:"column:kartu_keluarga"`
     PendidikanTerakhir string `gorm:"column:pendidikan_terakhir"`
    CreatedAt            time.Time `gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt            time.Time `gorm:"column:updated_at;autoUpdateTime"`

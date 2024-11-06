@@ -1,8 +1,6 @@
 package usercontroller
 
 import (
-	"log"
-	"mime/multipart"
 	"net/http"
 
 	// "strings"
@@ -135,32 +133,39 @@ func (controller *UserControllerImpl) Update(c echo.Context) error {
 	kodepos    := c.FormValue("kode_pos")
 	kecamatan    := c.FormValue("kecamatan")
     address := c.FormValue("alamat")
-	var potoprofile *multipart.FileHeader
-    var err error
+	// var potoprofile *multipart.FileHeader
+    // var err error
 
-    // Check for potoprofile file
-     file, err := c.FormFile("potoprofile") 
-        potoprofile = file
-		if err != nil && err != http.ErrMissingFile {
-			return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "failed to get uploaded file", nil))
+    // // Check for potoprofile file
+    //  file, err := c.FormFile("potoprofile") 
+    //     potoprofile = file
+	// 	if err != nil && err != http.ErrMissingFile {
+	// 		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "failed to get uploaded file potoprofile", nil))
+	// 	}
+
+		file, err := c.FormFile("ktp")
+		if err == http.ErrMissingFile {
+			file = nil // jika file tidak ada, atur nil
+		} else if err != nil {
+			return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Failed to get the uploaded file ktp", nil))
 		}
+		
 
 
-    
-    log.Printf("Form values - Name: %s, Email: %s, PhoneNumber: %s, Address: %s", name, email, phoneNumber, address)
-
-    // Handle file upload for profile picture if present
-	var files []*multipart.FileHeader
-	if file, err := c.FormFile("ktp"); err == nil {
-		files = append(files, file)
-	}
-	
-	// Handle file upload for KK
-	var fileskk []*multipart.FileHeader
-	if file, err := c.FormFile("kk"); err == nil {
-		fileskk = append(fileskk, file)
-	}
-	
+		ktp, err := c.FormFile("ktp")
+		if err == http.ErrMissingFile {
+			ktp = nil // jika file tidak ada, atur nil
+		} else if err != nil {
+			return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Failed to get the uploaded file ktp", nil))
+		}
+		
+		// Handle KK file
+		kk, err := c.FormFile("kk")
+		if err == http.ErrMissingFile {
+			kk = nil // jika file tidak ada, atur nil
+		} else if err != nil {
+			return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Failed to get the uploaded file kk", nil))
+		}
 
     // Create the request object manually
     request := web.UpdateUserRequest{
@@ -186,7 +191,7 @@ func (controller *UserControllerImpl) Update(c echo.Context) error {
     }
 
     // Call the service to update user info
-    result, err := controller.userService.Update(userId, request, potoprofile,files, fileskk)
+    result, err := controller.userService.Update(userId, request, file,ktp, kk)
     if err != nil {
         return c.JSON(http.StatusInternalServerError, helper.ResponseToJsonOtp(http.StatusInternalServerError, err.Error(), nil))
     }
