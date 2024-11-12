@@ -54,9 +54,9 @@ type KecamatanEntity struct {
 
 func ToKecamatanEntity(daerah domain.Kecamatan) KecamatanEntity {
 	return KecamatanEntity{
-		IdKabupaten:   daerah.IdKabupaten,
-		IdKecamatan: daerah.KodeWilayah,
-		Name: daerah.NamaWilayah,
+		IdKabupaten:   daerah.IdKab,
+		IdKecamatan: daerah.KodeKec,
+		Name: daerah.Nama,
 	}
 }
 
@@ -70,16 +70,16 @@ func ToDaerahKecamatanEntities(daerahList []domain.Kecamatan) []KecamatanEntity 
 
 //
 type KeluarahanEntity struct {
-	IdKabupaten   string    `json:"id_kecamatan"`
-	IdKecamatan  string `json:"id_kelurahan"` 
+	IdKec   string    `json:"id_kecamatan"`
+	IdKel  string `json:"id_kelurahan"` 
 	Name string `json:"name"`
 }
 
 func ToKelurahanEntity(daerah domain.Keluarahan) KeluarahanEntity {
 	return KeluarahanEntity{
-		IdKabupaten:   daerah.KodeKecamatan,
-		IdKecamatan: daerah.KodeKewilayah,
-		Name: daerah.NamaWilayah,
+		IdKec:   daerah.IdKec,
+		IdKel: daerah.KodeKel,
+		Name: daerah.Nama,
 	}
 }
 

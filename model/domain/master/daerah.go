@@ -26,24 +26,27 @@ func (Kabupaten) TableName() string {
 //kecamatan
 type Kecamatan struct {
 	Id int       `gorm:"column:id;primaryKey;autoIncrement"`
-	IdKabupaten  string       `gorm:"column:kode_kabupaten"`
-	KodeWilayah  string       `gorm:"column:kode_wilayah"`
-	NamaWilayah string  `gorm:"column:nama_wilayah"`
+	IdProv  string       `gorm:"column:id_prov"`
+	IdKab string `gorm:"column:id_kab"`
+	KodeKec string `gorm:"column:kode_kec"`
+	Nama string  `gorm:"column:nama"`
 }
 
 func (Kecamatan) TableName() string {
-	return "master.kode_kec"
+	return "master.kecamatan"
 }
 
 
 //keluarahan
 type Keluarahan struct {
 	Id int       `gorm:"column:id;primaryKey;autoIncrement"`
-	KodeKecamatan  string       `gorm:"column:kode_kec"`
-	KodeKewilayah  string       `gorm:"column:kode_wilayah"`
-	NamaWilayah string  `gorm:"column:nama_wilayah"`
+	IdProv  string       `gorm:"column:id_prov"`
+	IdKab string `gorm:"column:id_kab"`
+	IdKec string `gorm:"column:id_kec"`
+	KodeKel string `gorm:"column:kode_kel"`
+	Nama string  `gorm:"column:nama"`
 }
 
 func (Keluarahan) TableName() string {
-	return "master.kode_kel"
+	return "master.kelurahan"
 }

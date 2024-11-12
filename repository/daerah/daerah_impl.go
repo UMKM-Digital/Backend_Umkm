@@ -25,7 +25,7 @@ func (repo *DaerahRepoImpl) GetProvinsi() ([]domain.Provinsi, error) {
 
 func (repo *DaerahRepoImpl) GetKabupaten(id string) ([]domain.Kabupaten, error){
 	var Kabupaten []domain.Kabupaten
-	err := repo.db.Where("id_prov  = ?", id).Find(&Kabupaten).Error
+	err := repo.db.Order("id ASC").Where("id_prov  = ?", id).Find(&Kabupaten).Error
 	if err != nil{
 		return nil, err
 	}
@@ -34,7 +34,7 @@ func (repo *DaerahRepoImpl) GetKabupaten(id string) ([]domain.Kabupaten, error){
 
 func (repo *DaerahRepoImpl) GetKecamatan(id string) ([]domain.Kecamatan, error){
 	var kecamatan []domain.Kecamatan
-	err := repo.db.Where("kode_kabupaten  = ?", id).Find(&kecamatan).Error
+	err := repo.db.Order("id ASC").Where("id_kab  = ?", id).Find(&kecamatan).Error
 	if err != nil{
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func (repo *DaerahRepoImpl) GetKecamatan(id string) ([]domain.Kecamatan, error){
 
 func (repo *DaerahRepoImpl) GetKelurahan(id string) ([]domain.Keluarahan, error){
 	var kecamatan []domain.Keluarahan
-	err := repo.db.Where("kode_kec  = ?", id).Find(&kecamatan).Error
+	err := repo.db.Order("id ASC").Where("id_kec  = ?", id).Find(&kecamatan).Error
 	if err != nil{
 		return nil, err
 	}
