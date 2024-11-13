@@ -55,6 +55,10 @@ func (umkmQueryBuilder *UmkmQueryBuilderImpl) GetBuilder(filters string, limit i
 func (umkmQueryBuilder *UmkmQueryBuilderImpl) GetBuilderWebList(filters string, limit int, page int, KategoriUmkm string, sortOrder string) (*gorm.DB, error) {
     query := umkmQueryBuilder.db
 
+     // Tambahkan filter untuk status UMKM yang disetujui
+     query = umkmQueryBuilder.db.Table("umkm").
+        Joins("JOIN hak_akses ON hak_akses.umkm_id = umkm.id").
+        Where("hak_akses.status = ?", "disetujui") // Hanya ambil UMKM yang disetujui
     // Tambahkan filter sebelum pagination
     if filters != "" {
         searchPattern := "%" + filters + "%"
