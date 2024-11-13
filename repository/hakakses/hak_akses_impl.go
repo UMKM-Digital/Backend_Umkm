@@ -64,3 +64,19 @@ func (repo *HakAksesRepoUmkmImpl) AcceptBulkStatus(umkmids []uuid.UUID, hakakses
     }
     return nil
 }
+
+
+func (repo *HakAksesRepoUmkmImpl) CheckUmkmStatus(umkmId uuid.UUID) (bool, error) {
+	var status string
+	err := repo.db.Table("hak_akses").
+		Select("status").
+		Where("umkm_id = ?", umkmId).
+		Scan(&status).Error
+	if err != nil {
+		return false, err
+	}
+	if status == "" {
+		return false, errors.New("status tidak ditemukan untuk UMKM ID ini")
+	}
+	return status == "disetujui", nil
+}

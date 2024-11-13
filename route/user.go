@@ -119,7 +119,7 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	transaksiQueryBuilder := general_query_builder.NewTransaksiQueryBuilder(db)
 
 	userTransaksiRepo := transaksirepo.NewTransaksiRepositoryImpl(db, transaksiQueryBuilder)
-	userTransaksiService := transaksiservice.NewTransaksiservice(userTransaksiRepo, db)
+	userTransaksiService := transaksiservice.NewTransaksiservice(userTransaksiRepo,db, userHakAksesRepo)
 	userTransaksiController := transaksicontroller.NewTransaksiController(userTransaksiService, db)
 	
 	KategoriProdukQueryBuilder := query_builder_kategori_produk.NewKategoriProdukQueryBuilder(db)
@@ -185,7 +185,7 @@ userDataController := datacontroller.NewUmkmController(userDataService)
 
 //omset
 omsetUmkm := omsetrepo.NewomsetRepositoryImpl(db)
-userOmsetService := omsetservice.NewOmsetService(omsetUmkm)
+userOmsetService := omsetservice.NewOmsetService(omsetUmkm, userHakAksesRepo)
 userOmsetController := omsetcontroller.NewOmsetController(userOmsetService)
 
 	g := e.Group(prefix)

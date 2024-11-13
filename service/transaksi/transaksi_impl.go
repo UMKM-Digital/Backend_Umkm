@@ -12,6 +12,7 @@ import (
 	"umkm/model/web"
 
 	// querybuilder "umkm/query_builder"
+	hakaksesrepo "umkm/repository/hakakses"
 	transaksirepo "umkm/repository/transaksi"
 
 	"github.com/google/uuid"
@@ -22,18 +23,28 @@ import (
 type TranssaksiServiceImpl struct {
 	transaksirepository transaksirepo.TransaksiRepo
 	db                  *gorm.DB
+	HakAkses hakaksesrepo.CreateHakakses
 }
 
-func NewTransaksiservice(transaksirepository transaksirepo.TransaksiRepo, db *gorm.DB) *TranssaksiServiceImpl {
+func NewTransaksiservice(transaksirepository transaksirepo.TransaksiRepo, db *gorm.DB, HakAkses hakaksesrepo.CreateHakakses) *TranssaksiServiceImpl {
 	return &TranssaksiServiceImpl{
 		transaksirepository: transaksirepository,
 		db:                  db,
+		HakAkses: HakAkses,
 	}
 }
 
 // register
 // service/transaksiservice/auth_service_impl.go
 func (service *TranssaksiServiceImpl) CreateTransaksi(transaksi web.CreateTransaksi) (map[string]interface{}, error) {
+	isApproved, err := service.HakAkses.CheckUmkmStatus(transaksi.UmkmId)
+    if err != nil {
+        return nil, errors.New("gagal memeriksa status UMKM")
+    }
+    if !isApproved {
+        return nil, errors.New("UMKM belum disetujui, transaksi tidak dapat dibuat")
+    } 
+
 	date, err := helper.ParseDate(transaksi.Tanggal)
 	IDKategoriProduk, err := helper.RawMessageToJSONB(transaksi.IDKategoriProduk)
 	if err != nil {

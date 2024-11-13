@@ -55,7 +55,15 @@ func generateRandomFileName(ext string) string {
 	return fmt.Sprintf("%s-%s-%s%s", datePrefix, uniqueID, seconds, ext)
 }
 
+
 func (service *ProdukServiceImpl) CreateProduk(produk web.WebProduk, files []*multipart.FileHeader) (map[string]interface{}, error) {
+    isApproved, err := service.HakAkses.CheckUmkmStatus(produk.UmkmId)
+    if err != nil {
+        return nil, errors.New("gagal memeriksa status UMKM")
+    }
+    if !isApproved {
+        return nil, errors.New("UMKM belum disetujui, produk tidak dapat dibuat")
+    }
     // Proses untuk menyimpan gambar baru
     var newImages []map[string]interface{}
     index := 0 // Menggunakan integer untuk indeks gambar
@@ -129,12 +137,6 @@ func (service *ProdukServiceImpl) CreateProduk(produk web.WebProduk, files []*mu
         "deskripsi":          saveProduk.Deskripsi,
     }, nil
 }
-
-
-
-
-
-
 
 //
 func (service *ProdukServiceImpl) DeleteProduk(id uuid.UUID) error {

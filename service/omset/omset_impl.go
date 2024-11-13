@@ -1,10 +1,12 @@
 package omsetservice
 
 import (
+	"errors"
 	"umkm/helper"
 	"umkm/model/domain"
 	"umkm/model/entity"
 	"umkm/model/web"
+	hakaksesrepo "umkm/repository/hakakses"
 	omsetrepo "umkm/repository/omset"
 
 	"github.com/google/uuid"
@@ -12,16 +14,26 @@ import (
 
 type OmzetServiceImpl struct {
 	omsetrepository omsetrepo.OmsetRepo
+	HakAkses hakaksesrepo.CreateHakakses
 }
 
-func NewOmsetService(omsetrepo omsetrepo.OmsetRepo) *OmzetServiceImpl{
+func NewOmsetService(omsetrepo omsetrepo.OmsetRepo, HakAkses hakaksesrepo.CreateHakakses) *OmzetServiceImpl{
 	return &OmzetServiceImpl{
 		omsetrepository: omsetrepo,
+		HakAkses: HakAkses,
 	}
 }
 
 
 func(service *OmzetServiceImpl) CreateOmsetService( omset web.Omset)(map[string]interface{}, error){
+	isApproved, err := service.HakAkses.CheckUmkmStatus(omset.UmkmId)
+    if err != nil {
+        return nil, errors.New("gagal memeriksa status UMKM")
+    }
+    if !isApproved {
+        return nil, errors.New("UMKM belum disetujui, transaksi tidak dapat dibuat")
+    } 
+
 	newOmset := domain.Omset{
 		UmkmId: omset.UmkmId,
 		Nominal: omset.JumlahOmset,

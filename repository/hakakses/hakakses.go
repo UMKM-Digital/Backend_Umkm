@@ -14,4 +14,5 @@ type CreateHakakses interface {
 	GetUmkmIdsByUserId(userId int) ([]uuid.UUID, error)
 	GetUmkmId(umkmid uuid.UUID) (domain.HakAkses, error)
 	AcceptBulkStatus(umkmids []uuid.UUID, hakakses domain.HakAkses) error
+	CheckUmkmStatus(umkmId uuid.UUID) (bool, error) 
 }
