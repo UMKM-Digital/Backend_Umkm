@@ -161,11 +161,7 @@ func (controller *UmkmControllerImpl) Create(c echo.Context) error {
 			return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid omset data", nil))
 		}
 	}
-
-	// Ambil dokumen yang diunggah
-
-	// Ambil dokumen IDs dan dokumen uploads
-	// Mengambil dokumen ID dan dokumen file berdasarkan indeks
+	
 	var dokumenIDs []string
 	var dokumenFiles []*multipart.FileHeader
 
@@ -441,48 +437,6 @@ func (controller *UmkmControllerImpl) GetUmmkmList(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, model.ResponseToClientpagi(http.StatusOK, "true", "berhasil", pagination, getUmkm))
 }
-
-// func (controller *UmkmControllerImpl)  GetUmkmListDetial(c echo.Context) error {
-
-//     IdUmkm := c.Param("id")
-// 	id, _ := uuid.Parse(IdUmkm)
-//      // Ambil parameter limit dan page dari query string
-//      limitStr := c.QueryParam("limit")
-//      pageStr := c.QueryParam("page")
-
-//      limit := 10
-//     page := 1
-
-//      if limitStr != "" {
-//         parsedLimit, err := strconv.Atoi(limitStr)
-//         if err == nil && parsedLimit > 0 {
-//             limit = parsedLimit
-//         }
-//     }
-
-//     // Parsing parameter page jika tersedia
-//     if pageStr != "" {
-//         parsedPage, err := strconv.Atoi(pageStr)
-//         if err == nil && parsedPage > 0 {
-//             page = parsedPage
-//         }
-//     }
-// 	getUmkmDetailList, totalCount, currentPage, totalPages, nextPage, prevPage, errGetUmkmDetailList := controller.umkmservice.GetUmkmDetailList(id, limitStr, pageStr)
-
-// 	pagination := model.Pagination{
-// 		CurrentPage:  currentPage,
-// 		NextPage:     nextPage,
-// 		PrevPage:     prevPage,
-// 		TotalPages:   totalPages,
-// 		TotalRecords: totalCount,
-// 	}
-
-// 	if errGetUmkmDetailList != nil {
-// 		return c.JSON(http.StatusInternalServerError, model.ResponseToClientpagi(http.StatusInternalServerError, "false", errGetUmkmDetailList.Error(), model.Pagination{}, nil))
-// 	}
-
-// 	return c.JSON(http.StatusOK, model.ResponseToClientpagi(http.StatusOK, "true", "success",pagination, getUmkmDetailList))
-// }
 
 func (controller *UmkmControllerImpl) GetUmkmListDetial(c echo.Context) error {
 	IdUmkm := c.Param("id")

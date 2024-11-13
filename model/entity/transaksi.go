@@ -57,11 +57,3 @@ func ToTransaksiEntity(transaksi domain.Transaksi) TransaksiEntity {
 		Deskripsi: transaksi.Keterangan,
 	}
 }
-
-// func ToTransaksiEntities(transaksilist []domain.Transaksi) []TransaksiEntity {
-// 	var kategoriEntities []TransaksiEntity
-// 	for _, kategori := range transaksilist {
-// 		kategoriEntities = append(kategoriEntities, ToTransaksiEntity(kategori))
-// 	}
-// 	return kategoriEntities
-// }

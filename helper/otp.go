@@ -47,8 +47,6 @@ func generateRandomOTP(length int) (string, error) {
 	return otp, nil
 }
 
-// SendWhatsAppOTP sends OTP via WhatsApp and saves it to the database
-// SendWhatsAppOTP sends OTP via WhatsApp and saves it to the database
 func SendWhatsAppOTP(db *gorm.DB, phone string, expiresAt time.Time) error {
 	otp, err := GenerateOTP()
 	if err != nil {

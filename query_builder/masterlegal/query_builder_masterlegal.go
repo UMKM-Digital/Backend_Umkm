@@ -90,21 +90,7 @@ return nil, err
 		return builder.db.Table("master_dokumen_legal").Where("1 = 0"), nil
 	}
 
-	// Query untuk mengambil dokumen master legal dengan status upload
-	// Query untuk mengambil dokumen master legal dengan status upload
-// query := builder.db.Table("master_dokumen_legal").
-// Select(`
-// umkm.id AS umkm_id, 
-// master_dokumen_legal.id, 
-// master_dokumen_legal.nama, 
-// CASE 
-// 	WHEN umkm_id IS NOT NULL THEN 1 
-// 	ELSE 0 
-// END AS status`).
-// Joins("JOIN umkm ON umkm.id IN (?)", umkmIds). // Mengambil UMKM yang terkait dengan hak akses
-// Joins("LEFT JOIN umkm_dokumen_legal ud ON ud.umkm_id = umkm.id AND ud.dokumen_id = master_dokumen_legal.id").
-// Group("umkm.id, master_dokumen_legal.id, master_dokumen_legal.nama").
-// Order("umkm.id, master_dokumen_legal.id")
+	
 
 query := builder.db.Table("master_dokumen_legal").
     Select(`

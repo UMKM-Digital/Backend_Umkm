@@ -7,7 +7,7 @@ type RegisterRequest struct {
 	No_Nik             string `validate:"required" json:"no_nik"`         //
 	No_Phone           string `validate:"required" json:"no_telp"`        //
 	No_KK              string `validate:"required" json:"no_kk"`          //
-	No_Nib             string `json:"no_nib"`         //
+	// No_Nib             string `json:"no_nib"`         //
 	TanggalLahir       string `validate:"required" json:"tgl_lahir"`      //
 	JenisKelamin       string `validate:"required" json:"jenis_kelamin"`  //
 	StatusMenikah      string `validate:"required" json:"status_menikah"` //
@@ -35,7 +35,7 @@ type UpdateUserRequest struct {
 	No_Nik             string  `validate:"required" json:"no_nik"`         //00
 	No_Phone           string  `validate:"required" json:"no_telp"`        //
 	No_KK              string  `validate:"required" json:"no_kk"`          //00
-	No_Nib             string  `json:"no_nib"`         //00
+	// No_Nib             string  `json:"no_nib"`         //00
 	TanggalLahir       string  `validate:"required" json:"tgl_lahir"`      //00
 	JenisKelamin       string  `validate:"required" json:"jenis_kelamin"`  //00
 	StatusMenikah      string  `validate:"required" json:"status_menikah"` //00

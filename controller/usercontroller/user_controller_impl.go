@@ -87,27 +87,6 @@ func (controller *UserControllerImpl) View(c echo.Context) error {
 	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "Profile dapat dilihat", result))
 }
 
-//logout
-
-// func (controller *UserControllerImpl) Logout(c echo.Context) error {
-//     authHeader := c.Request().Header.Get("Authorization")
-//     if authHeader == "" {
-//         return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, "Authorization header is required", nil))
-//     }
-
-//     // Extract the token from the header
-//     tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-
-//     // Blacklist the token
-//     err := controller.tokenUseCase.BlacklistAccessToken(tokenString)
-//     if err != nil {
-//         return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, err.Error(), nil))
-//     }
-
-//     // Return a success message without a new token
-//     return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, "You have been logged out", nil))
-// }
-
 //update
 func (controller *UserControllerImpl) Update(c echo.Context) error {
     // Get the user ID from the JWT token
@@ -120,7 +99,7 @@ func (controller *UserControllerImpl) Update(c echo.Context) error {
 	Password := c.FormValue("password")
 	NoNik    := c.FormValue("no_nik")
 	no_kk    := c.FormValue("no_kk")
-	no_nib    := c.FormValue("no_nib")
+	// no_nib    := c.FormValue("no_nib")
 	tanggalLahir    := c.FormValue("tanggal_lahir")
 	jeniskelamin    := c.FormValue("jenis_kelamin")
 	statusmenikah   := c.FormValue("status_menikah")
@@ -133,15 +112,6 @@ func (controller *UserControllerImpl) Update(c echo.Context) error {
 	kodepos    := c.FormValue("kode_pos")
 	kecamatan    := c.FormValue("kecamatan")
     address := c.FormValue("alamat")
-	// var potoprofile *multipart.FileHeader
-    // var err error
-
-    // // Check for potoprofile file
-    //  file, err := c.FormFile("potoprofile") 
-    //     potoprofile = file
-	// 	if err != nil && err != http.ErrMissingFile {
-	// 		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "failed to get uploaded file potoprofile", nil))
-	// 	}
 
 		file, err := c.FormFile("ktp")
 		if err == http.ErrMissingFile {
@@ -176,7 +146,7 @@ func (controller *UserControllerImpl) Update(c echo.Context) error {
 		Password: Password,
 		No_Nik: NoNik,
 		No_KK: no_kk,
-		No_Nib: no_nib,
+		// No_Nib: no_nib,
 		TanggalLahir: tanggalLahir,
 		JenisKelamin: jeniskelamin,
 		StatusMenikah: statusmenikah,
@@ -319,36 +289,13 @@ func (controller *UserControllerImpl) ChangePassword(c echo.Context) error {
 }
 
 
-
-// func (controller *UserControllerImpl) LoginWithGoogle(c echo.Context) error {
-//     var request struct {
-//         GoogleToken string `json:"google_token"`
-//     }
-
-//     if err := c.Bind(&request); err != nil {
-//         return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "invalid request", nil))
-//     }
-
-//     // Verifikasi token Google dan login
-//     user, jwtToken, err := controller.userService.LoginWithGoogle(request.GoogleToken)
-//     if err != nil {
-//         return c.JSON(http.StatusUnauthorized, model.ResponseToClient(http.StatusUnauthorized, false, err.Error(), nil))
-//     }
-
-//     return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "login successful", map[string]interface{}{
-//         "user":  user,
-//         "token": jwtToken,
-//     }))
-// }
-
-
 // HandleGoogleLoginOrRegister untuk menangani login atau pendaftaran menggunakan Google
 func (controller *UserControllerImpl) HandleGoogleLoginOrRegister(c echo.Context) error {
     var request struct {
-        GoogleID string `json:"google_id"` // ID Google pengguna
-        Email    string `json:"email"`     // Email pengguna
-        Username string `json:"username"`  // Nama pengguna
-        Picture   string `json:"picture"`   // URL gambar profil
+        GoogleID string `json:"google_id"`
+        Email    string `json:"email"`     
+        Username string `json:"username"`  
+        Picture   string `json:"picture"`   
     }
 
     // Bind JSON request ke struct

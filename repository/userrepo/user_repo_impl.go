@@ -209,10 +209,6 @@ func (repo *AuthrepositoryImpl) CountUserByGenderWithPercentage() (map[string]ma
             "total":      float64(countPerempuan),
             "persentase": percentagePerempuan,
         },
-        // "persentase_laki-laki": percentageLakiLaki,
-        // "persentase_perempuan": percentagePerempuan,
-        // "total_laki_laki": countPerempuan,
-        // "total perempuan" countLakiLaki,
     }
 
     return result, nil

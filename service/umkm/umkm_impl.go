@@ -279,44 +279,6 @@ func (service *UmkmServiceImpl) CreateUmkm(umkm web.UmkmRequest, userID int, fil
 	}, nil
 }
 
-// func (s *UmkmServiceImpl) GetUmkmListByUserId(ctx context.Context, userId int, filters string, limit int, page int) (map[string]interface{}, error) {
-//     // Mendapatkan Hak Akses berdasarkan user ID
-//     hakAksesList, err := s.hakaksesrepository.GetHakAksesByUserId(ctx, userId)
-//     if err != nil {
-//         return nil, err
-//     }
-
-//     // Membuat slice untuk menampung UMKM IDs dari Hak Akses
-//     var umkmIDs []uuid.UUID
-//     for _, hakAkses := range hakAksesList {
-//         umkmIDs = append(umkmIDs, hakAkses.UmkmId)
-//     }
-
-//     // Mengambil daftar UMKM berdasarkan UMKM IDs dengan pagination
-//     umkmList, totalCount, currentPage, totalPages, nextPage, prevPage, err := s.umkmrepository.GetUmkmListByIds(ctx, umkmIDs, filters, limit, page)
-//     if err != nil {
-//         return nil, err
-//     }
-
-//     // Mengonversi UMKM list ke entitas yang sesuai untuk response
-//     umkmEntitiesList, err := entity.ToUmkmEntities(umkmList, s.db)
-//     if err != nil {
-//         return nil, err
-//     }
-
-//     // Mengembalikan hasil dalam format map, termasuk pagination detail
-//     result := map[string]interface{}{
-//         "total_records": totalCount,
-//         "current_page":  currentPage,
-//         "total_pages":   totalPages,
-//         "next_page":     nextPage,
-//         "prev_page":     prevPage,
-//         "umkm_list":     umkmEntitiesList,
-//     }
-
-//     return result, nil
-// }
-
 func (s *UmkmServiceImpl) GetUmkmListByUserId(ctx context.Context, userId int, filters string, limit int, page int) ([]entity.UmkmFilterEntity, int, int, int, *int, *int, error) {
     // Fetch HakAkses and UMKM IDs
     hakAksesList, err := s.hakaksesrepository.GetHakAksesByUserId(ctx, userId)
@@ -453,51 +415,8 @@ if len(files) > 0 {
         log.Printf("Failed to parse images from UMKM")
     }
 }
-// // Hapus gambar lama jika ada
-// if images, ok := getUmkmById.Images["urls"].([]interface{}); ok {
-//     for _, img := range images {
-//         // Cek apakah gambar bertipe string
-//         if imgPath, ok := img.(string); ok {
-//             oldImagePath := imgPath // Pastikan path gambar tidak mengandung "uploads/" lagi
-//             log.Printf("Attempting to remove old image: %s", oldImagePath) // Log path yang ingin dihapus
 
-//             // Cek apakah file ada sebelum dihapus
-//             if _, err := os.Stat(oldImagePath); err == nil {
-//                 if err := os.Remove(oldImagePath); err != nil {
-//                     log.Printf("Failed to remove old image %s: %v", oldImagePath, err)
-//                 } else {
-//                     log.Printf("Successfully removed old image: %s", oldImagePath)
-//                 }
-//             } else {
-//                 log.Printf("Image does not exist: %s", oldImagePath)
-//             }
-//         } else {
-//             log.Printf("Invalid image type: %v", img)
-//         }
-//     }
-// } else {
-//     log.Printf("Failed to parse images from UMKM")
-// }
-
-    // Simpan gambar baru di folder uploads
 	var imageUrls []string
-	// for _, file := range files {
-	// 	// Mendapatkan ekstensi file
-	// 	ext := filepath.Ext(file.Filename)
-	// 	// Menghasilkan nama file acak dengan ekstensi yang sesuai
-	// 	filename := generateRandomFileName(ext)
-	// 	filePath := fmt.Sprintf("uploads/%s", filename)
-	
-	// 	// Gunakan helper untuk menyimpan file
-	// 	if err := helper.SaveFile(file, filePath); err != nil {
-	// 		return nil, err
-	// 	}
-	
-	// 	// Tambahkan path gambar baru ke array imageUrls
-	// 	imageUrls = append(imageUrls, filePath)  // Format: uploads/filename.jpg
-	// }
-	
-
 
 if len(files) > 0 {
     // Ada file baru yang diunggah
@@ -731,12 +650,6 @@ if len(files) > 0 {
 				// Hapus produk dari database
 			}
 		
-
-			///
-			// Hapus dokumen dari folder dan database
-// Hapus dokumen dari folder dan database
-// Hapus dokumen dari folder dan database
-// Hapus dokumen dari folder
 dokumenList, err := service.dokumenrepository.GetDokumnByUmkmId(id)
 if err != nil {
     return err
@@ -793,7 +706,7 @@ for _, dokumen := range dokumenList {
         }
     }
 
-    // Di sini tidak ada penghapusan dari database, hanya hapus file
+ 
 }
 
 

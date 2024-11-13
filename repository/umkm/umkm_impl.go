@@ -190,14 +190,7 @@ func (repo *RepoUmkmImpl) GetUmkmList(filters string, limit int, page int, kateg
 	return umkm, int(totalcount), currentPage, totalPages, nextPage, prevPage, nil
 }
 
-// func(RepoUmkmImpl *RepoUmkmImpl) GetUmkmListDetailId(id uuid.UUID) ([]domain.UMKM, error){
-//     var umkm []domain.UMKM
-// 	err := RepoUmkmImpl.db.Preload("Produk").Find(&umkm, "id = ?", id).Error
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return umkm, nil
-// }
+
 
 func (repo *RepoUmkmImpl) GetUmkmListDetailPaginated(id uuid.UUID, limit int, page int) ([]domain.UMKM, int, int, int, *int, *int, error) {
 	var umkm []domain.UMKM

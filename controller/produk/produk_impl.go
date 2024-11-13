@@ -28,62 +28,6 @@ func NewProdukController(Produk produkservice.Produk) *ProdukControllerImpl {
 	}
 }
 
-// func (controller *ProdukControllerImpl) CreateProduk(c echo.Context) error {
-// 	produk := new(web.WebProduk)
-
-// 	// Konversi umkm_id dari string ke uuid.UUID
-// 	umkmIDStr := c.FormValue("umkm_id")
-// 	umkmID, err := uuid.Parse(umkmIDStr)
-// 	if err != nil {
-// 		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid UMKM ID format", nil))
-// 	}
-
-// 	produkHargastr := c.FormValue("harga")
-// 	produkHarga, err := strconv.Atoi(produkHargastr)
-// 	if err != nil {
-// 		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest,false, "Invalid harga format", nil))
-// 	}
-
-
-// 	produkminpesananstr := c.FormValue("min_pesanan")
-// 	produkminpesanan, err := strconv.Atoi(produkminpesananstr)
-// 	if err != nil {
-// 		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid min_pesanan format", nil))
-// 	}
-
-// 	kategorid := c.FormValue("kategori_produk_id")
-//     if kategorid != "" {
-//         produk.KategoriProduk = json.RawMessage(kategorid)
-//     }
-
-
-// 	produk.UmkmId = umkmID
-// 	produk.Harga = produkHarga
-// 	produk.Satuan = c.FormValue("satuan")
-// 	produk.MinPesanan = produkminpesanan
-// 	produk.Name = c.FormValue("nama")
-// 	produk.Deskripsi = c.FormValue("deskripsi")
-
-// 	// Handle image upload
-// 	if err := c.Request().ParseMultipartForm(32 << 20); err != nil {
-// 		return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, "Failed to parse form", nil))
-// 	}
-
-// 	files := c.Request().MultipartForm.File["gambar"]
-// 	fileHeaders := make(map[string]*multipart.FileHeader)
-// 	for _, file := range files {
-// 		fileHeaders[file.Filename] = file
-// 	}
-
-// 	produk.GambarId = json.RawMessage([]byte("[]")) // Default empty JSON array
-// 	result, errSaveProduk := controller.Produk.CreateProduk(*produk, fileHeaders)
-// 	if errSaveProduk != nil {
-// 		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, errSaveProduk.Error(), nil))
-// 	}
-
-// 	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "membut produk berhasil", result))
-// }
-
 
 func (controller *ProdukControllerImpl) CreateProduk(c echo.Context) error {
 	produk := new(web.WebProduk)
@@ -243,13 +187,6 @@ func (controller *ProdukControllerImpl) UpdateProduk(c echo.Context) error {
         log.Printf("Error converting harga: %v", err)
         return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid harga format", nil))
     }
-
-    // satuanStr := c.FormValue("satuan")
-    // satuan, err := strconv.Atoi(satuanStr)
-    // if err != nil {
-    //     log.Printf("Error converting satuan: %v", err)
-    //     return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, "Invalid satuan format", nil))
-    // }
 
     minPesananStr := c.FormValue("minpesanan")
     minPesanan, err := strconv.Atoi(minPesananStr)
@@ -420,5 +357,5 @@ func (controller *ProdukControllerImpl) GetProdukActive(c echo.Context) error {
     return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success", getProduk))
 }
 
-//login google
+
 

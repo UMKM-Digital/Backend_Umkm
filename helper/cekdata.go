@@ -11,7 +11,6 @@ func IsUserDataComplete(user domain.Users) bool {
            user.No_Phone != "" && 
            user.NoKk != "" && 
            user.Nik != "" && 
-           user.Nib != "" &&
 		   user.Email != "" &&
 			user.Picture != "" &&
 		   !user.TanggalLahir.IsZero() && 

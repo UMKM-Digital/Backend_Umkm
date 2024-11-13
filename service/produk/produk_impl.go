@@ -55,67 +55,6 @@ func generateRandomFileName(ext string) string {
 	return fmt.Sprintf("%s-%s-%s%s", datePrefix, uniqueID, seconds, ext)
 }
 
-// func (service *ProdukServiceImpl) CreateProduk(produk web.WebProduk, files map[string]*multipart.FileHeader) (map[string]interface{}, error) {
-// 	var Gambar domain.JSONB
-// 	var savedImageURLs []map[string]interface{}
-
-// 	// Handle gambar files
-// 	if len(files) > 0 {
-// 		for _, file := range files {
-// 			ext := filepath.Ext(file.Filename)
-// 			randomFileName := generateRandomFileName(ext)
-// 			newImagePath := filepath.Join("uploads/Produk", randomFileName)
-
-// 			if err := helper.SaveFile(file, newImagePath); err != nil {
-// 				return nil, errors.New("failed to save image")
-// 			}
-
-// 			// Save the image path in a format with forward slashes
-// 			// savedImageURLs = append(savedImageURLs, filepath.ToSlash(newImagePath))
-// 			savedImageURLs = append(savedImageURLs, map[string]interface{}{
-// 				"id":     len(savedImageURLs) + 1, // Assuming ID is generated sequentially
-// 				"gambar": filepath.ToSlash(newImagePath),
-// 			})
-// 		}
-
-// 		Gambar = domain.JSONB{"urls": savedImageURLs}
-// 	} else {
-// 		Gambar = domain.JSONB{"urls": []interface{}	{}}
-// 	}
-
-// 	KategoriProduk, err := helper.RawMessageToJSONB(produk.KategoriProduk)
-// 	if err != nil {
-// 		return nil, errors.New("invalid type for KategoriProduk")
-// 	}
-
-// 	newProduk := domain.Produk{
-// 		UmkmId:           produk.UmkmId,
-// 		Nama:             produk.Name,
-// 		Gamabr:           Gambar,
-// 		Harga:            produk.Harga,
-// 		Satuan:           produk.Satuan,
-// 		Min_pesanan:      produk.MinPesanan,
-// 		KategoriProduk:   KategoriProduk,
-// 		Deskripsi:        produk.Deskripsi,
-// 	}
-
-// 	saveProduk, errSaveProduk := service.produkrepository.CreateRequest(newProduk)
-// 	if errSaveProduk != nil {
-// 		return nil, errSaveProduk
-// 	}
-
-// 	return map[string]interface{}{
-// 		"umkm_id":            saveProduk.UmkmId,
-// 		"nama":               saveProduk.Nama,
-// 		"gambar":             saveProduk.Gamabr,
-// 		"harga":              saveProduk.Harga,
-// 		"satuan":             saveProduk.Satuan,
-// 		"minimal_pesanan":    saveProduk.Min_pesanan,
-// 		"kategori_produk_id": saveProduk.KategoriProduk,
-// 		"deskripsi":          saveProduk.Deskripsi,
-// 	}, nil
-// }
-
 func (service *ProdukServiceImpl) CreateProduk(produk web.WebProduk, files []*multipart.FileHeader) (map[string]interface{}, error) {
     // Proses untuk menyimpan gambar baru
     var newImages []map[string]interface{}

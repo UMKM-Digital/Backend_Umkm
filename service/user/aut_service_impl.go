@@ -100,7 +100,7 @@ func (service *AuthServiceImpl) RegisterRequest(user web.RegisterRequest) (map[s
         ExpectedLength int
     }{
         {"No NIK", user.No_Nik, 16},
-        {"No NIB", user.No_Nib, 13},
+        // {"No NIB", user.No_Nib, 13},
         {"No KK", user.No_KK, 16},
     }
 
@@ -117,7 +117,7 @@ func (service *AuthServiceImpl) RegisterRequest(user web.RegisterRequest) (map[s
         No_Phone:           user.No_Phone,
         Nik:                user.No_Nik,
         NoKk:               user.No_KK,
-        Nib:                user.No_Nib,
+        // Nib:                user.No_Nib,
         TanggalLahir:       tanggalLahirParsed,
         JenisKelamin:       user.JenisKelamin,
         PendidikanTerakhir: user.PendidikanTerakhir,
@@ -254,7 +254,7 @@ func (service *AuthServiceImpl) Update(Id int, req web.UpdateUserRequest, file *
         ExpectedLength int
     }{
         {"No NIK", req.No_Nik, 16},
-        {"No NIB", req.No_Nib, 13},
+        // {"No NIB", req.No_Nib, 13},
         {"No KK", req.No_KK, 16},
     }
 
@@ -427,7 +427,7 @@ func (service *AuthServiceImpl) Update(Id int, req web.UpdateUserRequest, file *
         No_Phone:        req.No_Phone,
         Nik:             req.No_Nik,
         NoKk:            req.No_KK,
-        Nib:             req.No_Nib,
+        // Nib:             req.No_Nib,
         TanggalLahir:    tanggalLahirParsed,
         JenisKelamin:    req.JenisKelamin,
         StatusMenikah:   req.StatusMenikah,
