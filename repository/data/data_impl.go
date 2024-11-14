@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
 	"math"
 	// "sync"
 	"time"
@@ -227,22 +226,29 @@ func (repo *DatarepositoryImpl) GrafikKategoriBySektorUsaha(ctx context.Context,
     }
 
     var results []KategoriCount
+    // query := repo.db.WithContext(ctx).Table("kategori_umkm").
+    //     Select("kategori_umkm.id_sektor_usaha, kategori_umkm.name, COALESCE(SUM(CASE WHEN master_kec.kode_kec = ? AND master_kel.kode_kel = ? AND EXTRACT(YEAR FROM umkm.created_at) = ? AND hak_akses.status = 'disetujui' THEN 1 ELSE 0 END), 0) AS jumlah_umkm", kodeKecamatan, kodeKelurahan, tahun).
+    //     Where("kategori_umkm.id_sektor_usaha = ?", sektorUsahaID).
+    //     Joins("LEFT JOIN umkm ON kategori_umkm.name = (umkm.kategori_umkm_id->'nama'->>0)").
+    //     Joins("LEFT JOIN hak_akses ON umkm.id = hak_akses.umkm_id").
+    //     Joins("LEFT JOIN master.kecamatan AS master_kec ON umkm.kode_kec = master_kec.nama").
+    //     Joins("LEFT JOIN master.kelurahan AS master_kel ON umkm.kode_kelurahan = master_kel.nama").
+    //     Group("kategori_umkm.id_sektor_usaha, kategori_umkm.name")
     query := repo.db.WithContext(ctx).Table("kategori_umkm").
-        Select("kategori_umkm.id_sektor_usaha, kategori_umkm.name, COALESCE(SUM(CASE WHEN master_kec.kode_kec = ? AND master_kel.kode_kel = ? AND EXTRACT(YEAR FROM umkm.created_at) = ? AND hak_akses.status = 'disetujui' THEN 1 ELSE 0 END), 0) AS jumlah_umkm", kodeKecamatan, kodeKelurahan, tahun).
-        Where("kategori_umkm.id_sektor_usaha = ?", sektorUsahaID).
-        Joins("LEFT JOIN umkm ON kategori_umkm.name = (umkm.kategori_umkm_id->'nama'->>0)").
-        Joins("LEFT JOIN hak_akses ON umkm.id = hak_akses.umkm_id").
-        Joins("LEFT JOIN master.kecamatan AS master_kec ON umkm.kode_kec = master_kec.nama").
-        Joins("LEFT JOIN master.kelurahan AS master_kel ON umkm.kode_kelurahan = master_kel.nama").
-        Group("kategori_umkm.id_sektor_usaha, kategori_umkm.name")
+    Select("kategori_umkm.id_sektor_usaha, kategori_umkm.name, COALESCE(SUM(CASE WHEN master_kec.kode_kec = ? AND (master_kel.kode_kel = ? OR ? = '') AND EXTRACT(YEAR FROM umkm.created_at) = ? AND hak_akses.status = 'disetujui' THEN 1 ELSE 0 END), 0) AS jumlah_umkm", kodeKecamatan, kodeKelurahan, kodeKelurahan, tahun).
+    Where("kategori_umkm.id_sektor_usaha = ?", sektorUsahaID).
+    Joins("LEFT JOIN umkm ON kategori_umkm.name = (umkm.kategori_umkm_id->'nama'->>0)").
+    Joins("LEFT JOIN hak_akses ON umkm.id = hak_akses.umkm_id").
+    Joins("LEFT JOIN master.kecamatan AS master_kec ON umkm.kode_kec = master_kec.nama").
+    Joins("LEFT JOIN master.kelurahan AS master_kel ON umkm.kode_kelurahan = master_kel.nama").
+    Group("kategori_umkm.id_sektor_usaha, kategori_umkm.name").
+    Find(&results)
 
     err := query.Scan(&results).Error
     if err != nil {
-        log.Println("Error executing query:", err)
+      
         return nil, err
     }
-
-    log.Printf("Results from the database: %+v", results)
     return results, nil
 }
 

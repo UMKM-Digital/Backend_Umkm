@@ -263,8 +263,6 @@ func (service *UmkmServiceImpl) CreateUmkm(umkm web.UmkmRequest, userID int, fil
 	  }
   }
 
-
-
 	return map[string]interface{}{
 		"name":                  saveUmkm.Name,
 		"kategori_umkm_id":      saveUmkm.KategoriUmkmId,
@@ -313,9 +311,8 @@ func (s *UmkmServiceImpl) GetUmkmListByUserId(ctx context.Context, userId int, f
     if err != nil {
         return nil, 0, 0, 0, nil, nil, err
     }
-
-
-    umkmResponses := entity.ToUmkmfilterEntities(umkmList, products, umkmDokumenList, masterDokumenLegalList) // Convert UMKM entities to responses
+	
+    umkmResponses := entity.ToUmkmfilterEntities(umkmList, products, umkmDokumenList, masterDokumenLegalList, hakAksesList) // Convert UMKM entities to responses
 
     return umkmResponses, totalCount, currentPage, totalPages, nextPage, prevPage, nil
 }

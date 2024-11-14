@@ -1,15 +1,17 @@
 package helper
 
 import (
-	"errors"
 	"bytes"
 	"crypto/rand"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math/big"
 	"net/http"
+	"os"
 	"time"
 
+	"github.com/joho/godotenv"
 	"gorm.io/gorm"
 )
 
@@ -47,6 +49,15 @@ func generateRandomOTP(length int) (string, error) {
 	return otp, nil
 }
 
+
+func init() {
+    // Load environment variables from .env file
+    err := godotenv.Load()
+    if err != nil {
+        fmt.Println("Error loading .env file")
+    }
+}
+
 func SendWhatsAppOTP(db *gorm.DB, phone string, expiresAt time.Time) error {
 	otp, err := GenerateOTP()
 	if err != nil {
@@ -59,10 +70,10 @@ func SendWhatsAppOTP(db *gorm.DB, phone string, expiresAt time.Time) error {
 		return err
 	}
 
-	// Send OTP via WhatsApp
-	url := "http://103.162.60.86:3000/kirim-pesan"
+	url := os.Getenv("WHATSAPP_API_URL")
+    appTokenID := os.Getenv("WHATSAPP_APP_TOKEN_ID")
 	requestData := map[string]interface{}{
-		"app_token_id": "ea5be31c-d4ec-4d44-8163-948a8e528ff6",
+		"app_token_id": appTokenID,
 		"service":      "whatsapp",
 		"penerima":     phone,
 		"konten":       "kode OTP Anda adalah " + otp,

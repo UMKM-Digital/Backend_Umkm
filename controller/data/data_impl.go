@@ -33,7 +33,6 @@ func (controller *DataControllerImpl) CountData(c echo.Context) error {
     return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success", result))
 }
 
-
 func (controller *DataControllerImpl) GrafikKategoriBySektorHandler(c echo.Context) error {
     // Mengambil parameter sektor_usaha_id dari query string
     sektorUsahaIDParam := c.QueryParam("sektor_usaha_id")

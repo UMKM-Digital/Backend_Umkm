@@ -17,11 +17,16 @@ type UmkmFilterEntity struct {
 	 TotalProduk        int           `json:"total_produk"`
 	 Progres int 	`json:"progres"`
 	 CreatedAt time.Time   `json:"created_at"`
+	 Status string `json:"status"`
 }
 
-func ToUmkmFilterEntity(umkm domain.UMKM, products []domain.Produk, dokumenList []domain.UmkmDokumen, masterDokumenList []domain.MasterDokumenLegal) UmkmFilterEntity {
+func ToUmkmFilterEntity(umkm domain.UMKM, products []domain.Produk, dokumenList []domain.UmkmDokumen, masterDokumenList []domain.MasterDokumenLegal, hakAkses domain.HakAkses) UmkmFilterEntity {
 	totalProduk := CalculateTotalProdukByUmkm(umkm.IdUmkm, products)
 	progres := CalculateProgresDokumen(umkm.IdUmkm, dokumenList, masterDokumenList)
+	status := "tidak ada status"
+    if hakAkses.Status != "" {
+        status = string(hakAkses.Status)
+    }
 
 	return UmkmFilterEntity{
 	Id: umkm.IdUmkm,
@@ -33,17 +38,29 @@ func ToUmkmFilterEntity(umkm domain.UMKM, products []domain.Produk, dokumenList 
 	TotalProduk:        totalProduk, // Menambahkan total produk
 	Progres:            progres, 
 	CreatedAt: umkm.CreatedAt,
+	Status: status,
 	}
 }
 
-func ToUmkmfilterEntities(umkmList []domain.UMKM, products []domain.Produk, dokumenList []domain.UmkmDokumen, masterDokumenList []domain.MasterDokumenLegal) []UmkmFilterEntity {
+func ToUmkmfilterEntities(umkmList []domain.UMKM, products []domain.Produk, dokumenList []domain.UmkmDokumen, masterDokumenList []domain.MasterDokumenLegal, hakAksesList []domain.HakAkses) []UmkmFilterEntity {
     var umkmEntities []UmkmFilterEntity
     for _, umkm := range umkmList {
-        umkmEntity := ToUmkmFilterEntity(umkm, products, dokumenList, masterDokumenList)
+        // Cari status hak akses berdasarkan ID UMKM
+        var hakAkses domain.HakAkses
+        for _, ha := range hakAksesList {
+            if ha.UmkmId == umkm.IdUmkm {
+                hakAkses = ha
+                break
+            }
+        }
+        
+        // Konversi UMKM ke UmkmFilterEntity
+        umkmEntity := ToUmkmFilterEntity(umkm, products, dokumenList, masterDokumenList, hakAkses)
         umkmEntities = append(umkmEntities, umkmEntity)
     }
     return umkmEntities
 }
+
 
 
 //menghitung produk
@@ -59,16 +76,16 @@ func CalculateTotalProdukByUmkm(umkmId uuid.UUID, products []domain.Produk) int 
 
 
 func CalculateProgresDokumen(umkmId uuid.UUID, dokumenList []domain.UmkmDokumen, masterDokumenList []domain.MasterDokumenLegal) int {
-	// Hitung total dokumen yang wajib diupload
+
 	totalWajib := 0
 	totalDiisi := 0
 
 	// Loop untuk hitung dokumen yang wajib
 	for _, masterDokumen := range masterDokumenList {
-		if masterDokumen.Iswajib == 1 { // 1 berarti wajib
+		if masterDokumen.Iswajib == 1 { 
 			totalWajib++
 
-			// Cek apakah dokumen tersebut sudah diisi oleh UMKM
+		
 			for _, dokumen := range dokumenList {
 				if dokumen.UmkmId == umkmId && dokumen.DokumenId == masterDokumen.IdMasterDokumenLegal {
 					totalDiisi++
@@ -78,7 +95,6 @@ func CalculateProgresDokumen(umkmId uuid.UUID, dokumenList []domain.UmkmDokumen,
 		}
 	}
 
-	// Jika tidak ada dokumen yang wajib, progres 100%
 	if totalWajib == 0 {
 		return 100
 	}
