@@ -33,11 +33,6 @@ func (repo *BeritaRepoImpl)  GetBeritaList(ctx context.Context, limit int, page 
 	var berita []domain.Berita
     var totalcount int64
 
-    // // Set default limit jika limit == 0
-    // if limit <= 0 {
-    //     limit = 15
-    // }
-
     // Dapatkan query dengan filter dan pagination
     query, err := repo.beritarepo.GetBuilder( limit, page)
     if err != nil {
@@ -45,7 +40,7 @@ func (repo *BeritaRepoImpl)  GetBeritaList(ctx context.Context, limit int, page 
     }
 
     // Filter berdasarkan beritaIDs
-    err =  query.Preload("User").Order("id ASC").Find(&berita).Error
+    err =  query.Preload("User").Order("id DESC").Find(&berita).Error
     if err != nil {
         return nil, 0, 0, 0, nil, nil, err
     }

@@ -82,8 +82,6 @@ func (repo *AuthrepositoryImpl) UpdateId(idUser int, user domain.Users) (domain.
     return user, nil
 }
 
-//verivy otp
-
 
 //cek in paswword
 func(repo *AuthrepositoryImpl) CekInPassword(userId int) (*domain.Users, error) {

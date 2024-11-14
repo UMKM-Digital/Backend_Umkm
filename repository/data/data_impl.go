@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"math"
-	// "sync"
 	"time"
 	"umkm/model/domain"
 
@@ -439,8 +438,6 @@ func (repo *DatarepositoryImpl) PersentasiKenaikanUmkmTahun() (float64, error) {
 func (repo *DatarepositoryImpl) TotalOmzetBulanIni() (float64, error) {
     var TotalOmzetBulan float64
 
-    // Ambil tanggal pertama dan terakhir dari bulan ini
-   // Ambil tanggal awal dan akhir bulan ini
 firstDayOfMonth := time.Date(time.Now().Year(), time.Now().Month(), 1, 0, 0, 0, 0, time.UTC)
 firstDayOfNextMonth := firstDayOfMonth.AddDate(0, 1, 0)
 
