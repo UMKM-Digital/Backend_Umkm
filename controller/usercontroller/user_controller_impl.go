@@ -113,7 +113,7 @@ func (controller *UserControllerImpl) Update(c echo.Context) error {
 	kecamatan    := c.FormValue("kecamatan")
     address := c.FormValue("alamat")
 
-		file, err := c.FormFile("ktp")
+		file, err := c.FormFile("potoprofile")
 		if err == http.ErrMissingFile {
 			file = nil // jika file tidak ada, atur nil
 		} else if err != nil {
