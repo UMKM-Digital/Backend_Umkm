@@ -38,7 +38,6 @@ func ToUserEntity(user domain.Users) UserEntity {
 		Role: user.Role,
 		NoKk: user.NoKk,
 		NoNik: user.Nik,
-		NoNib: user.Nib,
 		TanggalLahir: user.TanggalLahir,
 		JenisKelamin: user.JenisKelamin,
 		PendidikanTerakhir: user.PendidikanTerakhir,

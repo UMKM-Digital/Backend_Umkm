@@ -1,11 +1,15 @@
     CREATE TABLE users(
         id SERIAL PRIMARY KEY,
-        username VARCHAR(255) NOT NULL,
+        username VARCHAR(255),
         email VARCHAR(255) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
         role VARCHAR(255) NOT NULL,
         no_phone VARCHAR(255) UNIQUE NOT NULL,
-        picture VARCHAR(255) DEFAULT NULL,
+        picture VARCHAR(255) ,
+        google_id VARCHAR(255),
+        fullnam VARCHAR(255),
+        alamat TEXT,
+        no_kk 
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
@@ -114,13 +118,6 @@ created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
 );
 
-CREATE TABLE homepage.brandlogo(
-id SERIAL PRIMARY  KEY,
-brand_name VARCHAR(255) NOT NULL,
-brand_logo VARCHAR(255) NOT NULL,
-created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
 
 CREATE TABLE homepage.brandlogo(
 id SERIAL PRIMARY  KEY,
@@ -134,19 +131,11 @@ updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 CREATE TABLE homepage.about(
 id SERIAL PRIMARY  KEY,
 image VARCHAR(255) NOT NULL,
-description VARCHAR(255) NOT NULL,
+description TEXT NOT NULL,
 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE struk(
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    umkm_id UUID UNIQUE,
-     created_at TIMESTAMPTZ(6),
-    updated_at TIMESTAMPTZ(6)   
-    FOREIGN KEY (umkm_id) REFERENCES umkm(id) ON DELETE CASCADE
-);
 
 CREATE TABLE master_dokumen_legal(
     id SERIAL PRIMARY KEY,
@@ -165,17 +154,6 @@ CREATE TABLE umkm_dokumen_legal (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (umkm_id) REFERENCES umkm(id) ON DELETE CASCADE
     FOREIGN KEY (dokumen_id) REFERENCES master_dokumen_legal(id) ON DELETE CASCADE
-);
-
-CREATE TABLE homepage.berita (
-    id SERIAL PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    image VARCHAR(255) NOT NULL,
-    content VARCHAR(255) NOT NULL,
-    author TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (author) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE homepage.berita (

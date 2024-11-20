@@ -13,7 +13,7 @@ type Users struct {
     GoogleId string         `gorm:"column:google_id"`
     NoKk string         `gorm:"column:no_kk"`
     Nik string         `gorm:"column:nik"`
-    Nib string         `gorm:"column:nib"`
+    // Nib string         `gorm:"column:nib"`
     TanggalLahir time.Time `gorm:"column:tanggal_lahir"`
     JenisKelamin string         `gorm:"column:jenis_kelamin"`
     StatusMenikah string         `gorm:"column:status_menikah"`
