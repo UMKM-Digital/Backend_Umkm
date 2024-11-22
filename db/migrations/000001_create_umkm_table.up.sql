@@ -92,6 +92,7 @@ CREATE TABLE produk(
     min_pesanan INT NOT NULL,
     kategori_produk_id JSONB NOT NULL,
     deskripsi text NOT NULL,
+    active INT
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_produk_umkm FOREIGN KEY (umkm_id) REFERENCES umkm(id)
@@ -143,7 +144,7 @@ CREATE TABLE master_dokumen_legal(
     is_wajib INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)
+);
 
 CREATE TABLE umkm_dokumen_legal (
     id SERIAL PRIMARY KEY,

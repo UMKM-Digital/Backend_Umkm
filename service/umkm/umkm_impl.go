@@ -173,9 +173,11 @@ func (service *UmkmServiceImpl) CreateUmkm(umkm web.UmkmRequest, userID int, fil
 		NoNpwd: umkm.NoNpwd,
 		NoNib: umkm.NoNib,
 		SektorUsaha: umkm.SektorUsaha,
-		// JenisUsaha: umkm.JenisUsaha,
 		BentukUsaha: umkm.BentukUsaha,
 		StatusTempatUsaha: umkm.StatusTempatUsaha,
+		Gaji: umkm.Gaji,
+		KaryawanPria: umkm.KaryawanPria,
+		KaryawanWanita: umkm.KaryawanWanita,
 	}
 
 	saveUmkm, errSaveUmkm := service.umkmrepository.CreateRequest(newUmkm)

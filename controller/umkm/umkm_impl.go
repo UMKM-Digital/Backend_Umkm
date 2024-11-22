@@ -65,7 +65,7 @@ func (controller *UmkmControllerImpl) Create(c echo.Context) error {
 	}
 
 	umkm.EkonomiKreatif = ekonomiKreatif
-
+	///
 	nominalsendiristr := c.FormValue("nominal_sendiri")
 	nominalsendiri, err := strconv.ParseFloat(nominalsendiristr, 64)
 	if err != nil {
@@ -79,6 +79,22 @@ func (controller *UmkmControllerImpl) Create(c echo.Context) error {
 
 	// Assign to umkm.NominalSendiri
 	umkm.NominalSendiri = nominalsendiriDecimal
+	/////
+	///ini gaji
+	gajistr := c.FormValue("gaji")
+	gaji, err := strconv.ParseFloat(gajistr, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"message": "Invalid value for gaji. Must be a decimal number.",
+		})
+	}
+
+	// Convert float64 to decimal.Decimal
+	gajiDecimal := decimal.NewFromFloat(gaji)
+
+	// Assign to umkm.NominalSendiri
+	umkm.NominalSendiri = gajiDecimal
+	/////
 
 	nominalasetstr := c.FormValue("nominal_aset")
 	nominalaset, err := strconv.ParseFloat(nominalasetstr, 64)
@@ -104,6 +120,7 @@ func (controller *UmkmControllerImpl) Create(c echo.Context) error {
 
 	umkm.TenagaKerjaPria = tenagaKerjaPria
 
+	//////
 	TenagaKerjaWanitastr := c.FormValue("tenaga_kerja_wanita")
 	TenagaKerjaWanita, err := strconv.Atoi(TenagaKerjaWanitastr)
 	if err != nil {
@@ -113,6 +130,30 @@ func (controller *UmkmControllerImpl) Create(c echo.Context) error {
 	}
 
 	umkm.TenagaKerjaWanita = TenagaKerjaWanita
+	////
+	//////karyawanpria
+	karyawanpriastr := c.FormValue("karyawan_pria")
+	karyawanpria, err := strconv.Atoi(karyawanpriastr)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"message": "Invalid value for tenaga_kerja_pria. Must be an integer.",
+		})
+	}
+
+	umkm.KaryawanPria = karyawanpria
+	////
+	//////karyawanwanita
+	karyawanwanitastr := c.FormValue("karyawan_pria")
+	karyawanwanita, err := strconv.Atoi(karyawanwanitastr)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"message": "Invalid value for tenaga_kerja_pria. Must be an integer.",
+		})
+	}
+
+	umkm.KaryawanWanita = karyawanwanita
+	////
+	
     tanggalMulaiUsahaStr := c.FormValue("tanggal_mulai_usaha")
     layout := "2006-01-02" // Format tanggal yang diharapkan, misalnya YYYY-MM-DD
     tanggalMulaiUsaha, err := time.Parse(layout, tanggalMulaiUsahaStr)
@@ -318,12 +359,11 @@ func (controller *UmkmControllerImpl) UpdateUmkm(c echo.Context) error {
 	kodepos := c.FormValue("kode_pos")
 	noNpwd   := c.FormValue("no_npwd")
 	bahanbakar := c.FormValue("bahan_bakar")
-	// tanggalmulaiusaha := c.FormValue("tanggal_mulai_usaha")
 	kapasitas         := c.FormValue("kapasitas")
 	krtiteriausaha := c.FormValue("kriteria_usaha")
 	bentukusaha    := c.FormValue("bentuk_usaha")
 	nonib          := c.FormValue("nonib")
-	// jenisusaha     := c.FormValue("jenis_usaha")
+	
 
 	log.Printf("Form values - Name: %s, NoNpwp: %s, KategoriUmkmId: %s, informasijambuka: %s, ", name, noNpwp, kategoriUmkmID, informasiJamBuka)
 

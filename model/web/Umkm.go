@@ -43,6 +43,9 @@ type UmkmRequest struct {
 	BentukUsaha           string          `json:"bentuk_usaha"`
 	NoNib                 string          `json:"no_nib"`
 	JenisUsaha            string          `json:"jenis_usaha"`
+	Gaji 				  decimal.Decimal `json:"gaji"`
+	KaryawanPria          int 			  `json:"karyawan_pria"`
+	KaryawanWanita        int 			  `json:"karyawan_wanita"`
 	Omset                 []OmsetRequest  `json:"omset"`
 	Dokumen               []DokumenLegal  `json:"dokumen"`
 }
@@ -71,11 +74,11 @@ type Updateumkm struct {
 	Maps                  json.RawMessage `json:"maps"`
 	Gambar                json.RawMessage `json:"gambar"`
 	SektorUsaha           string          `json:"sekto_usaha"`
-	StatusTempatUsaha     string          `json:"status_tempat_usaha"`//
-	KodeProv              string          `json:"kode_prov"`//
-	KodeKabupaten string `gorm:"column:kode_kabupaten"`//
-	KodeKec               string          `json:"kode_kec"`//
-	KodeKel               string          `json:"kode_kelurahan"`//
+	StatusTempatUsaha     string          `json:"status_tempat_usaha"`
+	KodeProv              string          `json:"kode_prov"`
+	KodeKabupaten string `gorm:"column:kode_kabupaten"`
+	KodeKec               string          `json:"kode_kec"`
+	KodeKel               string          `json:"kode_kelurahan"`
 	Rt                    string          `json:"rt"`
 	Rw                    string          `json:"rw"`
 	KodePos               string          `json:"kode_pos"`
@@ -83,15 +86,17 @@ type Updateumkm struct {
 	BahanBakar            string          `json:"bahan_bakar"`
 	TanggalMulaiUsaha     time.Time       `json:"tanggal_mulai_usaha"`
 	Kapasitas             string             `json:"kapasitas"`
-	TenagaKerjaPria       int             `json:"tenaga_kerja_pria"`//belum
-	TenagaKerjaWanita     int             `json:"tenaga_kerja_wanita"`//belum
-	NominalAset           decimal.Decimal `json:"nominal_aset"`//belum
-	NominalSendiri        decimal.Decimal `json:"nominal_sendiri"`//belum
-	EkonomiKreatif        bool            `json:"ekonomi_kreatif"`//belum
+	TenagaKerjaPria       int             `json:"tenaga_kerja_pria"`
+	TenagaKerjaWanita     int             `json:"tenaga_kerja_wanita"`
+	NominalAset           decimal.Decimal `json:"nominal_aset"`
+	NominalSendiri        decimal.Decimal `json:"nominal_sendiri"`
+	EkonomiKreatif        bool            `json:"ekonomi_kreatif"`
 	KriteriaUsaha         string          `json:"kriteria_usaha"`
 	BentukUsaha           string          `json:"bentuk_usaha"`
 	NoNib                 string          `json:"no_nib"`
-	// JenisUsaha            string          `json:"jenis_usaha"`
+	Gaji 				  decimal.Decimal `json:"gaji"`
+	KaryawanPria          int 			  `json:"karyawan_pria"`
+	KaryawanWanita        int 			  `json:"karyawan_wanita"`
 }
 
 type UpdateActiveUmkm struct {

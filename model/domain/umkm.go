@@ -49,6 +49,9 @@ type UMKM struct {
     Active                 int `gorm:"column:active"`
     // JenisUsaha string `gorm:"column:jenis_usaha"`
     BentukUsaha string `gorm:"column:bentuk_usaha"`
+    Gaji decimal.Decimal `gorm:"column:gaji"`
+    KaryawanPria int `gorm:"karyawan_pria"`
+    KaryawanWanita int `gorm:"karyawan_wanita"`
     HakAkses []HakAkses  `gorm:"foreignKey:UmkmId;references:IdUmkm"`
     Produk               []Produk  `gorm:"foreignkey:UmkmId"`
     Transaksi            []Transaksi `gorm:"foreignkey:UmkmId"`
