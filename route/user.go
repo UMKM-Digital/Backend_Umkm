@@ -90,9 +90,6 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userHakAksesService := hakaksesservice.NewKHakAkesService(userHakAksesRepo)
 	userHakAksesController := hakaksescontroller.NewHakAksesController(userHakAksesService)
 
-	userAuthRepo := userrepo.NewAuthRepositoryImpl(db)
-	userAuthService := userservice.Newauthservice(userAuthRepo, tokenUseCase, db)
-	userAuthController := usercontroller.NewAuthController(userAuthService, tokenUseCase)
 
 	kategoriUmkmQueryBuilder := query_builder_kategori_umkm.NewKategoriUmkmQueryBuilder(db)
 	userKategoriUmkmRepo := repokategoriumkm.NewKategoriUmkmRepositoryImpl(db, kategoriUmkmQueryBuilder)
@@ -188,6 +185,10 @@ omsetUmkm := omsetrepo.NewomsetRepositoryImpl(db)
 userOmsetService := omsetservice.NewOmsetService(omsetUmkm, userHakAksesRepo)
 userOmsetController := omsetcontroller.NewOmsetController(userOmsetService)
 
+	userAuthRepo := userrepo.NewAuthRepositoryImpl(db)
+	userAuthService := userservice.Newauthservice(userAuthRepo, tokenUseCase, db, userHakAksesRepo,userUmkmRepo,userProdukrepo,userDokumenuMKM,userTransaksiRepo, useromsetRepo)
+	userAuthController := usercontroller.NewAuthController(userAuthService, tokenUseCase)
+
 	g := e.Group(prefix)
 
 	authRoute := g.Group("/auth")
@@ -205,6 +206,7 @@ userOmsetController := omsetcontroller.NewOmsetController(userOmsetService)
 	authRoute.PUT("/edit_profile", userAuthController.Update, JWTProtection()) 
 	authRoute.GET("/list", userAuthController.GetUser) 
 	authRoute.GET("/count", userAuthController.GetUserCountByGender) 
+	authRoute.DELETE("/delete", userAuthController.DeleteUser, JWTProtection())
 
 	meRoute := g.Group("/me")
 	meRoute.GET("", userAuthController.View, JWTProtection())

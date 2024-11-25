@@ -120,3 +120,7 @@ func (repo *OmmsetRepoImpl) OmsetBulanan(umkm_id uuid.UUID, tahun string) (map[s
 
 	return totalOmzetPerBulan, nil
 }
+
+func(repo *OmmsetRepoImpl) DeleteUserOmzet(id uuid.UUID) error{
+	return repo.db.Where("umkm_id = ?", id).Delete(&domain.Omset{}).Error
+}

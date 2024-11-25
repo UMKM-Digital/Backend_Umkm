@@ -80,3 +80,7 @@ func (repo *HakAksesRepoUmkmImpl) CheckUmkmStatus(umkmId uuid.UUID) (bool, error
 	}
 	return status == "disetujui", nil
 }
+
+func(repo *HakAksesRepoUmkmImpl) DeleteUser(id int) error{
+	return repo.db.Where("user_id = ?", id).Delete(&domain.HakAkses{}).Error
+}

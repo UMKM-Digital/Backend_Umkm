@@ -706,20 +706,11 @@ for _, dokumen := range dokumenList {
     }
 
  
-}
-
-
-
-
-
-	
+}	
 		// Hapus produk yang terkait dengan UMKM
 		if err := service.produkRepository.DeleteProdukUmkmId(id); err != nil {
 			return err
 		}
-
-		
-	
 		// Hapus transaksi yang terkait dengan UMKM
 		if err := service.transaksiRepository.DeleteTransaksiUmkmId(id); err != nil {
 			return err

@@ -19,5 +19,6 @@ type AuthUserRepo interface {
 	CountUserByGenderWithPercentage()  (map[string]map[string]float64, error)
 	CountUserByStudy() (map[string]int64, error)
 	CountUserByAge() (map[string]int64, error)
+	DeleteUser(iduser int) error
 }
 	

@@ -16,6 +16,12 @@ import (
 	"umkm/model/entity"
 
 	"umkm/model/web"
+	dokumenumkmrepo "umkm/repository/dokumenumkm"
+	hakaksesrepo "umkm/repository/hakakses"
+	omsetrepo "umkm/repository/omset"
+	produkrepo "umkm/repository/produk"
+	transaksirepo "umkm/repository/transaksi"
+	umkmrepo "umkm/repository/umkm"
 	"umkm/repository/userrepo"
 
 	"fmt"
@@ -27,13 +33,27 @@ import (
 
 type AuthServiceImpl struct {
 	authrepository userrepo.AuthUserRepo
+    hakaksesrepository hakaksesrepo.CreateHakakses
+    umkmrepository     umkmrepo.CreateUmkm
 	tokenUseCase   helper.TokenUseCase
+    produkRepository produkrepo.CreateProduk
+    dokumenrepository dokumenumkmrepo.DokumenUmkmrRepo
+    transaksiRepository transaksirepo.TransaksiRepo
+    omsetrepository omsetrepo.OmsetRepo
 	db             *gorm.DB // Tambahkan field ini
 }
 
-func Newauthservice(authrepository userrepo.AuthUserRepo, token helper.TokenUseCase, db *gorm.DB) *AuthServiceImpl {
+func Newauthservice(authrepository userrepo.AuthUserRepo, token helper.TokenUseCase, db *gorm.DB, hakaksesrepository hakaksesrepo.CreateHakakses,  umkmrepository  umkmrepo.CreateUmkm,  produkRepository produkrepo.CreateProduk,
+    dokumenrepository dokumenumkmrepo.DokumenUmkmrRepo,transaksiRepository transaksirepo.TransaksiRepo,
+    omsetrepository omsetrepo.OmsetRepo) *AuthServiceImpl {
 	return &AuthServiceImpl{
 		authrepository: authrepository,
+        hakaksesrepository: hakaksesrepository,
+        umkmrepository: umkmrepository,
+        produkRepository: produkRepository,
+        dokumenrepository: dokumenrepository,
+        transaksiRepository: transaksiRepository,
+        omsetrepository: omsetrepository,
 		tokenUseCase:   token,
 		db:             db,
 	}
@@ -724,4 +744,68 @@ func (service *AuthServiceImpl) CountUser() (map[string]interface{}, error) {
     // Menambahkan struktur respons sesuai dengan yang Anda inginkan
 
     return result, nil
+}
+
+
+func(service *AuthServiceImpl) DeleteUser(iduser int) error{
+    // Cek apakah user ada
+    _, err := service.authrepository.GetByID(iduser)
+    if err != nil {
+        fmt.Println("Error getting user:", err)
+        return err
+    }
+
+    umkmIDs, err := service.hakaksesrepository.GetUmkmIdsByUserId(iduser)
+    if err != nil {
+        fmt.Println("Error getting UMKM IDs:", err)
+        return fmt.Errorf("gagal mendapatkan daftar UMKM: %w", err)
+    }
+    fmt.Println("UMKM IDs to delete:", umkmIDs) // Log daftar UMKM IDs
+
+    if err := service.hakaksesrepository.DeleteUser(iduser); err != nil {
+        fmt.Println("Error deleting user from hakaksesrepository:", err)
+        return err
+    }
+
+    // Hapus semua UMKM dari tabel umkm berdasarkan ID
+    for _, umkmID := range umkmIDs {
+        fmt.Println("Deleting UMKM with ID:", umkmID)
+        if err := service.umkmrepository.DeleteUmkmId(umkmID); err != nil {
+            fmt.Println("Error deleting UMKM:", err)
+            return fmt.Errorf("gagal menghapus UMKM dengan ID %d: %w", umkmID, err)
+        }
+
+        fmt.Println("Deleting Produk with UMKM ID:", umkmID)
+        if err := service.produkRepository.DeleteProdukUmkmId(umkmID); err != nil {
+            fmt.Println("Error deleting Produk:", err)
+            return fmt.Errorf("gagal menghapus produk dengan ID %d: %w", umkmID, err)
+        }
+
+        fmt.Println("Deleting Dokumen with UMKM ID:", umkmID)
+        if err := service.dokumenrepository.DeleteDokumenUmkmId(umkmID); err != nil {
+            fmt.Println("Error deleting Dokumen:", err)
+            return err
+        }
+
+        fmt.Println("Deleting Omset with UMKM ID:", umkmID)
+        if err := service.omsetrepository.DeleteUserOmzet(umkmID); err != nil {
+            fmt.Println("Error deleting Omset:", err)
+            return err
+        }
+
+        fmt.Println("Deleting Transaksi with UMKM ID:", umkmID)
+        if err := service.transaksiRepository.DeleteTransaksiUmkmId(umkmID); err != nil {
+            fmt.Println("Error deleting Transaksi:", err)
+            return err
+        }
+    }
+
+    fmt.Println("Deleting User with ID:", iduser)
+    if err := service.authrepository.DeleteUser(iduser); err != nil {
+        fmt.Println("Error deleting user from authrepository:", err)
+        return err
+    }
+
+    fmt.Println("User deleted successfully")
+    return nil
 }

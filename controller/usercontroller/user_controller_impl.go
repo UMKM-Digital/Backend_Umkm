@@ -1,6 +1,7 @@
 package usercontroller
 
 import (
+	"log"
 	"net/http"
 
 	// "strings"
@@ -372,4 +373,16 @@ func (controller *UserControllerImpl) GetUserCountByGender(c echo.Context) error
 
     // Mengembalikan respons sukses dengan data yang diperoleh
     return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success", result))
+}
+
+
+func (controller *UserControllerImpl)DeleteUser(c echo.Context) error{
+	log.Println("Checking userService:", controller.userService) // Debugging
+	userId, _ := helper.GetAuthId(c)
+
+	if errDeleteUser := controller.userService.DeleteUser(userId); errDeleteUser != nil {
+		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, errDeleteUser.Error(), nil))
+	}
+
+	return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "Delete all data user Success", nil))
 }

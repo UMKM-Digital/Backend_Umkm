@@ -15,4 +15,5 @@ type SellerController interface {
 	CekPassword(c echo.Context) error
 	ChangePassword(c echo.Context) error
 	HandleGoogleLoginOrRegister(c echo.Context) error
+	DeleteUser(c echo.Context) error
 }

@@ -399,3 +399,10 @@ func (repo *AuthrepositoryImpl) CountUserByAge() (map[string]int64, error) {
 
     return result, nil
 }
+
+func (repo *AuthrepositoryImpl) DeleteUser(iduser int) error{
+    if err := repo.db.Delete(&domain.Users{}, iduser).Error; err != nil{
+        return err;
+    }
+    return nil
+}
