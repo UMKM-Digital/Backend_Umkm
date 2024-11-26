@@ -754,7 +754,7 @@ func(service *AuthServiceImpl) DeleteUser(iduser int) error{
         fmt.Println("Error getting user:", err)
         return err
     }
-
+    
     umkmIDs, err := service.hakaksesrepository.GetUmkmIdsByUserId(iduser)
     if err != nil {
         fmt.Println("Error getting UMKM IDs:", err)

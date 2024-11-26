@@ -78,7 +78,7 @@ func SendWhatsAppOTP(db *gorm.DB, phone string, expiresAt time.Time) error {
 		"penerima":     phone,
 		"konten":       "kode OTP Anda adalah " + otp,
 		"optional_data": map[string]string{
-			"callback": "http://localhost:8001/user/auth/send-otp",
+			"callback": "https://demo-umkm.simda.net/",
 		},
 	}
 
