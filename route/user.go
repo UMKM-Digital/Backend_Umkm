@@ -16,6 +16,7 @@ import (
 	slidercontroller "umkm/controller/homepage/slider"
 	omsetcontroller "umkm/controller/omset"
 	sektorusahacontroller "umkm/controller/sektorusaha"
+	storagegambarcontroller "umkm/controller/storagegambar"
 
 	kategoriprodukcontroller "umkm/controller/kategoriproduk"
 	kategoriumkmcontroller "umkm/controller/kategoriumkm"
@@ -46,6 +47,7 @@ import (
 	sliderrepo "umkm/repository/homepage/slider"
 	omsetrepo "umkm/repository/omset"
 	sektorusaharepo "umkm/repository/sektorusaha"
+	storagegambarrepo "umkm/repository/storagegambar"
 
 	kategoriprodukrepo "umkm/repository/kategori_produk"
 	repokategoriumkm "umkm/repository/kategori_umkm"
@@ -65,6 +67,7 @@ import (
 	sliderservice "umkm/service/homepage/slider"
 	omsetservice "umkm/service/omset"
 	sektorusahaservice "umkm/service/sektorusaha"
+	storagegambarservice "umkm/service/storagegambarproduk"
 
 	kategoriprodukservice "umkm/service/kategori_produk"
 	kategoriumkmservice "umkm/service/kategori_umkm"
@@ -173,8 +176,6 @@ func RegisterUserRoute(prefix string, e *echo.Echo) {
 	userDaerahService := daerahservice.NewDaerahService(userDaerah)
 	userDaerahController := daerahcontoller.NewDaerahController(userDaerahService)
 
-	//data
-	//data
 dataUmkm := datarepo.NewDataRepositoryImpl(db)
 userDataService := dataservice.NewDataservice(dataUmkm) // Ensure this constructor matches the signature
 userDataController := datacontroller.NewUmkmController(userDataService)
@@ -189,7 +190,19 @@ userOmsetController := omsetcontroller.NewOmsetController(userOmsetService)
 	userAuthService := userservice.Newauthservice(userAuthRepo, tokenUseCase, db, userHakAksesRepo,userUmkmRepo,userProdukrepo,userDokumenuMKM,userTransaksiRepo, useromsetRepo)
 	userAuthController := usercontroller.NewAuthController(userAuthService, tokenUseCase)
 
+	repo := storagegambarrepo.NewStorageGambarRepo()
+	service := storagegambarservice.NewStorageGambarService(repo)
+	controller := storagegambarcontroller.NewStorageGambarController(service)
+
 	g := e.Group(prefix)
+
+	linkRoute := g.Group("/link")
+	linkRoute.POST("/produk", func(c echo.Context) error {
+		r := c.Request()
+		w := c.Response()
+		controller.UploadFiles(w, r)
+		return nil
+	})
 
 	authRoute := g.Group("/auth")
 	authRoute.POST("/register", userAuthController.Register)

@@ -11,7 +11,6 @@ import (
 
 type OmmsetRepoImpl struct {
 	db                 *gorm.DB
-	
 }
 
 func NewomsetRepositoryImpl(db *gorm.DB) *OmmsetRepoImpl {
