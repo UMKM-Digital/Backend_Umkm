@@ -220,22 +220,23 @@ type KategoriCount struct {
 }
 
 func (repo *DatarepositoryImpl) GrafikKategoriBySektorUsaha(ctx context.Context, sektorUsahaID int, kodeKecamatan, kodeKelurahan string, tahun int) ([]KategoriCount, error) {
-    if sektorUsahaID <= 0 {
+    if sektorUsahaID < 0 {
         return nil, gorm.ErrInvalidData
     }
 
     var results []KategoriCount
     query := repo.db.WithContext(ctx).Table("kategori_umkm").
-        Select("kategori_umkm.id_sektor_usaha, kategori_umkm.name, COALESCE(COUNT(DISTINCT CASE WHEN master_kec.kode_kec = ? AND (master_kel.kode_kel = ? OR ? = '') AND EXTRACT(YEAR FROM umkm.created_at) = ? AND hak_akses.status = 'disetujui' THEN umkm.id END), 0) AS jumlah_umkm", kodeKecamatan, kodeKelurahan, kodeKelurahan, tahun).
-        Joins("LEFT JOIN umkm ON kategori_umkm.name = (umkm.kategori_umkm_id->'nama'->>0)").
-        Joins("LEFT JOIN hak_akses ON umkm.id = hak_akses.umkm_id").
-        Joins("LEFT JOIN master.kecamatan AS master_kec ON umkm.kode_kec = master_kec.nama").
-        Joins("LEFT JOIN master.kelurahan AS master_kel ON umkm.kode_kelurahan = master_kel.nama").
-        Where("kategori_umkm.id_sektor_usaha = ?", sektorUsahaID).
-        Group("kategori_umkm.id_sektor_usaha, kategori_umkm.name").
-        Order("kategori_umkm.name ASC"). // Untuk memastikan data diurutkan berdasarkan nama kategori
-        Find(&results)
-    
+    Select("kategori_umkm.id_sektor_usaha, kategori_umkm.name, COALESCE(COUNT(DISTINCT CASE WHEN ( ? = 'all' OR master_kec.kode_kec = ? ) AND ( ? = 'all' OR master_kec.kode_kec = ? ) AND ( ? = 'all' OR master_kel.kode_kel = ? ) AND EXTRACT(YEAR FROM umkm.created_at) = ? AND hak_akses.status = 'disetujui' THEN umkm.id END), 0) AS jumlah_umkm", 
+        kodeKecamatan, kodeKecamatan, kodeKecamatan, kodeKecamatan, kodeKelurahan, kodeKelurahan, tahun).
+    Joins("LEFT JOIN umkm ON kategori_umkm.name = (umkm.kategori_umkm_id->'nama'->>0)").
+    Joins("LEFT JOIN hak_akses ON umkm.id = hak_akses.umkm_id").
+    Joins("LEFT JOIN master.kecamatan AS master_kec ON umkm.kode_kec = master_kec.nama").
+    Joins("LEFT JOIN master.kelurahan AS master_kel ON umkm.kode_kelurahan = master_kel.nama").
+    Where("kategori_umkm ? = '0' OR kategori_umkm.id_sektor_usaha = ?", sektorUsahaID).
+    Group("kategori_umkm.id_sektor_usaha, kategori_umkm.name").
+    Order("kategori_umkm.name ASC").
+    Find(&results)
+
 
     err := query.Scan(&results).Error
     if err != nil {

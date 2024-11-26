@@ -343,7 +343,6 @@ userOmsetController := omsetcontroller.NewOmsetController(userOmsetService)
 	sektorusaha.POST("/create", userSektorUsahaController.Create)
 	sektorusaha.GET("/list", userSektorUsahaController.GetSektorUsaha)
 	
-
 	//
 	bentukusaha := g.Group("/bentukusaha")
 	bentukusaha.GET("/list", userSektorUsahaController.GetBentukUsaha)
@@ -367,8 +366,6 @@ userOmsetController := omsetcontroller.NewOmsetController(userOmsetService)
 	data.GET("/omset", userDataController.CountOmzets)
 	data.GET("/umkm", userDataController.CountPengggunaUmkm, JWTProtection())
 	data.GET("/omzet_bulan", userDataController.CountPenggunaOmzet, JWTProtection())
-
-
 
 	hakakses := g.Group("/hakakses")
 	hakakses.PUT("/update", userHakAksesController.UpdateHakAksesIds)
