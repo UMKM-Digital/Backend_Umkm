@@ -29,12 +29,23 @@ func (repo *AuthrepositoryImpl) RegisterRequest(user domain.Users)(domain.Users,
 }
 
 //login
-func (repo *AuthrepositoryImpl) FindUserByUsername(username string) (*domain.Users, error){
-	user := new(domain.Users)
+func (repo *AuthrepositoryImpl) FindUserByUsername(username string, email string, no_phone string) (*domain.Users, error){
+    user := new(domain.Users)
+    query := repo.db
 
-	if err	:= repo.db.Where("username = ?", username).Take(&user).Error; err != nil{
-		return user, err
-	}
+    if username != "" {
+        query = query.Or("username = ?", username)
+    }
+    if email != "" {
+        query = query.Or("email = ?", email)
+    }
+    if no_phone != "" {
+        query = query.Or("no_phone = ?", no_phone)
+    }
+
+    if err := query.Take(&user).Error; err != nil {
+        return nil, err
+    }
 
 	return user, nil
 }

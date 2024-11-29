@@ -6,7 +6,7 @@ import (
 
 type AuthUserRepo interface {
 	RegisterRequest(user domain.Users)(domain.Users, error)
-	FindUserByUsername(username string) (*domain.Users, error)
+	FindUserByUsername(username string, email string, no_phone string) (*domain.Users, error)
 	FindUserByPhone(phone string) (*domain.Users, error)
 	GetByID(idUser int) (domain.Users, error)
 	UpdateId(idUser int, user domain.Users) (domain.Users, error)

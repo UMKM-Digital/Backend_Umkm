@@ -4,6 +4,7 @@ import (
 	// "encoding/json"
 	// "encoding/json"
 	"errors"
+	"log"
 	"math/rand"
 	"mime/multipart"
 	"os"
@@ -190,13 +191,43 @@ func (service *AuthServiceImpl) RegisterRequest(user web.RegisterRequest) (map[s
 
 
 func (service *AuthServiceImpl) LoginRequest(username string, password string) (map[string]interface{}, error) {
-	user, getUserErr := service.authrepository.FindUserByUsername(username)
-    if getUserErr != nil {
-        return nil, fmt.Errorf("Username tidak ditemukan")
-    }    
-	if checkPassword := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); checkPassword != nil {
-		return nil, errors.New("Password salah")
-	}
+	var user *domain.Users
+	var err error
+
+	
+        if strings.Contains(username, "@") {
+            user, err = service.authrepository.FindUserByUsername("", username, "")
+            if err != nil {
+                return nil, fmt.Errorf("Email tidak ditemukan") 
+            } 
+        }else if strings.HasPrefix(username, "08") || strings.HasPrefix(username, "62") {
+            // Jika input adalah nomor telepon
+            if len(username) < 10 {
+                return nil, fmt.Errorf("Nomor telepon tidak valid")
+            }
+        
+            var formattedPhone string
+            if strings.HasPrefix(username, "08") {
+                formattedPhone = "62" + username[1:]
+            } else {
+                formattedPhone = username
+            }
+        
+            user, err = service.authrepository.FindUserByUsername("", "", formattedPhone)
+            if err != nil {
+                return nil, fmt.Errorf("Nomor telepon tidak ditemukan")
+            }
+        } else {
+            user, err = service.authrepository.FindUserByUsername(username, "", "")
+            if err != nil {
+                return nil, fmt.Errorf("Username tidak ditemukan")
+                
+            }   
+        }
+        log.Print("user tidak ditemukan", user) 
+        if checkPassword := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); checkPassword != nil {
+            return nil, errors.New("Password salah")
+        }
 
 	claims := helper.JwtCustomClaims{
 		ID:      strconv.Itoa(user.IdUser),

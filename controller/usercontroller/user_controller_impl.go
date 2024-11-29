@@ -50,7 +50,7 @@ func (controller *UserControllerImpl) Login(c echo.Context) error {
 	if err := c.Bind(&user); err != nil {
 		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, err.Error(), nil))
 	}
-	userRes, errLogin := controller.userService.LoginRequest(user.Username, user.Password)
+	userRes, errLogin := controller.userService.LoginRequest(user.Username,  user.Password)
 
 	if errLogin != nil {
 		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, false, errLogin.Error(), nil))
