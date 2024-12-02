@@ -2,6 +2,7 @@ package userrepo
 
 import (
 	"errors"
+	"log"
 	"math"
 
 	"umkm/model/domain"
@@ -431,6 +432,7 @@ func (repo *AuthrepositoryImpl) DeleteUser(iduser int) error{
 }
 
 func (repo *AuthrepositoryImpl) GetNamaWilayah(provCode, kabCode, kecCode, kelCode string) (provinsi, kabupaten, kecamatan, kelurahan string, err error) {
+    log.Printf("Fetching wilayah from DB: prov=%s, kab=%s, kec=%s, kel=%s", provCode, kabCode, kecCode, kelCode)
 	// Ambil nama provinsi berdasarkan kode
 	var namaProvinsi string
 	if err = repo.db.Table("master.provinsi").
@@ -443,7 +445,7 @@ func (repo *AuthrepositoryImpl) GetNamaWilayah(provCode, kabCode, kecCode, kelCo
 	// Ambil nama kabupaten berdasarkan kode
 	var namaKabupaten string
 	if err = repo.db.Table("master.kabupaten").
-		Select("nama_kabupaten").
+		Select("nama").
 		Where("kode_kab = ?", kabCode).
 		Scan(&namaKabupaten).Error; err != nil {
 		return "", "", "", "", errors.New("failed to fetch kabupaten name")

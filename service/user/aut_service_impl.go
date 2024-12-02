@@ -289,7 +289,6 @@ func (service *AuthServiceImpl) SendOtp(phone string) (map[string]interface{}, e
 
         userEntity := entity.ToUserEntity(user, service.authrepository)
 	return userEntity, nil
-        // return entity.ToUserEntity(user), nil
     }
 
 // update profile

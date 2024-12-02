@@ -6,6 +6,12 @@ import (
 	"umkm/repository/userrepo"
 )
 
+type Wilayah struct {
+    Nama string `json:"nama"`
+    Id   string `json:"id"`
+}
+
+
 type UserEntity struct {
 	Id        int    `json:"id"`
 	Fullname  string `json:"fullname"`
@@ -18,10 +24,10 @@ type UserEntity struct {
 	JenisKelamin string `json:"jenis_kelamin"`
 	PendidikanTerakhir string `json:"pendidikan_terakhir"`
 	StatusMenikah string `json:"status_menikah"`
-	Provinsi  string `json:"provinsi"`
-	Kabupaten string `json:"kabupaten"`
-	Kecamatan string `json:"kecamatan"`
-	Kelurahan string `json:"kelurahan"`
+	Provinsi          Wilayah  `json:"provinsi"`
+    Kabupaten         Wilayah  `json:"kabupaten"`
+    Kecamatan         Wilayah  `json:"kecamatan"`
+    Kelurahan         Wilayah  `json:"kelurahan"`
 	KodePos string `json:"kode_pos"`
 	Rt string `json:"rt"`
 	Rw string `json:"rw"`
@@ -33,13 +39,14 @@ type UserEntity struct {
 
 func ToUserEntity(user domain.Users, repo userrepo.AuthUserRepo) UserEntity {
 	provinsi, kabupaten, kecamatan, kelurahan, err := repo.GetNamaWilayah(user.Provinsi, user.Kabupaten, user.Kecamatan, user.Kelurahan)
-	if err != nil {
-		// Jika terjadi error, tetap gunakan kode wilayah
-		provinsi = user.Provinsi
-		kabupaten = user.Kabupaten
-		kecamatan = user.Kecamatan
-		kelurahan = user.Kelurahan
-	}
+    if err != nil {
+        // Jika gagal, gunakan kode wilayah sebagai fallback
+        provinsi = user.Provinsi
+        kabupaten = user.Kabupaten
+        kecamatan = user.Kecamatan
+        kelurahan = user.Kelurahan
+    }
+
 
 	return UserEntity{
 		Id: user.IdUser,
@@ -53,10 +60,10 @@ func ToUserEntity(user domain.Users, repo userrepo.AuthUserRepo) UserEntity {
 		JenisKelamin: user.JenisKelamin,
 		PendidikanTerakhir: user.PendidikanTerakhir,
 		StatusMenikah: user.StatusMenikah,
-		Provinsi: provinsi,
-		Kabupaten: kabupaten,
-		Kecamatan: kecamatan,
-		Kelurahan: kelurahan,
+		Provinsi: Wilayah{Nama: provinsi, Id: user.Provinsi},
+        Kabupaten: Wilayah{Nama: kabupaten, Id: user.Kabupaten},
+        Kecamatan: Wilayah{Nama: kecamatan, Id: user.Kecamatan},
+        Kelurahan: Wilayah{Nama: kelurahan, Id: user.Kelurahan},
 		KodePos: user.KodePos,
 		Rt: user.Rt,
 		Rw: user.Rw,
