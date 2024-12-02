@@ -232,3 +232,10 @@ func (service *DataServiceImpl) DataOmzetUmkm(id int, tahun int) (map[string]int
 
     return perUMKM, nil
 }
+
+
+//grafikbinaantahun
+
+func (service *DataServiceImpl) TotalUmkmKriteriaUsahaPertahun() (map[string]map[string]int64, error) {
+    return service.datarepository.TotalUmkmKriteriaUsahaPertahun()
+}

@@ -166,3 +166,15 @@ func (controller *DataControllerImpl) CountPenggunaOmzet(c echo.Context) error {
 
     return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success", result))
 }
+
+
+func (controller *DataControllerImpl) TotalUmkmKriteriaUsahaPertahun(c echo.Context) error {
+    // Panggil service untuk mendapatkan data UMKM
+    result, err := controller.dataservice.TotalUmkmKriteriaUsahaPertahun()
+    if err != nil {
+        return c.JSON(http.StatusInternalServerError, model.ResponseToClient(http.StatusInternalServerError, false, err.Error(), nil))
+    }
+
+    // Return hasil perhitungan dalam bentuk JSON
+    return c.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, true, "success", result))
+}

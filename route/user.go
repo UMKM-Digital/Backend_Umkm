@@ -364,6 +364,7 @@ userOmsetController := omsetcontroller.NewOmsetController(userOmsetService)
 	data.GET("/grafikbinaan", userDataController.TotalUmkmKriteriaUsahaPerBulanHandler)
 	data.GET("/umkmlist", userDataController.CountUmkmBulan)
 	data.GET("/omset", userDataController.CountOmzets)
+	data.GET("/grafikbinaantahun",userDataController.TotalUmkmKriteriaUsahaPertahun)
 	data.GET("/umkm", userDataController.CountPengggunaUmkm, JWTProtection())
 	data.GET("/omzet_bulan", userDataController.CountPenggunaOmzet, JWTProtection())
 

@@ -35,4 +35,5 @@ type DataUserRepo interface {
 	TotalProdukPengguna(id int) (int64, error)
 	TotalTransaksi(id int)(int64, error)
 	TotalOmzetPenggunaPerBulan(id int, tahun int) (map[string]map[string]int64, error) 
+	TotalUmkmKriteriaUsahaPertahun() (map[string]map[string]int64, error)
 }

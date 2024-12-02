@@ -13,4 +13,5 @@ type AuthUserService interface {
 	TotalOmzetBulanIni()(map[string]interface{}, error)
 	DataUmkm(id int)(map[string]interface{}, error)
 	DataOmzetUmkm(id int, tahun int) (map[string]interface{}, error)
+	TotalUmkmKriteriaUsahaPertahun() (map[string]map[string]int64, error)
 }

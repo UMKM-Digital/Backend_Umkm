@@ -764,3 +764,68 @@ func (repo *DatarepositoryImpl) TotalOmzetPenggunaPerBulan(id int, tahun int) (m
 
     return hasilPerNama, nil
 }
+
+
+//grafikbinaantahunan
+func (repo *DatarepositoryImpl) TotalUmkmKriteriaUsahaPertahun() (map[string]map[string]int64, error) {
+	// Ambil tahun saat ini
+	now := time.Now()
+	currentYear := now.Year()
+
+	// Membuat map untuk menyimpan total UMKM per kriteria usaha per tahun
+	result := make(map[string]map[string]int64)
+	kriteriaUsaha := []string{"Mikro", "Kecil", "Menengah"}
+
+	// Cari tahun terkecil yang ada di database
+	var minYear *int // Gunakan pointer untuk mendeteksi NULL
+	err := repo.db.Table("umkm").
+		Select("MIN(EXTRACT(YEAR FROM created_at))").
+		Scan(&minYear).Error
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to get minimum year: %v", err)
+	}
+
+	// Jika tabel kosong, set minYear ke 2024
+	if minYear == nil {
+		defaultYear := 2024
+		minYear = &defaultYear
+	}
+
+	// Inisialisasi map untuk setiap kriteria usaha
+	for _, kriteria := range kriteriaUsaha {
+		result[kriteria] = make(map[string]int64)
+		for tahun := *minYear; tahun <= currentYear; tahun++ { // Tambahkan data dari tahun terkecil hingga tahun sekarang
+			result[kriteria][fmt.Sprintf("%d", tahun)] = 0
+		}
+	}
+
+	// Iterasi setiap kriteria usaha untuk menghitung jumlah UMKM per tahun
+	for _, kriteria := range kriteriaUsaha {
+		var counts []struct {
+			Tahun int64
+			Total int64
+		}
+
+		// Menggabungkan tabel hak_akses dan umkm untuk menghitung jumlah UMKM per kriteria usaha
+		err := repo.db.Table("umkm").
+			Select("EXTRACT(YEAR FROM umkm.created_at) AS tahun, COUNT(*) AS total").
+			Joins("JOIN hak_akses ON hak_akses.umkm_id = umkm.id").
+			Where("hak_akses.status = ?", "disetujui").
+			Where("umkm.kriteria_usaha = ?", kriteria).
+			Group("tahun").
+			Order("tahun").
+			Scan(&counts).Error
+
+		if err != nil {
+			return nil, err
+		}
+
+		// Memasukkan hasil perhitungan ke dalam map
+		for _, count := range counts {
+			result[kriteria][fmt.Sprintf("%d", count.Tahun)] = count.Total
+		}
+	}
+
+	return result, nil
+}
