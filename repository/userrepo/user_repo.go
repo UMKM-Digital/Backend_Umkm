@@ -20,5 +20,6 @@ type AuthUserRepo interface {
 	CountUserByStudy() (map[string]int64, error)
 	CountUserByAge() (map[string]int64, error)
 	DeleteUser(iduser int) error
+	GetNamaWilayah(provCode, kabCode, kecCode, kelCode string) (provinsi, kabupaten, kecamatan, kelurahan string, err error) 
 }
 	

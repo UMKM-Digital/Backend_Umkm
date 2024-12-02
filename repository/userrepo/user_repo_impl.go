@@ -429,3 +429,44 @@ func (repo *AuthrepositoryImpl) DeleteUser(iduser int) error{
     }
     return nil
 }
+
+func (repo *AuthrepositoryImpl) GetNamaWilayah(provCode, kabCode, kecCode, kelCode string) (provinsi, kabupaten, kecamatan, kelurahan string, err error) {
+	// Ambil nama provinsi berdasarkan kode
+	var namaProvinsi string
+	if err = repo.db.Table("master.provinsi").
+		Select("nama_wilayah").
+		Where("kode_wilayah = ?", provCode).
+		Scan(&namaProvinsi).Error; err != nil {
+		return "", "", "", "", errors.New("failed to fetch provinsi name")
+	}
+
+	// Ambil nama kabupaten berdasarkan kode
+	var namaKabupaten string
+	if err = repo.db.Table("master.kabupaten").
+		Select("nama_kabupaten").
+		Where("kode_kab = ?", kabCode).
+		Scan(&namaKabupaten).Error; err != nil {
+		return "", "", "", "", errors.New("failed to fetch kabupaten name")
+	}
+
+	// Ambil nama kecamatan berdasarkan kode
+	var namaKecamatan string
+	if err = repo.db.Table("master.kecamatan").
+		Select("nama").
+		Where("kode_kec = ?", kecCode).
+		Scan(&namaKecamatan).Error; err != nil {
+		return "", "", "", "", errors.New("failed to fetch kecamatan name")
+	}
+
+	// Ambil nama kelurahan berdasarkan kode
+	var namaKelurahan string
+	if err = repo.db.Table("master.kelurahan").
+		Select("nama").
+		Where("kode_kel = ?", kelCode).
+		Scan(&namaKelurahan).Error; err != nil {
+		return "", "", "", "", errors.New("failed to fetch kelurahan name")
+	}
+
+	// Return nama wilayah
+	return namaProvinsi, namaKabupaten, namaKecamatan, namaKelurahan, nil
+}

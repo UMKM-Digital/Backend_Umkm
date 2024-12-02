@@ -3,6 +3,7 @@ package entity
 import (
 	"time"
 	"umkm/model/domain"
+	"umkm/repository/userrepo"
 )
 
 type UserEntity struct {
@@ -13,11 +14,12 @@ type UserEntity struct {
 	Role string `json:"role"`
 	NoKk string `json:"no_kk"`
 	NoNik string `json:"no_nik"`
-	NoNib string `json:"no_nib"`
 	TanggalLahir time.Time `json:"tanggal_lahir"`
 	JenisKelamin string `json:"jenis_kelamin"`
 	PendidikanTerakhir string `json:"pendidikan_terakhir"`
 	StatusMenikah string `json:"status_menikah"`
+	Provinsi  string `json:"provinsi"`
+	Kabupaten string `json:"kabupaten"`
 	Kecamatan string `json:"kecamatan"`
 	Kelurahan string `json:"kelurahan"`
 	KodePos string `json:"kode_pos"`
@@ -29,7 +31,16 @@ type UserEntity struct {
 	Kk string `json:"kk"`
 }
 
-func ToUserEntity(user domain.Users) UserEntity {
+func ToUserEntity(user domain.Users, repo userrepo.AuthUserRepo) UserEntity {
+	provinsi, kabupaten, kecamatan, kelurahan, err := repo.GetNamaWilayah(user.Provinsi, user.Kabupaten, user.Kecamatan, user.Kelurahan)
+	if err != nil {
+		// Jika terjadi error, tetap gunakan kode wilayah
+		provinsi = user.Provinsi
+		kabupaten = user.Kabupaten
+		kecamatan = user.Kecamatan
+		kelurahan = user.Kelurahan
+	}
+
 	return UserEntity{
 		Id: user.IdUser,
 	    Fullname: user.Fullname,
@@ -42,8 +53,10 @@ func ToUserEntity(user domain.Users) UserEntity {
 		JenisKelamin: user.JenisKelamin,
 		PendidikanTerakhir: user.PendidikanTerakhir,
 		StatusMenikah: user.StatusMenikah,
-		Kecamatan: user.Kecamatan,
-		Kelurahan: user.Kelurahan,
+		Provinsi: provinsi,
+		Kabupaten: kabupaten,
+		Kecamatan: kecamatan,
+		Kelurahan: kelurahan,
 		KodePos: user.KodePos,
 		Rt: user.Rt,
 		Rw: user.Rw,

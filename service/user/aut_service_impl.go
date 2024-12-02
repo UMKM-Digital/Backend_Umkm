@@ -281,14 +281,16 @@ func (service *AuthServiceImpl) SendOtp(phone string) (map[string]interface{}, e
 }
 
 // get profile
-func (service *AuthServiceImpl) ViewMe(userId int) (entity.UserEntity, error) {
-	user, err := service.authrepository.GetByID(userId)
-	if err != nil {
-		return entity.UserEntity{}, err
-	}
+    func (service *AuthServiceImpl) ViewMe(userId int) (entity.UserEntity, error) {
+        user, err := service.authrepository.GetByID(userId)
+        if err != nil {
+            return entity.UserEntity{}, err
+        }
 
-	return entity.ToUserEntity(user), nil
-}
+        userEntity := entity.ToUserEntity(user, service.authrepository)
+	return userEntity, nil
+        // return entity.ToUserEntity(user), nil
+    }
 
 // update profile
 func (service *AuthServiceImpl) Update(Id int, req web.UpdateUserRequest, file *multipart.FileHeader, fileKTP *multipart.FileHeader, fileKK *multipart.FileHeader) (helper.ResponseToJson, error) {
